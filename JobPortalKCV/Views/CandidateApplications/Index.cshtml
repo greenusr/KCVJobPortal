@@ -1,0 +1,99 @@
+@model JobPortalKCV.Models.ViewModel.CandidateApplicationsIndexViewModel
+@using System.Linq
+
+@{
+    ViewBag.Title = "My Applications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-shell">
+    <div class="container">
+    <div class="section-tittle mb-35">
+        <span>Candidate</span>
+        <h2>My Applications</h2>
+    </div>
+
+    @if (TempData["CandidateApplicationError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["CandidateApplicationError"]</div>
+    }
+
+    <div class="ui-toolbar mb-30">
+        @Html.ActionLink("All", "Index", new { filter = "all", page = 1 }, new { @class = Model.Filter == "all" ? "btn" : "btn btn-default" })
+        @Html.ActionLink("Pending", "Index", new { filter = "pending", page = 1 }, new { @class = Model.Filter == "pending" ? "btn" : "btn btn-default" })
+        @Html.ActionLink("Interview", "Index", new { filter = "interview", page = 1 }, new { @class = Model.Filter == "interview" ? "btn" : "btn btn-default" })
+        @Html.ActionLink("Completed", "Index", new { filter = "completed", page = 1 }, new { @class = Model.Filter == "completed" ? "btn" : "btn btn-default" })
+    </div>
+
+    @if (Model.Applications == null || !Model.Applications.Any())
+    {
+        <div class="ui-empty">No applications found.</div>
+    }
+    else
+    {
+        foreach (var application in Model.Applications)
+        {
+            <div class="single-job-items mb-30">
+                <div class="job-items">
+                    <div class="company-img">
+                        <a href="@Url.Action("Details", "Companies", new { id = application.CompanyId, returnUrl = Request.RawUrl })">
+                            <img src="@application.CompanyLogoPath" alt="@application.CompanyName" style="width:85px;height:85px;object-fit:contain;" />
+                        </a>
+                    </div>
+                    <div class="job-tittle">
+                        <h4>@application.JobTitle</h4>
+                        <ul>
+                            <li>@application.CompanyName</li>
+                            <li>Applied: @(application.AppliedDate.HasValue ? application.AppliedDate.Value.ToString("dd/MM/yyyy HH:mm") : "")</li>
+                            <li>Status: <span class="ui-badge @(application.Status == "Completed" ? "ui-badge-success" : (application.Status == "Interview" ? "ui-badge-info" : "ui-badge-warning"))">@application.Status</span></li>
+                            @if (!String.IsNullOrWhiteSpace(application.FinalResult))
+                            {
+                                <li>Final result: <span class="ui-badge @(application.FinalResult == "Accepted" ? "ui-badge-success" : "ui-badge-danger")">@application.FinalResult</span></li>
+                            }
+                        </ul>
+
+                        @if (!String.IsNullOrWhiteSpace(application.CvFilePath))
+                        {
+                            <p><strong>CV:</strong> <a href="@application.CvFilePath" target="_blank" rel="noopener">@application.CvFileName</a></p>
+                        }
+
+                        @if (!String.IsNullOrWhiteSpace(application.CoverLetter))
+                        {
+                            <p style="white-space:pre-wrap;"><strong>Cover letter:</strong> @application.CoverLetter</p>
+                        }
+
+                        @if (application.Interview != null)
+                        {
+                            <div class="mt-20">
+                                <strong>Interview information</strong>
+                                <p>Date: @application.Interview.InterviewDate.ToString("dd/MM/yyyy HH:mm")</p>
+                                <p>Location: @application.Interview.Location</p>
+                                <p>Contact: @application.Interview.ContactName - @application.Interview.ContactEmail - @application.Interview.ContactPhone</p>
+                                @if (!String.IsNullOrWhiteSpace(application.Interview.AdditionalInfo))
+                                {
+                                    <p style="white-space:pre-wrap;">@application.Interview.AdditionalInfo</p>
+                                }
+                            </div>
+                        }
+
+                        <div class="mt-20">
+                            @Html.ActionLink("View Job", "Details", "Jobs", new { id = application.JobId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm btn-primary" })
+                            @Html.ActionLink("View Company", "Details", "Companies", new { id = application.CompanyId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm btn-default" })
+                            @if (!String.IsNullOrWhiteSpace(application.CvFilePath))
+                            {
+                                <a href="@application.CvFilePath" target="_blank" rel="noopener" class="btn btn-sm btn-default">View CV</a>
+                            }
+                            @if (application.Interview != null)
+                            {
+                                @Html.ActionLink("Interview Details", "InterviewDetails", new { id = application.ApplicationId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm btn-default" })
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    @Html.Partial("_Pagination", (JobPortalKCV.Models.ViewModel.PaginationViewModel)ViewBag.Pagination)
+    </div>
+</div>

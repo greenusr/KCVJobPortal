@@ -1,0 +1,110 @@
+@model IEnumerable<JobPortalKCV.Models.ViewModel.AdminChartItemViewModel>
+@using System
+@using System.Linq
+@using System.Web.Helpers
+
+@{
+    var title = ViewData["Title"] as string ?? "Chart";
+    var chartType = (ViewData["Type"] as string ?? "doughnut").ToLowerInvariant();
+    var items = (Model ?? Enumerable.Empty<JobPortalKCV.Models.ViewModel.AdminChartItemViewModel>())
+        .Where(item => item != null)
+        .ToList();
+    var labels = items.Select(item => String.IsNullOrWhiteSpace(item.Label) ? "Unknown" : item.Label).ToList();
+    var values = items.Select(item => item.Count).ToList();
+    var total = values.Sum();
+    var chartId = "adminChart_" + Guid.NewGuid().ToString("N");
+    var palette = new[] { "#8b6cff", "#f06aa6", "#c38bff", "#6d5dfc", "#ff80ba", "#a855f7", "#2b2538", "#b44cff" };
+}
+
+<div class="ui-card admin-chart-card">
+    <div class="ui-card-title">
+        <h3>@title</h3>
+        <span class="ui-subtle">@total total</span>
+    </div>
+    @if (!items.Any())
+    {
+        <div class="ui-empty">No records found.</div>
+    }
+    else
+    {
+        <div class="admin-chart-frame">
+            <canvas id="@chartId" aria-label="@title" role="img"></canvas>
+        </div>
+        <ul class="admin-chart-legend">
+            @for (var i = 0; i < items.Count; i++)
+            {
+                var item = items[i];
+                var color = palette[i % palette.Length];
+                <li>
+                    <span class="admin-chart-dot" style="background:@color"></span>
+                    <span class="admin-chart-label">@item.Label</span>
+                    <strong>@item.Count</strong>
+                </li>
+            }
+        </ul>
+
+        <script>
+            (function () {
+                var canvas = document.getElementById("@chartId");
+                if (!canvas || typeof Chart === "undefined") {
+                    return;
+                }
+
+                var labels = @Html.Raw(Json.Encode(labels));
+                var values = @Html.Raw(Json.Encode(values));
+                var colors = @Html.Raw(Json.Encode(palette));
+                var type = "@chartType";
+                var isBar = type === "bar";
+
+                new Chart(canvas, {
+                    type: isBar ? "bar" : "doughnut",
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: values,
+                            backgroundColor: labels.map(function (_, index) { return colors[index % colors.length]; }),
+                            borderColor: "#ffffff",
+                            borderWidth: isBar ? 0 : 3,
+                            borderRadius: isBar ? 8 : 0,
+                            hoverOffset: isBar ? 0 : 7
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: { duration: 650, easing: "easeOutQuart" },
+                        cutout: isBar ? undefined : "66%",
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: "#0f172a",
+                                titleColor: "#ffffff",
+                                bodyColor: "#e5e7eb",
+                                displayColors: false,
+                                padding: 12,
+                                callbacks: {
+                                    label: function (context) {
+                                        var value = context.parsed.y == null ? context.parsed : context.parsed.y;
+                                        return context.label + ": " + value;
+                                    }
+                                }
+                            }
+                        },
+                        scales: isBar ? {
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: "#64748b", maxRotation: 0, autoSkip: false }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                precision: 0,
+                                grid: { color: "rgba(148, 163, 184, .2)" },
+                                ticks: { color: "#64748b", precision: 0 }
+                            }
+                        } : {}
+                    }
+                });
+            })();
+        </script>
+    }
+</div>

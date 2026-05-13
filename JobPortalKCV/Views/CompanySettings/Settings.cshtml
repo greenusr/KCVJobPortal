@@ -1,0 +1,114 @@
+@model JobPortalKCV.Models.ViewModel.CompanySettingsViewModel
+
+@{
+    ViewBag.Title = "Company Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = ViewBag.ReturnUrl as string ?? Request.QueryString["returnUrl"] ?? Request.Form["returnUrl"];
+    var backUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Details", "Companies", new { id = Model.CompanyId });
+}
+
+<div class="page-shell">
+    <div class="container">
+    <div class="section-tittle mb-35">
+        <span>Employer</span>
+        <h2>Company Settings</h2>
+    </div>
+
+    @if (TempData["CompanySettingsMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["CompanySettingsMessage"]</div>
+    }
+    @if (TempData["CompanySettingsError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["CompanySettingsError"]</div>
+    }
+
+    @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+    @using (Html.BeginForm("Settings", "CompanySettings", new { returnUrl = returnUrl }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.CompanyId)
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+        <div class="ui-card">
+            <div class="small-section-tittle"><h4>Company Information</h4></div>
+            <div class="ui-form-grid">
+            <div class="form-group">
+                @Html.LabelFor(model => model.CompanyName, "Company name")
+                @Html.TextBoxFor(model => model.CompanyName, new { @class = "form-control", required = "required" })
+                @Html.ValidationMessageFor(model => model.CompanyName, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Industry)
+                @Html.TextBoxFor(model => model.Industry, new { @class = "form-control" })
+            </div>
+            <div class="form-group form-group-full">
+                @Html.LabelFor(model => model.Description)
+                @Html.TextAreaFor(model => model.Description, 5, 40, new { @class = "form-control" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.Website)
+                @Html.TextBoxFor(model => model.Website, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Website, "", new { @class = "text-danger" })
+            </div>
+            </div>
+        </div>
+
+        <div class="ui-card">
+            <div class="small-section-tittle"><h4>Contact Information</h4></div>
+            <div class="ui-form-grid">
+            <div class="form-group">
+                @Html.LabelFor(model => model.ContactEmail, "Contact email")
+                @Html.TextBoxFor(model => model.ContactEmail, new { @class = "form-control", type = "email" })
+                @Html.ValidationMessageFor(model => model.ContactEmail, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.ContactPhone, "Contact phone")
+                @Html.TextBoxFor(model => model.ContactPhone, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.ContactPhone, "", new { @class = "text-danger" })
+            </div>
+            <div class="form-group form-group-full">
+                @Html.LabelFor(model => model.Address)
+                @Html.TextBoxFor(model => model.Address, new { @class = "form-control" })
+            </div>
+            </div>
+        </div>
+
+        <div class="ui-card">
+            <div class="small-section-tittle"><h4>Branding</h4></div>
+            <div class="form-group">
+                <label>Company logo upload</label>
+                @if (!String.IsNullOrWhiteSpace(Model.LogoPath))
+                {
+                    <div class="mb-2">
+                        <img src="@Model.LogoPath" alt="@Model.CompanyName" style="height:90px;object-fit:contain;" />
+                    </div>
+                }
+                <input type="file" name="logo" class="form-control" accept="@Model.LogoAcceptTypes" />
+                <small>Allowed: @Model.AllowedImageTypes</small>
+                @Html.ValidationMessage("LogoPath", "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="ui-card">
+            <div class="small-section-tittle"><h4>Visibility</h4></div>
+            <div class="form-check mb-2">
+                @Html.CheckBoxFor(model => model.PublicCompanyProfile, new { @class = "form-check-input", id = "PublicCompanyProfile" })
+                <label class="form-check-label" for="PublicCompanyProfile">Public company profile</label>
+            </div>
+            <div class="form-check">
+                @Html.CheckBoxFor(model => model.ShowJobsPublicly, new { @class = "form-check-input", id = "ShowJobsPublicly" })
+                <label class="form-check-label" for="ShowJobsPublicly">Show jobs publicly</label>
+            </div>
+        </div>
+
+        <div class="ui-toolbar">
+            <button type="submit" class="btn head-btn2">Save Changes</button>
+            <a href="@backUrl" class="btn">Back to company</a>
+        </div>
+    }
+    </div>
+</div>

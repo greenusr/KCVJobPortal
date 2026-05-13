@@ -1,0 +1,50 @@
+@model JobPortalKCV.Models.ViewModel.JobDetailViewModel
+
+@{
+    ViewBag.Title = "Delete Job";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = Request.QueryString["returnUrl"] ?? Request.Form["returnUrl"];
+    var backUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Index", "Jobs");
+}
+
+<div class="container pt-120 pb-120">
+    <h2>Delete Job</h2>
+    <h4>Are you sure you want to delete this job?</h4>
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <dl class="dl-horizontal">
+        <dt>Job title</dt>
+        <dd>@Html.DisplayFor(model => model.job_title)</dd>
+
+        <dt>Company</dt>
+        <dd>@Html.DisplayFor(model => model.company_name)</dd>
+
+        <dt>Location</dt>
+        <dd>@Html.DisplayFor(model => model.location_name)</dd>
+
+        <dt>Employment type</dt>
+        <dd>@Html.DisplayFor(model => model.employment_type)</dd>
+
+        <dt>Salary</dt>
+        <dd>@Html.DisplayFor(model => model.salary_range)</dd>
+
+        <dt>Posted date</dt>
+        <dd>@Html.DisplayFor(model => model.posted_date)</dd>
+
+        <dt>Application deadline</dt>
+        <dd>@Html.DisplayFor(model => model.application_deadline)</dd>
+    </dl>
+
+    @using (Html.BeginForm("Delete", "Jobs", new { id = Model.job_id, returnUrl = returnUrl }, FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-danger" />
+            <a href="@backUrl" class="btn btn-default">Back to list</a>
+        </div>
+    }
+</div>

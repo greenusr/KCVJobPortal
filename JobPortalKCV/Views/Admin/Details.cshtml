@@ -1,0 +1,43 @@
+@model JobPortalKCV.Models.ViewModel.AdminRecordFormViewModel
+
+@{
+    ViewBag.Title = "Admin Details - " + Model.DisplayName;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var returnUrl = Request.QueryString["returnUrl"];
+    var backUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Table", "Admin", new { table = Model.TableName });
+}
+
+<div class="page-shell">
+    <div class="section-tittle mb-35">
+        <span>Admin</span>
+        <h2>@Model.DisplayName Details</h2>
+    </div>
+
+    <div class="ui-card">
+        <div class="ui-table-wrap">
+            <table class="table ui-table admin-detail-table">
+                @foreach (var field in Model.Fields)
+                {
+                    <tr>
+                        <th>@field.Label</th>
+                        <td><span class="admin-detail-value">@field.Value</span></td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+
+    <div class="ui-toolbar">
+        @if (Model.TableName == "Users")
+        {
+            @Html.ActionLink("View Profile", "View", "Profile", new { id = Model.Key, returnUrl = Request.RawUrl }, new { @class = "btn" })
+        }
+        @if (Model.CanEdit)
+        {
+            @Html.ActionLink("Edit", "Edit", new { table = Model.TableName, key = Model.Key, returnUrl = Request.RawUrl }, new { @class = "btn" })
+        }
+        <a href="@backUrl" class="btn btn-default">Back</a>
+    </div>
+</div>

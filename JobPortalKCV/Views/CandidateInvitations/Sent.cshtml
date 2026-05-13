@@ -1,0 +1,76 @@
+@model IEnumerable<JobPortalKCV.Models.ViewModel.CandidateInvitationListItemViewModel>
+@using System.Linq
+
+@{
+    ViewBag.Title = "Sent Invitations";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var filter = (ViewBag.Filter as string) ?? "all";
+}
+
+<div class="page-shell">
+    <div class="container">
+    <div class="section-tittle mb-35">
+        <span>Employer tools</span>
+        <h2>Sent Invitations</h2>
+    </div>
+
+    @if (TempData["InvitationMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["InvitationMessage"]</div>
+    }
+
+    <div class="ui-toolbar mb-30">
+        @Html.ActionLink("All", "Sent", new { filter = "all", page = 1 }, new { @class = filter == "all" ? "btn" : "btn btn-default" })
+        @Html.ActionLink("Pending", "Sent", new { filter = "pending", page = 1 }, new { @class = filter == "pending" ? "btn" : "btn btn-default" })
+        @Html.ActionLink("Accepted", "Sent", new { filter = "accepted", page = 1 }, new { @class = filter == "accepted" ? "btn" : "btn btn-default" })
+        @Html.ActionLink("Declined", "Sent", new { filter = "declined", page = 1 }, new { @class = filter == "declined" ? "btn" : "btn btn-default" })
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="ui-empty">No invitations found.</div>
+    }
+    else
+    {
+        <div class="ui-card">
+        <div class="ui-table-wrap">
+        <table class="table ui-table">
+            <tr>
+                <th>Candidate</th>
+                <th>Job</th>
+                <th>Company</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Responded</th>
+                <th>Actions</th>
+            </tr>
+            @foreach (var invitation in Model)
+            {
+                <tr>
+                    <td>
+                        <img src="@invitation.CandidateAvatarPath" alt="@invitation.CandidateName" style="width:48px;height:48px;object-fit:cover;border-radius:50%;margin-right:8px;" />
+                        <strong>@invitation.CandidateName</strong>
+                        <br /><small>@invitation.CandidateEmail</small>
+                    </td>
+                    <td>@Html.ActionLink(invitation.JobTitle, "Details", "Jobs", new { id = invitation.JobId, returnUrl = Request.RawUrl }, null)</td>
+                    <td>@invitation.CompanyName</td>
+                    <td style="max-width:300px;white-space:pre-wrap;">@invitation.Message</td>
+                    <td><span class="ui-badge @(invitation.Status == "Accepted" ? "ui-badge-success" : (invitation.Status == "Declined" ? "ui-badge-danger" : "ui-badge-warning"))">@invitation.Status</span></td>
+                    <td>@invitation.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@(invitation.RespondedAt.HasValue ? invitation.RespondedAt.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
+                    <td><div class="ui-toolbar">
+                        @Html.ActionLink("View Candidate", "View", "Profile", new { id = invitation.CandidateId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm btn-default mb-10" })
+                        @Html.ActionLink("View Job", "Details", "Jobs", new { id = invitation.JobId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm btn-default mb-10" })
+                        @Html.ActionLink("View Details", "Details", "CandidateInvitations", new { id = invitation.InvitationId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm btn-primary mb-10" })
+                    </div></td>
+                </tr>
+            }
+        </table>
+        </div>
+        </div>
+    }
+
+    @Html.Partial("_Pagination", (JobPortalKCV.Models.ViewModel.PaginationViewModel)ViewBag.Pagination)
+    </div>
+</div>

@@ -1,0 +1,718 @@
+﻿<!DOCTYPE html>
+@using JobPortalKCV.Helpers
+@{
+    var isAuthenticated = Request.IsAuthenticated;
+    var isAdmin = isAuthenticated && AuthRoleHelper.IsAdmin(User.Identity.Name);
+    var isEmployer = isAuthenticated && AuthRoleHelper.IsEmployer(User.Identity.Name);
+    var isCandidate = isAuthenticated && AuthRoleHelper.IsCandidate(User.Identity.Name);
+    var currentLang = UiText.CurrentLanguage;
+    var returnUrl = Request.RawUrl;
+    Func<string, string> T = key => UiText.T(key);
+    Func<string, string> langUrl = lang => UiText.SwitchUrl(Url, lang, returnUrl);
+}
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>@(String.IsNullOrWhiteSpace(ViewBag.Title as string) ? "KCV Job Portal" : ViewBag.Title + " - KCV Job Portal")</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="/img/logo/kcv-icon.svg">
+
+    <!-- CSS here -->
+    <link rel="stylesheet" href="/Content/bootstrap.min.css">
+    <link rel="stylesheet" href="/Content/owl.carousel.min.css">
+    <link rel="stylesheet" href="/Content/flaticon.css">
+    <link rel="stylesheet" href="/Content/price_rangs.css">
+    <link rel="stylesheet" href="/Content/slicknav.css">
+    <link rel="stylesheet" href="/Content/animate.min.css">
+    <link rel="stylesheet" href="/Content/magnific-popup.css">
+    <link rel="stylesheet" href="/Content/fontawesome-all.min.css">
+    <link rel="stylesheet" href="/Content/themify-icons.css">
+    <link rel="stylesheet" href="/Content/slick.css">
+    <link rel="stylesheet" href="/Content/nice-select.css">
+    <link rel="stylesheet" href="/Content/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    <style>
+        .notification-menu {
+            display: inline-block;
+            position: relative;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .notification-toggle {
+            color: #1e293b;
+            display: inline-block;
+            font-size: 18px;
+            padding: 8px 10px;
+            position: relative;
+        }
+
+        .notification-badge {
+            background: #3b82f6;
+            border-radius: 20px;
+            color: #fff;
+            font-size: 11px;
+            min-width: 18px;
+            padding: 1px 5px;
+            position: absolute;
+            right: 0;
+            top: 0;
+            text-align: center;
+        }
+
+        .notification-dropdown {
+            background: #fff;
+            border: 1px solid #e6e8ef;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 38px;
+            width: 360px;
+            z-index: 9999;
+        }
+
+        .notification-menu:hover .notification-dropdown,
+        .notification-menu:focus-within .notification-dropdown {
+            display: block;
+        }
+
+        .notification-dropdown-header,
+        .notification-dropdown-footer {
+            padding: 12px 15px;
+        }
+
+        .notification-dropdown-footer {
+            border-top: 1px solid #eef0f5;
+            text-align: center;
+        }
+
+        .notification-dropdown-list {
+            max-height: 360px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            border-top: 1px solid #eef0f5;
+            color: #1e293b;
+            display: block;
+            padding: 12px 15px;
+        }
+
+        .notification-item:hover {
+            background: #f7f8fb;
+            color: #1e293b;
+        }
+
+        .notification-item.is-unread {
+            background: #fff3f7;
+            font-weight: 600;
+        }
+
+        .notification-item span,
+        .notification-item small,
+        .notification-item em {
+            display: block;
+        }
+
+        .notification-item small {
+            color: #5f6678;
+            font-weight: 400;
+            line-height: 1.4;
+            margin-top: 4px;
+        }
+
+        .notification-item em,
+        .notification-empty {
+            color: #8a91a4;
+            font-size: 12px;
+            font-style: normal;
+            margin-top: 4px;
+        }
+
+        .notification-empty {
+            padding: 18px 15px;
+        }
+
+        .user-menu {
+            display: inline-block;
+            position: relative;
+            vertical-align: middle;
+        }
+
+        .user-menu-toggle {
+            cursor: pointer;
+        }
+
+        .user-menu .submenu {
+            background: #fff;
+            border: 1px solid #e6e8ef;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+            display: none;
+            min-width: 220px;
+            padding: 10px 0;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            z-index: 9999;
+        }
+
+        .user-menu:hover .submenu,
+        .user-menu:focus-within .submenu {
+            display: block;
+        }
+
+        .user-menu .submenu a {
+            color: #1e293b;
+            display: block;
+            padding: 9px 16px;
+            white-space: nowrap;
+        }
+
+        .user-menu .submenu a:hover {
+            background: #f7f8fb;
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="@(isAuthenticated ? "is-authenticated" : "is-guest")">
+    <div id="preloader-active">
+        <div class="preloader d-flex align-items-center justify-content-center">
+            <div class="preloader-inner position-relative">
+                <div class="preloader-circle"></div>
+                <div class="preloader-img pere-text">
+                    <img src="/img/logo/kcv-icon.svg" alt="KCV Job Portal">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Preloader Start -->
+    <header>
+        <!-- Header Start -->
+        <div class="header-area header-transparrent">
+            <div class="headder-top header-sticky">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-3 col-md-2">
+                            <!-- Logo -->
+                            <div class="logo">
+                                <a href="@Url.Action("Index", "Home")"><img src="/img/logo/kcv-logo.svg" alt="KCV Job Portal"></a>
+                            </div>
+                        </div>
+                        <div class="col-lg-9 col-md-9">
+                            <div class="menu-wrapper">
+                                <!-- Main-menu -->
+                                <div class="main-menu">
+                                    <nav class="d-none d-lg-block">
+                                        <ul id="navigation">
+                                            <li>@Html.ActionLink(T("Nav.Home"), "Index", "Home")</li>
+                                            <li>@Html.ActionLink(T("Nav.FindJobs"), "Index", "Jobs")</li>
+                                            <li>@Html.ActionLink(T("Nav.Companies"), "Index", "Companies")</li>
+                                            @if (isEmployer || isAdmin)
+                                            {
+                                                <li>@Html.ActionLink(T("Nav.Candidates"), "Index", "Candidates")</li>
+                                            }
+                                            <li>@Html.ActionLink(T("Nav.Docs"), "Index", "Docs")</li>
+                                            @if (isAuthenticated)
+                                            {
+                                                if (isAdmin)
+                                                {
+                                                    <li class="mobile-nav-only">@Html.ActionLink(T("Nav.AdminDashboard"), "Index", "Admin")</li>
+                                                }
+                                                else if (isCandidate)
+                                                {
+                                                    <li class="mobile-nav-only">@Html.ActionLink(T("Nav.MyProfile"), "Me", "Profile")</li>
+                                                    <li class="mobile-nav-only">@Html.ActionLink(T("Nav.MyApplications"), "Index", "CandidateApplications")</li>
+                                                    <li class="mobile-nav-only">@Html.ActionLink(T("Nav.SavedItems"), "Saved", "Stars")</li>
+                                                }
+                                                else if (isEmployer)
+                                                {
+                                                    <li class="mobile-nav-only">@Html.ActionLink(T("Nav.MyProfile"), "Me", "Profile")</li>
+                                                    <li class="mobile-nav-only">@Html.ActionLink(T("Nav.ManageJobs"), "Index", "Jobs")</li>
+                                                    <li class="mobile-nav-only">@Html.ActionLink(T("Nav.Applications"), "Index", "Applications")</li>
+                                                    <li class="mobile-nav-only">@Html.ActionLink(T("Nav.CompanySettings"), "Index", "CompanySettings")</li>
+                                                }
+                                                else
+                                                {
+                                                    <li class="mobile-nav-only">@Html.ActionLink(T("Nav.MyProfile"), "Me", "Profile")</li>
+                                                }
+                                                <li class="mobile-nav-only">@Html.ActionLink(T("Nav.AccountSettings"), "Index", "AccountSettings")</li>
+                                                <li class="mobile-nav-only">@Html.ActionLink(T("Auth.Logout"), "Logout", "Account")</li>
+                                            }
+                                            else
+                                            {
+                                                <li class="mobile-nav-only">@Html.ActionLink(T("Auth.Register"), "Register", "Account")</li>
+                                                <li class="mobile-nav-only">@Html.ActionLink(T("Auth.Login"), "Login", "Account")</li>
+                                            }
+                                            <li class="mobile-nav-only"><a href="@langUrl("en")">@T("Lang.English")</a></li>
+                                            <li class="mobile-nav-only"><a href="@langUrl("vi")">@T("Lang.Vietnamese")</a></li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                                <!-- Header-btn -->
+                                <div class="header-btn d-none f-right d-lg-block">
+                                    <div class="site-language-switch" aria-label="@T("Lang.Language")">
+                                        <a class="@(currentLang == "en" ? "is-active" : "")" href="@langUrl("en")">EN</a>
+                                        <a class="@(currentLang == "vi" ? "is-active" : "")" href="@langUrl("vi")">VI</a>
+                                    </div>
+                                    @if (isAuthenticated)
+                                    {
+                                        @Html.Action("Dropdown", "Notifications")
+                                        <div class="user-menu">
+                                            <a href="#" class="btn head-btn2 user-menu-toggle">@User.Identity.Name</a>
+                                            <ul class="submenu">
+                                                @if (isCandidate)
+                                                {
+                                                    <li>@Html.ActionLink(T("Nav.MyProfile"), "Me", "Profile")</li>
+                                                    <li>@Html.ActionLink(T("Nav.MyApplications"), "Index", "CandidateApplications")</li>
+                                                    <li>@Html.ActionLink(T("Nav.SavedItems"), "Saved", "Stars")</li>
+                                                    <li>@Html.ActionLink(T("Nav.Invitations"), "Index", "CandidateInvitations")</li>
+                                                    <li>@Html.ActionLink(T("Nav.CVManagement"), "Index", "UserCVs")</li>
+                                                    <li>@Html.ActionLink(T("Nav.AccountSettings"), "Index", "AccountSettings")</li>
+                                                    <li>@Html.ActionLink(T("Auth.Logout"), "Logout", "Account")</li>
+                                                }
+                                                else if (isAdmin)
+                                                {
+                                                    <li>@Html.ActionLink(T("Nav.MyProfile"), "Me", "Profile")</li>
+                                                    <li>@Html.ActionLink(T("Nav.AdminDashboard"), "Index", "Admin")</li>
+                                                    <li>@Html.ActionLink(T("Nav.ManageUsers"), "Table", "Admin", new { table = "Users" }, null)</li>
+                                                    <li>@Html.ActionLink(T("Nav.ManageCompanies"), "Table", "Admin", new { table = "Companies" }, null)</li>
+                                                    <li>@Html.ActionLink(T("Nav.ManageApplications"), "Table", "Admin", new { table = "JobApplications" }, null)</li>
+                                                    <li>@Html.ActionLink(T("Nav.ManageStars"), "Table", "Admin", new { table = "Stars" }, null)</li>
+                                                    <li>@Html.ActionLink(T("Nav.SystemSettings"), "Index", "AdminSystemSettings")</li>
+                                                    <li>@Html.ActionLink(T("Nav.AccountSettings"), "Index", "AccountSettings")</li>
+                                                    <li>@Html.ActionLink(T("Auth.Logout"), "Logout", "Account")</li>
+                                                }
+                                                else if (isEmployer)
+                                                {
+                                                    <li>@Html.ActionLink(T("Nav.MyProfile"), "Me", "Profile")</li>
+                                                    <li>@Html.ActionLink(T("Nav.ManageJobs"), "Index", "Jobs")</li>
+                                                    <li>@Html.ActionLink(T("Nav.Applications"), "Index", "Applications")</li>
+                                                    <li>@Html.ActionLink(T("Nav.SentInvitations"), "Sent", "CandidateInvitations")</li>
+                                                    <li>@Html.ActionLink(T("Nav.SavedCandidates"), "Saved", "Stars")</li>
+                                                    <li>@Html.ActionLink(T("Nav.CompanySettings"), "Index", "CompanySettings")</li>
+                                                    <li>@Html.ActionLink(T("Nav.AccountSettings"), "Index", "AccountSettings")</li>
+                                                    <li>@Html.ActionLink(T("Auth.Logout"), "Logout", "Account")</li>
+                                                }
+                                                else
+                                                {
+                                                    <li>@Html.ActionLink(T("Nav.MyProfile"), "Me", "Profile")</li>
+                                                    <li>@Html.ActionLink(T("Nav.AccountSettings"), "Index", "AccountSettings")</li>
+                                                    <li>@Html.ActionLink(T("Auth.Logout"), "Logout", "Account")</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        @Html.ActionLink(T("Auth.Register"), "Register", "Account", null, new { @class = "btn head-btn1" })
+                                        @Html.ActionLink(T("Auth.Login"), "Login", "Account", null, new { @class = "btn head-btn2" })
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Mobile Menu -->
+                        <div class="col-12">
+                            <div class="mobile_menu d-block d-lg-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Header End -->
+    </header>
+    @*
+          <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                        <li>@Html.ActionLink("About", "About", "Home")</li>
+                        <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    *@
+
+    <div class="container-fluid body-content">
+        @if (TempData["StarMessage"] != null)
+        {
+            <div class="container pt-20">
+                <div class="alert alert-success">@TempData["StarMessage"]</div>
+            </div>
+        }
+        @if (TempData["StarError"] != null)
+        {
+            <div class="container pt-20">
+                <div class="alert alert-danger">@TempData["StarError"]</div>
+            </div>
+        }
+        @RenderBody()
+        <hr />
+        <footer>
+            <!-- Footer Start-->
+            <div class="footer-area footer-bg footer-padding">
+                <div class="container">
+                    <div class="row d-flex justify-content-between">
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-6">
+                            <div class="single-footer-caption mb-50">
+                                <div class="single-footer-caption mb-30">
+                                    <div class="footer-tittle">
+                                        <h4>@T("Footer.AboutUs")</h4>
+                                        <div class="footer-pera">
+                                            <p>@T("Footer.AboutText")</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-5">
+                            <div class="single-footer-caption mb-50">
+                                <div class="footer-tittle">
+                                    <h4>@T("Footer.ContactInfo")</h4>
+                                    <ul>
+                                        <li>
+                                            <p>
+                                                @T("Footer.Address")
+                                            </p>
+                                        </li>
+                                        <li><a href="#">@T("Footer.Phone")</a></li>
+                                        <li><a href="#">@T("Footer.Email")</a></li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-lg-3 col-md-3 col-sm-5">
+                            <div class="single-footer-caption mb-50">
+                                <div class="footer-tittle">
+                                        <h4>@T("Footer.ImportantLinks")</h4>
+                                        <ul>
+                                            <li>@Html.ActionLink(T("Nav.FindJobs"), "Index", "Jobs")</li>
+                                            <li>@Html.ActionLink(T("Nav.Companies"), "Index", "Companies")</li>
+                                            <li>@Html.ActionLink(T("Auth.Register"), "Register", "Account")</li>
+                                            <li>@Html.ActionLink(T("Auth.Login"), "Login", "Account")</li>
+                                            <li>@Html.ActionLink(T("Nav.Contact"), "Contact", "Home")</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                       
+                    </div>
+                    <!--  -->
+            
+            <!-- footer-bottom area -->
+            <div class="footer-bottom-area footer-bg">
+                <div class="container">
+                    <div class="footer-border">
+                        <div class="row d-flex justify-content-between align-items-center">
+                            <div class="col-xl-10 col-lg-10 ">
+                                <div class="footer-copy-right">
+                                    <p>
+                                        Copyright &copy;
+                                        <script>document.write(new Date().getFullYear());</script> @T("Footer.Copyright")
+                                    </p>
+                                </div>
+                            </div>
+                            <!--
+
+                            <div class="col-xl-2 col-lg-2">
+                                <div class="footer-social f-right">
+                                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                                    <a href="#"><i class="fab fa-twitter"></i></a>
+                                    <a href="#"><i class="fas fa-globe"></i></a>
+                                    <a href="#"><i class="fab fa-behance"></i></a>
+                                </div>
+                            </div>
+                                -->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer End-->
+        </footer>
+    </div>
+    <!-- JS here -->
+    <!-- All JS Custom Plugins Link Here here -->
+    <script src="/Scripts/vendor/modernizr-3.5.0.min.js"></script>
+    <!-- Jquery, Popper, Bootstrap -->
+    <script src="/Scripts/vendor/jquery-1.12.4.min.js"></script>
+    <script src="/Scripts/popper.min.js"></script>
+    <script src="/Scripts/bootstrap.min.js"></script>
+    <!-- Jquery Mobile Menu -->
+    <script src="/Scripts/jquery.slicknav.min.js"></script>
+
+    <!-- Jquery Slick , Owl-Carousel Plugins -->
+    <script src="/Scripts/owl.carousel.min.js"></script>
+    <script src="/Scripts/slick.min.js"></script>
+    <script src="/Scripts/price_rangs.js"></script>
+
+    <!-- One Page, Animated-HeadLin -->
+    <script src="/Scripts/wow.min.js"></script>
+    <script src="/Scripts/animated.headline.js"></script>
+    <script src="/Scripts/jquery.magnific-popup.js"></script>
+
+    <!-- Scrollup, nice-select, sticky -->
+    <script src="/Scripts/jquery.scrollUp.min.js"></script>
+    <script src="/Scripts/jquery.nice-select.min.js"></script>
+    <script src="/Scripts/jquery.sticky.js"></script>
+
+    <!-- contact js -->
+    <script src="/Scripts/contact.js"></script>
+    <script src="/Scripts/jquery.form.js"></script>
+    <script src="/Scripts/jquery.validate.min.js"></script>
+    <script src="/Scripts/mail-script.js"></script>
+    <script src="/Scripts/jquery.ajaxchimp.min.js"></script>
+
+    <!-- Jquery Plugins, main Jquery -->
+    <script src="/Scripts/plugins.js"></script>
+    <script src="/Scripts/main.js"></script>
+    <script>
+        (function () {
+            function hidePreloader() {
+                var preloader = document.getElementById("preloader-active");
+                if (preloader) {
+                    preloader.classList.add("is-hidden");
+                    setTimeout(function () {
+                        preloader.style.display = "none";
+                    }, 260);
+                }
+                document.body.style.overflow = "visible";
+            }
+
+            if (document.readyState === "complete") {
+                hidePreloader();
+            } else {
+                window.addEventListener("load", hidePreloader);
+                setTimeout(hidePreloader, 1600);
+            }
+        })();
+    </script>
+    <script>
+        (function () {
+            var ticking = false;
+
+            function syncHeaderState() {
+                document.body.classList.toggle("site-header-scrolled", window.scrollY > 12);
+                ticking = false;
+            }
+
+            function requestHeaderSync() {
+                if (!ticking) {
+                    window.requestAnimationFrame(syncHeaderState);
+                    ticking = true;
+                }
+            }
+
+            syncHeaderState();
+            window.addEventListener("scroll", requestHeaderSync, { passive: true });
+            window.addEventListener("resize", requestHeaderSync);
+
+            function updateStarButton(button, isStarred) {
+                var icon = button.querySelector("i");
+                button.classList.toggle("is-starred", isStarred);
+                button.setAttribute("aria-label", isStarred ? "@T("Jobs.Unstar")" : "@T("Jobs.Star")");
+                button.setAttribute("title", isStarred ? "@T("Jobs.Unstar")" : "@T("Jobs.Star")");
+
+                if (icon) {
+                    icon.classList.toggle("fas", isStarred);
+                    icon.classList.toggle("far", !isStarred);
+                    icon.classList.add("fa-star");
+                }
+            }
+
+            function updateNearestStarCount(form, count) {
+                var card = form.closest(".listing-card, .single-job-items, .post-details3, .post-details4, .col-md-9");
+                if (!card || typeof count === "undefined" || count === null) {
+                    return;
+                }
+
+                var candidates = card.querySelectorAll(".listing-badges span, .job-tittle ul li, p, li");
+                for (var i = 0; i < candidates.length; i++) {
+                    if (/\bstar\(s\)|\bStars:/i.test(candidates[i].textContent)) {
+                        candidates[i].textContent = candidates[i].textContent.replace(/\d+\s*star\(s\)/i, count + " star(s)").replace(/Stars:\s*\d+/i, "Stars: " + count);
+                        break;
+                    }
+                }
+            }
+
+            document.addEventListener("submit", function (event) {
+                var form = event.target;
+                var button = form.querySelector(".star-toggle-button");
+
+                if (!button) {
+                    return;
+                }
+
+                event.preventDefault();
+
+                if (button.disabled) {
+                    return;
+                }
+
+                button.disabled = true;
+                button.classList.add("is-loading");
+
+                fetch(form.action, {
+                    method: "POST",
+                    body: new FormData(form),
+                    credentials: "same-origin",
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                })
+                    .then(function (response) {
+                        return response.json().then(function (data) {
+                            return { ok: response.ok, data: data };
+                        });
+                    })
+                    .then(function (result) {
+                        if (!result.ok || !result.data.success) {
+                            if (result.data && result.data.loginUrl) {
+                                window.location.href = result.data.loginUrl;
+                            }
+                            return;
+                        }
+
+                        updateStarButton(button, result.data.isStarred);
+                        updateNearestStarCount(form, result.data.starCount);
+                    })
+                    .catch(function () {
+                        form.submit();
+                    })
+                    .finally(function () {
+                        button.disabled = false;
+                        button.classList.remove("is-loading");
+                    });
+            });
+        })();
+    </script>
+    <script>
+        (function () {
+            function enhanceSelectActionLinks() {
+                var selects = document.querySelectorAll("select[data-select-action-value][data-select-action-url]");
+
+                Array.prototype.forEach.call(selects, function (select) {
+                    var actionValue = select.getAttribute("data-select-action-value");
+                    var actionUrl = select.getAttribute("data-select-action-url");
+                    var actionLabel = select.getAttribute("data-select-action-label");
+                    var niceSelect = select.nextElementSibling;
+
+                    if (!actionValue || !actionUrl || !actionLabel || !niceSelect || niceSelect.className.indexOf("nice-select") < 0) {
+                        return;
+                    }
+
+                    var list = niceSelect.querySelector(".list");
+
+                    if (!list) {
+                        return;
+                    }
+
+                    var option = niceSelect.querySelector('.option[data-value="' + actionValue + '"]') || niceSelect.querySelector('.select-action-option[data-action-value="' + actionValue + '"]');
+
+                    if (!option || option.querySelector("a")) {
+                        if (!option) {
+                            option = document.createElement("li");
+                            option.className = "option disabled select-action-option";
+                            option.setAttribute("data-action-value", actionValue);
+                            list.appendChild(option);
+                        }
+                        else {
+                            option.classList.add("disabled");
+                            return;
+                        }
+                    }
+
+                    if (!option.classList.contains("select-action-option")) {
+                        option.classList.add("select-action-option");
+                    }
+
+                    option.classList.add("disabled");
+                    option.classList.remove("selected", "focus");
+
+                    if (select.value === actionValue) {
+                        select.value = "";
+                    }
+
+                    var current = niceSelect.querySelector(".current");
+
+                    if (current && current.textContent.trim() === actionLabel.trim()) {
+                        var selectedOption = niceSelect.querySelector(".option.selected:not(.select-action-option)");
+                        var fallbackOption = niceSelect.querySelector(".option:not(.disabled):not(.select-action-option)");
+                        current.textContent = selectedOption ? selectedOption.textContent : (fallbackOption ? fallbackOption.textContent : "");
+                    }
+
+                    if (option.querySelector("a")) {
+                        return;
+                    }
+
+                    option.setAttribute("aria-disabled", "true");
+                    var link = document.createElement("a");
+                    link.href = actionUrl;
+                    link.className = "select-action-link";
+                    link.textContent = actionLabel;
+                    option.textContent = "";
+                    option.appendChild(link);
+                });
+            }
+
+            document.addEventListener("DOMContentLoaded", enhanceSelectActionLinks);
+            window.setTimeout(enhanceSelectActionLinks, 250);
+
+            document.addEventListener("click", function (event) {
+                var link = event.target.closest(".select-action-link");
+
+                if (!link) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+                window.location.href = link.href;
+            }, true);
+
+            document.addEventListener("change", function (event) {
+                var select = event.target;
+
+                if (!select || !select.matches("select[data-select-action-value][data-select-action-url]")) {
+                    return;
+                }
+
+                if (select.value !== select.getAttribute("data-select-action-value")) {
+                    return;
+                }
+
+                var actionUrl = select.getAttribute("data-select-action-url");
+                select.value = "";
+
+                if (window.jQuery && window.jQuery.fn && window.jQuery.fn.niceSelect) {
+                    window.jQuery(select).niceSelect("update");
+                    enhanceSelectActionLinks();
+                }
+
+                if (actionUrl) {
+                    window.location.href = actionUrl;
+                }
+            });
+        })();
+    </script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,43 @@
+@model JobPortalKCV.Models.ViewModel.NotificationDropdownViewModel
+@using System.Linq
+@using JobPortalKCV.Helpers
+@{
+    Func<string, string> T = key => UiText.T(key);
+}
+
+<div class="notification-menu">
+    <a href="#" class="notification-toggle" aria-label="@T("Nav.Notifications")">
+        <i class="fas fa-bell"></i>
+        @if (Model.UnreadCount > 0)
+        {
+            <span class="notification-badge">@Model.UnreadCount</span>
+        }
+    </a>
+    <div class="notification-dropdown">
+        <div class="notification-dropdown-header">
+            <strong>@T("Nav.Notifications")</strong>
+        </div>
+
+        <div class="notification-dropdown-list">
+            @if (Model.Notifications == null || !Model.Notifications.Any())
+            {
+                <div class="notification-empty">@T("Message.NoNotifications")</div>
+            }
+            else
+            {
+                foreach (var notification in Model.Notifications)
+                {
+                    <a class="notification-item @(notification.IsRead ? "" : "is-unread")" href="@Url.Action("Open", "Notifications", new { id = notification.NotificationId })">
+                        <span>@notification.Title</span>
+                        <small>@notification.Message</small>
+                        <em>@notification.CreatedAt.ToString("dd/MM/yyyy HH:mm")</em>
+                    </a>
+                }
+            }
+        </div>
+
+        <div class="notification-dropdown-footer">
+            @Html.ActionLink(T("Message.SeeAllNotifications"), "Index", "Notifications")
+        </div>
+    </div>
+</div>

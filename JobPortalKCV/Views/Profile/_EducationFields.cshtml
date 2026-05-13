@@ -1,0 +1,22 @@
+@model JobPortalKCV.Models.UserEducation
+
+<div class="row mt-20">
+    <div class="col-md-6 form-group">
+        <input type="text" name="school_name" value="@(Model == null ? "" : Model.school_name)" class="form-control" placeholder="School name" />
+    </div>
+    <div class="col-md-3 form-group">
+        <input type="text" name="degree" value="@(Model == null ? "" : Model.degree)" class="form-control" placeholder="Degree" />
+    </div>
+    <div class="col-md-3 form-group">
+        <input type="text" name="field_of_study" value="@(Model == null ? "" : Model.field_of_study)" class="form-control" placeholder="Field of study" />
+    </div>
+    <div class="col-md-3 form-group">
+        <input type="date" name="start_date" value="@(Model != null && Model.start_date.HasValue ? Model.start_date.Value.ToString("yyyy-MM-dd") : "")" class="form-control" />
+    </div>
+    <div class="col-md-3 form-group">
+        <input type="date" name="end_date" value="@(Model != null && Model.end_date.HasValue ? Model.end_date.Value.ToString("yyyy-MM-dd") : "")" class="form-control" />
+    </div>
+    <div class="col-md-6 form-group">
+        <textarea name="description" class="form-control" rows="2" placeholder="Description">@(Model == null ? "" : Model.description)</textarea>
+    </div>
+</div>

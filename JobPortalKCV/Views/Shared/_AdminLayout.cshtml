@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+@using JobPortalKCV.Helpers
+@{
+    var pageTitle = String.IsNullOrWhiteSpace(ViewBag.Title as string) ? "Admin" : ViewBag.Title as string;
+    var currentController = ViewContext.RouteData.Values["controller"] == null ? "" : ViewContext.RouteData.Values["controller"].ToString();
+    var currentAction = ViewContext.RouteData.Values["action"] == null ? "" : ViewContext.RouteData.Values["action"].ToString();
+    var currentTable = Request.QueryString["table"] ?? "";
+    var currentLang = UiText.CurrentLanguage;
+    var returnUrl = Request.RawUrl;
+    Func<string, string> T = key => UiText.T(key);
+    Func<string, string> langUrl = lang => UiText.SwitchUrl(Url, lang, returnUrl);
+    Func<string, string, string> activeClass = (controller, action) =>
+        String.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) &&
+        (String.IsNullOrWhiteSpace(action) || String.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase))
+            ? " active"
+            : "";
+    Func<string, string> tableActiveClass = table =>
+        String.Equals(currentController, "Admin", StringComparison.OrdinalIgnoreCase) &&
+        String.Equals(currentTable, table, StringComparison.OrdinalIgnoreCase)
+            ? " active"
+            : "";
+}
+<html lang="@currentLang">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@pageTitle - KCV Job Portal Admin</title>
+    <link rel="icon" type="image/svg+xml" href="/img/logo/kcv-icon.svg" />
+    <link rel="stylesheet" href="/Content/dasher/css/theme.css" />
+    <link rel="stylesheet" href="/Content/fontawesome-all.min.css" />
+    <link rel="stylesheet" href="/Content/nice-select.css" />
+    <link rel="stylesheet" href="/Content/Site.css" />
+    <link rel="stylesheet" href="/Content/dasher/css/admin.css" />
+    <script src="/Scripts/vendor/chart.umd.min.js"></script>
+    @RenderSection("Styles", required: false)
+</head>
+<body class="admin-shell">
+    <aside class="admin-sidebar" id="adminSidebar">
+        <a class="admin-brand" href="@Url.Action("Index", "Admin")">
+            <img src="/img/logo/kcv-icon.svg" alt="KCV Job Portal Admin" />
+            <span>KCV Admin</span>
+        </a>
+
+        <div class="admin-nav-label">@T("Admin.Overview")</div>
+        <a class="admin-nav-link@activeClass(" Admin", "Index" )" href="@Url.Action("Index", "Admin")">
+            <span class="admin-nav-icon">D</span><span>@T("Admin.Dashboard")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link" href="@Url.Action("Index", "Home")">
+            <span class="admin-nav-icon">S</span><span>@T("Nav.BackToSite")</span>
+        </a>
+        <br />
+        <div class="admin-nav-label">@T("Admin.CoreTables")</div>
+        <a class="admin-nav-link@tableActiveClass(" Users")" href="@Url.Action("Table", "Admin", new { table = "Users" })">
+            <span class="admin-nav-icon">U</span><span>@T("Admin.Users")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" Roles")" href="@Url.Action("Table", "Admin", new { table = "Roles" })">
+            <span class="admin-nav-icon">R</span><span>@T("Admin.Roles")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" UserRoles")" href="@Url.Action("Table", "Admin", new { table = "UserRoles" })">
+            <span class="admin-nav-icon">UR</span><span>@T("Admin.UserRoles")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" UserSettings")" href="@Url.Action("Table", "Admin", new { table = "UserSettings" })">
+            <span class="admin-nav-icon">US</span><span>@T("Admin.UserSettings")</span>
+        </a>
+        <br />
+        <div class="admin-nav-label">@T("Admin.Companies")</div>
+        <a class="admin-nav-link@tableActiveClass(" Companies")" href="@Url.Action("Table", "Admin", new { table = "Companies" })">
+            <span class="admin-nav-icon">C</span><span>@T("Admin.Companies")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" CompanyUsers")" href="@Url.Action("Table", "Admin", new { table = "CompanyUsers" })">
+            <span class="admin-nav-icon">CU</span><span>@T("Admin.CompanyUsers")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" CompanyJoinRequests")" href="@Url.Action("Table", "Admin", new { table = "CompanyJoinRequests" })">
+            <span class="admin-nav-icon">CJ</span><span>@T("Admin.CompanyJoinRequests")</span>
+        </a>
+        <br />
+
+        <div class="admin-nav-label">@T("Admin.Jobs")</div>
+        <a class="admin-nav-link@tableActiveClass(" Jobs")" href="@Url.Action("Table", "Admin", new { table = "Jobs" })">
+            <span class="admin-nav-icon">J</span><span>@T("Admin.Jobs")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" JobCategories")" href="@Url.Action("Table", "Admin", new { table = "JobCategories" })">
+            <span class="admin-nav-icon">JC</span><span>@T("Admin.JobCategories")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" JobCategoryMap")" href="@Url.Action("Table", "Admin", new { table = "JobCategoryMap" })">
+            <span class="admin-nav-icon">JM</span><span>@T("Admin.JobCategoryMap")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" JobSkills")" href="@Url.Action("Table", "Admin", new { table = "JobSkills" })">
+            <span class="admin-nav-icon">JS</span><span>@T("Admin.JobSkills")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" Skills")" href="@Url.Action("Table", "Admin", new { table = "Skills" })">
+            <span class="admin-nav-icon">S</span><span>@T("Admin.Skills")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" EmploymentTypes")" href="@Url.Action("Table", "Admin", new { table = "EmploymentTypes" })">
+            <span class="admin-nav-icon">ET</span><span>@T("Admin.EmploymentTypes")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" Locations")" href="@Url.Action("Table", "Admin", new { table = "Locations" })">
+            <span class="admin-nav-icon">L</span><span>@T("Admin.Locations")</span>
+        </a>
+        <br />
+
+        <div class="admin-nav-label">@T("Admin.ProfilesCvs")</div>
+        <a class="admin-nav-link@tableActiveClass(" UserProfiles")" href="@Url.Action("Table", "Admin", new { table = "UserProfiles" })">
+            <span class="admin-nav-icon">P</span><span>@T("Admin.UserProfiles")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" UserEducations")" href="@Url.Action("Table", "Admin", new { table = "UserEducations" })">
+            <span class="admin-nav-icon">E</span><span>@T("Admin.UserEducations")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" UserExperiences")" href="@Url.Action("Table", "Admin", new { table = "UserExperiences" })">
+            <span class="admin-nav-icon">EX</span><span>@T("Admin.UserExperiences")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" UserProjects")" href="@Url.Action("Table", "Admin", new { table = "UserProjects" })">
+            <span class="admin-nav-icon">PR</span><span>@T("Admin.UserProjects")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" UserSkills")" href="@Url.Action("Table", "Admin", new { table = "UserSkills" })">
+            <span class="admin-nav-icon">UK</span><span>@T("Admin.UserSkills")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" UserCVs")" href="@Url.Action("Table", "Admin", new { table = "UserCVs" })">
+            <span class="admin-nav-icon">CV</span><span>@T("Admin.UserCVs")</span>
+        </a>
+        <br />
+
+        <div class="admin-nav-label">@T("Admin.Applications")</div>
+        <a class="admin-nav-link@tableActiveClass(" JobApplications")" href="@Url.Action("Table", "Admin", new { table = "JobApplications" })">
+            <span class="admin-nav-icon">A</span><span>@T("Admin.Applications")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" ApplicationStatuses")" href="@Url.Action("Table", "Admin", new { table = "ApplicationStatuses" })">
+            <span class="admin-nav-icon">AS</span><span>@T("Admin.ApplicationStatuses")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" Interviews")" href="@Url.Action("Table", "Admin", new { table = "Interviews" })">
+            <span class="admin-nav-icon">I</span><span>@T("Admin.Interviews")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" CandidateInvitations")" href="@Url.Action("Table", "Admin", new { table = "CandidateInvitations" })">
+            <span class="admin-nav-icon">CI</span><span>@T("Admin.CandidateInvitations")</span>
+        </a>
+        <br />
+
+        <div class="admin-nav-label">@T("Admin.Engagement")</div>
+        <a class="admin-nav-link@tableActiveClass(" Stars")" href="@Url.Action("Table", "Admin", new { table = "Stars" })">
+            <span class="admin-nav-icon">F</span><span>@T("Admin.Stars")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" Notifications")" href="@Url.Action("Table", "Admin", new { table = "Notifications" })">
+            <span class="admin-nav-icon">N</span><span>@T("Nav.Notifications")</span>
+        </a>
+        <br />
+
+        <div class="admin-nav-label">@T("Admin.System")</div>
+        <a class="admin-nav-link@activeClass(" AdminSystemSettings", "" )" href="@Url.Action("Index", "AdminSystemSettings")">
+            <span class="admin-nav-icon">G</span><span>@T("Admin.SystemSettingsPage")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" SystemSettings")" href="@Url.Action("Table", "Admin", new { table = "SystemSettings" })">
+            <span class="admin-nav-icon">ST</span><span>@T("Admin.SystemSettingsTable")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" UserVerifications")" href="@Url.Action("Table", "Admin", new { table = "UserVerifications" })">
+            <span class="admin-nav-icon">V</span><span>@T("Admin.UserVerifications")</span>
+        </a>
+        <br />
+        <div class="admin-nav-label">@T("Admin.Logs")</div>
+        <a class="admin-nav-link@tableActiveClass(" UserLoginLogs")" href="@Url.Action("Table", "Admin", new { table = "UserLoginLogs" })">
+            <span class="admin-nav-icon">L</span><span>@T("Admin.LoginLogs")</span>
+        </a>
+        <br />
+        <a class="admin-nav-link@tableActiveClass(" UserActivityLogs")" href="@Url.Action("Table", "Admin", new { table = "UserActivityLogs" })">
+            <span class="admin-nav-icon">R</span><span>@T("Admin.ActivityLogs")</span>
+        </a>
+        <br />
+    </aside>
+
+    <div class="admin-content">
+        <header class="admin-topbar">
+            <div class="d-flex align-items-center gap-3">
+                <button type="button" class="btn btn-light admin-mobile-toggle" id="adminSidebarToggle">@T("Admin.Menu")</button>
+                <div>
+                    <h1>@pageTitle</h1>
+                    <p>@T("Admin.Workspace")</p>
+                </div>
+            </div>
+            <div class="admin-topbar-actions d-flex align-items-center gap-3 flex-wrap">
+                <div class="site-language-switch admin-language-switch" aria-label="@T("Lang.Language")">
+                    <a class="@(currentLang == "en" ? "is-active" : "")" href="@langUrl("en")">EN</a>
+                    <a class="@(currentLang == "vi" ? "is-active" : "")" href="@langUrl("vi")">VI</a>
+                </div>
+                @Html.ActionLink(T("Nav.MyProfile"), "Me", "Profile", null, new { @class = "btn btn-light" })
+                @Html.ActionLink(T("Nav.AccountSettings"), "Index", "AccountSettings", null, new { @class = "btn btn-light" })
+                @Html.ActionLink(T("Auth.Logout"), "Logout", "Account", null, new { @class = "btn btn-light" })
+                <span class="admin-user-pill">
+                    <span class="admin-user-avatar">@((User.Identity.Name ?? "A").Substring(0, 1).ToUpper())</span>
+                    <span>@User.Identity.Name</span>
+                </span>
+            </div>
+        </header>
+
+        <main class="admin-page">
+            @RenderBody()
+        </main>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    <script src="/Scripts/jquery.nice-select.min.js"></script>
+    <script src="/Scripts/admin-select-search.js"></script>
+    <script>
+        (function () {
+            var toggle = document.getElementById("adminSidebarToggle");
+            var sidebar = document.getElementById("adminSidebar");
+
+            if (toggle && sidebar) {
+                toggle.addEventListener("click", function () {
+                    sidebar.classList.toggle("is-open");
+                    toggle.setAttribute("aria-expanded", sidebar.classList.contains("is-open") ? "true" : "false");
+                });
+            }
+        })();
+    </script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

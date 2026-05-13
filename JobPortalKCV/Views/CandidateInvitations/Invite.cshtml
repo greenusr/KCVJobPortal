@@ -1,0 +1,46 @@
+@model JobPortalKCV.Models.ViewModel.CandidateInvitationInviteViewModel
+
+@{
+    ViewBag.Title = "Invite Candidate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container pt-120 pb-120">
+    <div class="section-tittle mb-35">
+        <span>Employer tools</span>
+        <h2>Invite Candidate</h2>
+    </div>
+
+    @if (TempData["InvitationError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["InvitationError"]</div>
+    }
+
+    <div class="post-details3">
+        <p><strong>Candidate:</strong> @Model.CandidateName</p>
+
+        @using (Html.BeginForm("Invite", "CandidateInvitations", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.CandidateId)
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.JobId)
+                @Html.DropDownListFor(model => model.JobId, Model.Jobs, "-- Select job --", new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.JobId, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Message)
+                @Html.TextAreaFor(model => model.Message, new { @class = "form-control", rows = 5 })
+            </div>
+
+            <button type="submit" class="btn">Send invitation</button>
+            @Html.ActionLink("Back to profile", "View", "Profile", new { id = Model.CandidateId }, new { @class = "btn btn-default" })
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

@@ -1,0 +1,60 @@
+@model JobPortalKCV.Models.ViewModel.LoginViewModel
+@using JobPortalKCV.Helpers
+
+@{
+    ViewBag.Title = UiText.T("Auth.Login");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Func<string, string> T = key => UiText.T(key);
+}
+
+<div class="page-shell">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="ui-card">
+                <div class="small-section-tittle">
+                    <h4>@T("Auth.Login")</h4>
+                </div>
+
+                @if (TempData["AuthMessage"] != null)
+                {
+                    <div class="alert alert-info">@TempData["AuthMessage"]</div>
+                }
+
+                @using (Html.BeginForm("Login", "Account", new { returnUrl = ViewBag.ReturnUrl }, FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                    <div class="form-group">
+                        <label for="UserNameOrEmail">@T("Auth.EmailOrUsername")</label>
+                        @Html.TextBoxFor(model => model.UserNameOrEmail, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.UserNameOrEmail, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Password">@T("Auth.Password")</label>
+                        @Html.PasswordFor(model => model.Password, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            @Html.CheckBoxFor(model => model.RememberMe)
+                            @T("Auth.RememberMe")
+                        </label>
+                    </div>
+
+                    <div class="ui-toolbar">
+                        <button type="submit" class="btn">@T("Auth.Login")</button>
+                        @Html.ActionLink(T("Auth.Register"), "Register", null, new { @class = "btn head-btn2" })
+                        @Html.ActionLink(T("Auth.ForgotPassword"), "ForgotPassword", null, new { @class = "ml-20" })
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

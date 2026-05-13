@@ -1,0 +1,222 @@
+@model JobPortalKCV.Models.ViewModel.AdminDashboardViewModel
+@using System.Linq
+
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-shell">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="section-tittle mb-35">
+                    <span>Admin</span>
+                    <h2>Dashboard</h2>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="ui-stat-card">
+                            <div class="ui-stat-icon"><i class="fas fa-users"></i></div>
+                            <div><span class="ui-stat-value">@Model.TotalUsers</span><span class="ui-stat-label">Total Users</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="ui-stat-card">
+                            <div class="ui-stat-icon"><i class="fas fa-user-graduate"></i></div>
+                            <div><span class="ui-stat-value">@Model.CandidateUsers</span><span class="ui-stat-label">Total Candidates</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="ui-stat-card">
+                            <div class="ui-stat-icon"><i class="fas fa-briefcase"></i></div>
+                            <div><span class="ui-stat-value">@Model.EmployerUsers</span><span class="ui-stat-label">Total Employers</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="ui-stat-card">
+                            <div class="ui-stat-icon"><i class="fas fa-building"></i></div>
+                            <div><span class="ui-stat-value">@Model.TotalCompanies</span><span class="ui-stat-label">Total Companies</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="ui-stat-card">
+                            <div class="ui-stat-icon"><i class="fas fa-list"></i></div>
+                            <div><span class="ui-stat-value">@Model.TotalJobs</span><span class="ui-stat-label">Total Jobs</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="ui-stat-card">
+                            <div class="ui-stat-icon"><i class="fas fa-file-alt"></i></div>
+                            <div><span class="ui-stat-value">@Model.TotalApplications</span><span class="ui-stat-label">Total Applications</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="ui-stat-card">
+                            <div class="ui-stat-icon"><i class="fas fa-clock"></i></div>
+                            <div><span class="ui-stat-value">@Model.PendingApplications</span><span class="ui-stat-label">Pending Applications</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="ui-stat-card">
+                            <div class="ui-stat-icon"><i class="fas fa-star"></i></div>
+                            <div><span class="ui-stat-value">@Model.TotalStars</span><span class="ui-stat-label">Total Stars</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ui-card">
+                    <div class="ui-card-title">
+                        <h3>Quick Actions</h3>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-10">@Html.ActionLink("Manage Users", "Table", new { table = "Users" }, new { @class = "btn btn-block" })</div>
+                        <div class="col-md-3 col-sm-6 mb-10">@Html.ActionLink("Manage Jobs", "Table", new { table = "Jobs" }, new { @class = "btn btn-block head-btn2" })</div>
+                        <div class="col-md-3 col-sm-6 mb-10">@Html.ActionLink("Manage Companies", "Table", new { table = "Companies" }, new { @class = "btn btn-block head-btn2" })</div>
+                        <div class="col-md-3 col-sm-6 mb-10">@Html.ActionLink("System Settings", "Index", "AdminSystemSettings", null, new { @class = "btn btn-block head-btn2" })</div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        @Html.Partial("_AdminChart", Model.ApplicationsByStatus, new ViewDataDictionary { { "Title", "Applications by status" }, { "Type", "doughnut" } })
+                    </div>
+                    <div class="col-md-4">
+                        @Html.Partial("_AdminChart", Model.JobsByCategory, new ViewDataDictionary { { "Title", "Jobs by category" }, { "Type", "bar" } })
+                    </div>
+                    <div class="col-md-4">
+                        @Html.Partial("_AdminChart", Model.UsersByRole, new ViewDataDictionary { { "Title", "Users by role" }, { "Type", "doughnut" } })
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="ui-card">
+                            <div class="ui-card-title"><h3>Recent registered users</h3></div>
+                            @if (Model.RecentUsers == null || !Model.RecentUsers.Any())
+                            {
+                                <div class="ui-empty">No records found.</div>
+                            }
+                            else
+                            {
+                                <ul class="ui-mini-list">
+                                    @foreach (var user in Model.RecentUsers)
+                                    {
+                                        <li>
+                                            <strong>@Html.ActionLink(user.DisplayName, "View", "Profile", new { id = user.UserId, returnUrl = Request.RawUrl }, null)</strong>
+                                            <span class="ui-subtle">@user.Email</span>
+                                            <span class="ui-badge ui-badge-info">@user.RoleName</span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="ui-card">
+                            <div class="ui-card-title"><h3>Recent job posts</h3></div>
+                            @if (Model.RecentJobs == null || !Model.RecentJobs.Any())
+                            {
+                                <div class="ui-empty">No records found.</div>
+                            }
+                            else
+                            {
+                                <ul class="ui-mini-list">
+                                    @foreach (var job in Model.RecentJobs)
+                                    {
+                                        <li>
+                                            <strong>@Html.ActionLink(job.JobTitle, "Details", "Jobs", new { id = job.JobId }, null)</strong>
+                                            <span class="ui-subtle">@job.CompanyName - @job.PostedDate</span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="ui-card">
+                            <div class="ui-card-title"><h3>Recent applications</h3></div>
+                            @if (Model.RecentApplications == null || !Model.RecentApplications.Any())
+                            {
+                                <div class="ui-empty">No records found.</div>
+                            }
+                            else
+                            {
+                                <div class="ui-table-wrap">
+                                    <table class="table ui-table">
+                                        <tr>
+                                            <th>Applicant</th>
+                                            <th>Job</th>
+                                            <th>Status</th>
+                                            <th>Applied</th>
+                                        </tr>
+                                        @foreach (var application in Model.RecentApplications)
+                                        {
+                                            var badgeClass = application.Status == "Completed" ? "ui-badge-success" : (application.Status == "Interview" ? "ui-badge-info" : "ui-badge-warning");
+                                            <tr>
+                                                <td>@application.ApplicantName</td>
+                                                <td>@application.JobTitle</td>
+                                                <td><span class="ui-badge @badgeClass">@application.Status</span></td>
+                                                <td>@application.AppliedDate</td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="ui-card">
+                            <div class="ui-card-title"><h3>Recent activity</h3></div>
+                            @if (Model.RecentLogs == null || !Model.RecentLogs.Any())
+                            {
+                                <div class="ui-empty">No records found.</div>
+                            }
+                            else
+                            {
+                                <ul class="ui-mini-list">
+                                    @foreach (var log in Model.RecentLogs)
+                                    {
+                                        <li>
+                                            <span class="ui-badge ui-badge-muted">@log.Action</span>
+                                            <p class="mb-0">@log.Description</p>
+                                            <small class="ui-subtle">@log.CreatedAt</small>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ui-card">
+                    <div class="ui-card-title">
+                        <h3>Data Management</h3>
+                        <span class="ui-subtle">@Model.Tables.Count table(s)</span>
+                    </div>
+                    <div class="ui-table-wrap">
+                        <table class="table ui-table">
+                            <tr>
+                                <th>Table</th>
+                                <th>Records</th>
+                                <th>Action</th>
+                            </tr>
+                            @foreach (var table in Model.Tables)
+                            {
+                                <tr>
+                                    <td>@table.DisplayName</td>
+                                    <td>@table.RecordCount</td>
+                                    <td>@Html.ActionLink("Manage", "Table", new { table = table.TableName }, new { @class = "btn btn-sm btn-default" })</td>
+                                </tr>
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

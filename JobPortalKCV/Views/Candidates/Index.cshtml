@@ -1,0 +1,104 @@
+@model IEnumerable<JobPortalKCV.Models.ViewModel.UserSearchResultViewModel>
+@using System.Linq
+
+@{
+    ViewBag.Title = "Candidates";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var candidates = Model ?? Enumerable.Empty<JobPortalKCV.Models.ViewModel.UserSearchResultViewModel>();
+    var selectedSort = (ViewBag.Sort as string) ?? "name";
+    var totalRecords = ViewBag.TotalRecords == null ? candidates.Count() : (int)ViewBag.TotalRecords;
+}
+
+<div class="job-listing-area pt-120 pb-120">
+    <div class="container">
+        <div class="section-tittle mb-35">
+            <span>Candidates</span>
+            <h2>Find candidates</h2>
+        </div>
+
+        @using (Html.BeginForm("Index", "Candidates", FormMethod.Get, new { @class = "mb-35" }))
+        {
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    <input type="text" name="keyword" class="form-control" value="@ViewBag.Keyword" placeholder="Candidate, skill or keyword" />
+                </div>
+                <div class="col-md-3 form-group">
+                    @Html.DropDownList("locationId", ViewBag.Locations as SelectList, "All locations", new { @class = "form-control" })
+                </div>
+                <div class="col-md-3 form-group">
+                    @Html.DropDownList("skillId", ViewBag.Skills as SelectList, "All skills", new { @class = "form-control" })
+                </div>
+                <div class="col-md-2 form-group">
+                    <select name="sort" class="form-control">
+                        <option value="name" @(selectedSort == "name" ? "selected" : "")>Name A-Z</option>
+                        <option value="name_desc" @(selectedSort == "name_desc" ? "selected" : "")>Name Z-A</option>
+                        <option value="star_desc" @(selectedSort == "star_desc" ? "selected" : "")>Most starred</option>
+                        <option value="star_asc" @(selectedSort == "star_asc" ? "selected" : "")>Least starred</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn">Filter</button>
+        }
+
+        <div class="count-job mb-35">
+            <span>@totalRecords candidate(s) found</span>
+        </div>
+
+        @if (!candidates.Any())
+        {
+            <div class="ui-empty">No records found.</div>
+        }
+        else
+        {
+            <div class="listing-grid">
+                @foreach (var candidate in candidates)
+                {
+                    var about = candidate.AboutMe;
+
+                    if (!String.IsNullOrWhiteSpace(about) && about.Length > 120)
+                    {
+                        about = about.Substring(0, 120) + "...";
+                    }
+
+                    <article class="listing-card">
+                        <div class="listing-card-head">
+                            <div class="listing-logo">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <a class="listing-title" href="@Url.Action("View", "Profile", new { id = candidate.UserId, returnUrl = Request.RawUrl })">@candidate.DisplayName</a>
+                                <div class="listing-subtitle">@candidate.Email</div>
+                            </div>
+                        </div>
+                        <div class="listing-card-body">
+                            <div class="listing-badges">
+                                <span><i class="fas fa-map-marker-alt"></i>@candidate.LocationName</span>
+                                <span>@candidate.StarCount star(s)</span>
+                            </div>
+                            @if (!String.IsNullOrWhiteSpace(about))
+                            {
+                                <p>@about</p>
+                            }
+                        </div>
+                        <div class="listing-card-actions">
+                            @Html.ActionLink("Profile", "View", "Profile", new { id = candidate.UserId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm" })
+                            @Html.ActionLink("Invite", "Invite", "CandidateInvitations", new { candidateId = candidate.UserId }, new { @class = "btn btn-sm btn-default" })
+                            @using (Html.BeginForm("Toggle", "Stars", FormMethod.Post, new { @class = "listing-inline-form" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="targetId" value="@candidate.UserId" />
+                                <input type="hidden" name="targetType" value="User" />
+                                <input type="hidden" name="returnUrl" value="@Request.RawUrl" />
+                                <button type="submit" class="star-toggle-button @(candidate.IsStarredByCurrentUser ? "is-starred" : "")" aria-label="@(candidate.IsStarredByCurrentUser ? "Unstar candidate" : "Star candidate")" title="@(candidate.IsStarredByCurrentUser ? "Unstar" : "Star")">
+                                    <i class="@(candidate.IsStarredByCurrentUser ? "fas" : "far") fa-star"></i>
+                                </button>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+
+        @Html.Partial("_Pagination", (JobPortalKCV.Models.ViewModel.PaginationViewModel)ViewBag.Pagination)
+    </div>
+</div>

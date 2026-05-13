@@ -1,0 +1,188 @@
+@model JobPortalKCV.Models.ViewModel.CompanyDetailsViewModel
+@using System.Linq
+
+@{
+    ViewBag.Title = Model.CompanyName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var logoUrl = String.IsNullOrWhiteSpace(Model.LogoPath) ? "/img/icon/job-list1.png" : Model.LogoPath;
+    var websiteUrl = Model.Website;
+    var returnUrl = Request.QueryString["returnUrl"];
+    var backToListUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Index", "Companies");
+
+    if (!String.IsNullOrWhiteSpace(websiteUrl) && !websiteUrl.StartsWith("http://") && !websiteUrl.StartsWith("https://"))
+    {
+        websiteUrl = "https://" + websiteUrl;
+    }
+}
+
+<div class="container pt-120 pb-120">
+    @if (TempData["CompanyMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["CompanyMessage"]</div>
+    }
+    @if (TempData["CompanyError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["CompanyError"]</div>
+    }
+
+    <div class="row">
+        <div class="col-md-3">
+            <img src="@logoUrl" alt="@Model.CompanyName" style="width:160px;height:160px;object-fit:contain;" />
+        </div>
+        <div class="col-md-9">
+            <div class="section-tittle mb-20">
+                <span>@Model.Industry</span>
+                <h2>@Model.CompanyName</h2>
+            </div>
+            <p><strong>Email:</strong> @Model.ContactEmail</p>
+            <p><strong>Phone:</strong> @Model.ContactPhone</p>
+            <p><strong>Address:</strong> @Model.Address</p>
+            @if (!String.IsNullOrWhiteSpace(Model.Website))
+            {
+                <p><strong>Website:</strong> <a href="@websiteUrl" target="_blank" rel="noopener">@Model.Website</a></p>
+            }
+            <p><strong>Stars:</strong> @Model.StarCount</p>
+
+            <div class="detail-action-row">
+                @using (Html.BeginForm("Toggle", "Stars", FormMethod.Post, new { @class = "detail-action-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="targetId" value="@Model.CompanyId" />
+                    <input type="hidden" name="targetType" value="Company" />
+                    <input type="hidden" name="returnUrl" value="@Request.RawUrl" />
+                    <button type="submit" class="star-toggle-button @(Model.IsStarredByCurrentUser ? "is-starred" : "")" aria-label="@(Model.IsStarredByCurrentUser ? "Unstar company" : "Star company")" title="@(Model.IsStarredByCurrentUser ? "Unstar" : "Star")">
+                        <i class="@(Model.IsStarredByCurrentUser ? "fas" : "far") fa-star"></i>
+                    </button>
+                }
+
+                @if (Model.CanOwn)
+                {
+                    @Html.ActionLink("View starers", "StarredBy", "Stars", new { targetId = Model.CompanyId, targetType = "Company" }, new { @class = "btn btn-default" })
+                    @Html.ActionLink("Transfer owner", "TransferOwner", new { id = Model.CompanyId }, new { @class = "btn btn-default" })
+                }
+
+                @if (Model.CanManage)
+                {
+                    @Html.ActionLink("Edit", "Settings", "CompanySettings", new { id = Model.CompanyId, returnUrl = Request.RawUrl }, new { @class = "btn" })
+                }
+                <a href="@backToListUrl" class="btn btn-default">Back to companies</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-details3 mt-50">
+        <div class="small-section-tittle"><h4>About company</h4></div>
+        @if (String.IsNullOrWhiteSpace(Model.Description))
+        {
+            <p>No company description yet.</p>
+        }
+        else
+        {
+            <p>@Html.Raw(System.Web.HttpUtility.HtmlEncode(Model.Description).Replace("\n", "<br />"))</p>
+        }
+    </div>
+
+    <div class="post-details3 mt-30">
+        <div class="small-section-tittle"><h4>Open jobs</h4></div>
+        @if (Model.Jobs != null && Model.Jobs.Any())
+        {
+            foreach (var job in Model.Jobs)
+            {
+                var postedText = job.posted_date.HasValue ? job.posted_date.Value.ToString("dd/MM/yyyy") : "Not posted";
+
+                <div class="single-job-items mb-30">
+                    <div class="job-items">
+                        <div class="company-img">
+                            <a href="@Url.Action("Details", "Jobs", new { id = job.job_id, returnUrl = Request.RawUrl })">
+                                <img src="@logoUrl" alt="@Model.CompanyName" />
+                            </a>
+                        </div>
+                        <div class="job-tittle">
+                            <a href="@Url.Action("Details", "Jobs", new { id = job.job_id, returnUrl = Request.RawUrl })">
+                                <h4>@job.job_title</h4>
+                            </a>
+                            <ul>
+                                <li><i class="fas fa-map-marker-alt"></i>@job.location_name</li>
+                                <li>@job.employment_type</li>
+                                <li>@job.salary_range</li>
+                                <li>@job.star_count star(s)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="items-link items-link2">
+                        @Html.ActionLink("View job", "Details", "Jobs", new { id = job.job_id, returnUrl = Request.RawUrl }, null)
+                        <span>@postedText</span>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p>No jobs available for this company.</p>
+        }
+    </div>
+
+    <div class="post-details3 mt-30">
+        <div class="small-section-tittle"><h4>Members</h4></div>
+        @if (Model.Members.Any())
+        {
+            <ul>
+                @foreach (var member in Model.Members)
+                {
+                    <li>
+                        @Html.ActionLink(String.IsNullOrWhiteSpace(member.DisplayName) ? member.Email : member.DisplayName, "View", "Profile", new { id = member.UserId, returnUrl = Request.RawUrl }, null)
+                        <span>@member.Role</span>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No members yet.</p>
+        }
+    </div>
+
+    @if (Model.CanOwn)
+    {
+        <div class="post-details3 mt-30">
+            <div class="small-section-tittle"><h4>Pending join requests</h4></div>
+            @if (Model.PendingRequests.Any())
+            {
+                <table class="table">
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Requested</th>
+                        <th></th>
+                    </tr>
+                    @foreach (var request in Model.PendingRequests)
+                    {
+                        <tr>
+                            <td>@Html.ActionLink(String.IsNullOrWhiteSpace(request.DisplayName) ? request.Email : request.DisplayName, "View", "Profile", new { id = request.UserId, returnUrl = Request.RawUrl }, null)</td>
+                            <td>@request.Email</td>
+                            <td>@request.RequestedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @using (Html.BeginForm("ApproveRequest", "Companies", new { id = request.RequestId }, FormMethod.Post, new { @class = "d-inline" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-success">Accept</button>
+                                }
+                                @using (Html.BeginForm("RejectRequest", "Companies", new { id = request.RequestId }, FormMethod.Post, new { @class = "d-inline" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-default">Reject</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </table>
+            }
+            else
+            {
+                <p>No pending requests.</p>
+            }
+        </div>
+    }
+</div>

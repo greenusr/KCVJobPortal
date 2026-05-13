@@ -1,0 +1,151 @@
+@model JobPortalKCV.Models.ViewModel.DocsTopicViewModel
+@using System.Linq
+
+@{
+    ViewBag.Title = Model.Topic.Title + " - " + Model.Docs.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var relatedUrl = !String.IsNullOrWhiteSpace(Model.Topic.Action) && !String.IsNullOrWhiteSpace(Model.Topic.Controller)
+        ? Url.Action(Model.Topic.Action, Model.Topic.Controller, Model.Topic.RouteValues)
+        : null;
+    var noteLabel = Model.Docs.Lang == "vi" ? "Lưu ý" : "Note";
+    var warningLabel = Model.Docs.Lang == "vi" ? "Cảnh báo" : "Warning";
+}
+
+<div class="docs-page docs-detail-page pb-120" style="position: relative; z-index: 0; margin-top: 0 !important; padding-top: 132px !important;">
+    <div class="container">
+        <header class="docs-top docs-detail-top">
+            <div class="docs-article-header" style="margin-top: -27px;">
+                <nav class="docs-breadcrumb" aria-label="Breadcrumb">
+                    <a href="@Url.Action("Index", "Docs", new { lang = Model.Docs.Lang })">Docs</a>
+                    <span>/</span>
+                    <a href="@Url.Action("Index", "Docs", new { lang = Model.Docs.Lang, category = Model.Section.Id })">@Model.Section.Title</a>
+                    <span>/</span>
+                    <strong>@Model.Topic.Title</strong>
+                </nav>
+                <h1>@Model.Topic.Title</h1>
+                <p class="docs-subtitle">@Model.Topic.Summary</p>
+            </div>
+            <div class="docs-language">
+                <span>@Model.Docs.LanguageLabel</span>
+                <div class="docs-language-actions" role="group" aria-label="@Model.Docs.LanguageLabel">
+                    <a class="@(Model.Docs.Lang == "en" ? "is-active" : "")" href="@Url.Action("Detail", "Docs", new { id = Model.Topic.Id, lang = "en" })">@Model.Docs.EnglishLabel</a>
+                    <a class="@(Model.Docs.Lang == "vi" ? "is-active" : "")" href="@Url.Action("Detail", "Docs", new { id = Model.Topic.Id, lang = "vi" })">@Model.Docs.VietnameseLabel</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="docs-layout docs-topic-layout">
+            <aside class="docs-sidebar">
+                <a class="docs-back-link" href="@Url.Action("Index", "Docs", new { lang = Model.Docs.Lang })">@Model.BackToDocsText</a>
+                <div class="docs-sidebar-title">KCV Docs</div>
+                <nav>
+                    @foreach (var docsSection in Model.Docs.Sections)
+                    {
+                        <a class="@(docsSection.Id == Model.Section.Id ? "is-active" : "")" href="@Url.Action("Index", "Docs", new { lang = Model.Docs.Lang, category = docsSection.Id })">@docsSection.Title</a>
+                    }
+                </nav>
+            </aside>
+
+            <main class="docs-content">
+                <article class="docs-topic-card">
+                    @foreach (var contentSection in Model.Topic.ContentSections)
+                    {
+                        var sectionAnchor = contentSection.Heading.Replace(" ", "-").ToLowerInvariant();
+                        <section id="@sectionAnchor" class="docs-topic-section">
+                            <h2>@contentSection.Heading</h2>
+
+                            @foreach (var paragraph in contentSection.Paragraphs)
+                            {
+                                <p>@paragraph</p>
+                            }
+
+                            @if (contentSection.Steps.Any())
+                            {
+                                <ol>
+                                    @foreach (var step in contentSection.Steps)
+                                    {
+                                        <li>@step</li>
+                                    }
+                                </ol>
+                            }
+
+                            @if (contentSection.Bullets.Any())
+                            {
+                                <ul>
+                                    @foreach (var bullet in contentSection.Bullets)
+                                    {
+                                        <li>@bullet</li>
+                                    }
+                                </ul>
+                            }
+
+                            @if (!String.IsNullOrWhiteSpace(contentSection.Note))
+                            {
+                                <div class="docs-callout docs-callout-note">
+                                    <strong>@noteLabel</strong>
+                                    <p>@contentSection.Note</p>
+                                </div>
+                            }
+
+                            @if (!String.IsNullOrWhiteSpace(contentSection.Warning))
+                            {
+                                <div class="docs-callout docs-callout-warning">
+                                    <strong>@warningLabel</strong>
+                                    <p>@contentSection.Warning</p>
+                                </div>
+                            }
+                        </section>
+                    }
+
+                    @if (!String.IsNullOrWhiteSpace(relatedUrl))
+                    {
+                        <div class="docs-topic-actions">
+                            <a class="docs-link-button" href="@relatedUrl">@Model.OpenPageText</a>
+                        </div>
+                    }
+                </article>
+
+                <nav class="docs-prev-next" aria-label="Previous and next guides">
+                    @if (Model.PreviousTopic != null)
+                    {
+                        <a href="@Url.Action("Detail", "Docs", new { id = Model.PreviousTopic.Id, lang = Model.Docs.Lang })">
+                            <span>@Model.PreviousText</span>
+                            <strong>@Model.PreviousTopic.Title</strong>
+                        </a>
+                    }
+                    else
+                    {
+                        <span></span>
+                    }
+
+                    @if (Model.NextTopic != null)
+                    {
+                        <a class="is-next" href="@Url.Action("Detail", "Docs", new { id = Model.NextTopic.Id, lang = Model.Docs.Lang })">
+                            <span>@Model.NextText</span>
+                            <strong>@Model.NextTopic.Title</strong>
+                        </a>
+                    }
+                </nav>
+            </main>
+
+            <aside class="docs-toc" aria-label="@Model.Docs.TocTitle">
+                <div class="docs-sidebar-title">@Model.Docs.TocTitle</div>
+                <nav>
+                    @foreach (var contentSection in Model.Topic.ContentSections)
+                    {
+                        var sectionAnchor = contentSection.Heading.Replace(" ", "-").ToLowerInvariant();
+                        <a href="@("#" + sectionAnchor)">@contentSection.Heading</a>
+                    }
+                </nav>
+            </aside>
+        </div>
+
+        <div class="docs-mobile-language-footer">
+            <span>@Model.Docs.LanguageLabel</span>
+            <div class="docs-language-actions" role="group" aria-label="@Model.Docs.LanguageLabel">
+                <a class="@(Model.Docs.Lang == "en" ? "is-active" : "")" href="@Url.Action("Detail", "Docs", new { id = Model.Topic.Id, lang = "en" })">@Model.Docs.EnglishLabel</a>
+                <a class="@(Model.Docs.Lang == "vi" ? "is-active" : "")" href="@Url.Action("Detail", "Docs", new { id = Model.Topic.Id, lang = "vi" })">@Model.Docs.VietnameseLabel</a>
+            </div>
+        </div>
+    </div>
+</div>

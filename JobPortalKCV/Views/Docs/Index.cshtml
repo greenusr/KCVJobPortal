@@ -1,0 +1,104 @@
+@model JobPortalKCV.Models.ViewModel.DocsViewModel
+@using System.Linq
+
+@{
+    ViewBag.Title = Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var allSections = Model.AllSections ?? Model.Sections;
+}
+
+<div class="docs-page docs-index-page pb-120" style="position: relative; z-index: 0; margin-top: 0 !important; padding-top: 132px !important;">
+    <div class="container">
+        <header class="docs-top">
+            <div class="docs-article-header">
+                <h1>@Model.Title</h1>
+                <p class="docs-subtitle">@Model.Subtitle</p>
+                <p>@Model.IntroText</p>
+            </div>
+            <div class="docs-language">
+                <span>@Model.LanguageLabel</span>
+                <div class="docs-language-actions" role="group" aria-label="@Model.LanguageLabel">
+                    <a class="@(Model.Lang == "en" ? "is-active" : "")" href="@Url.Action("Index", "Docs", new { lang = "en", q = Model.Query, category = Model.Category })">@Model.EnglishLabel</a>
+                    <a class="@(Model.Lang == "vi" ? "is-active" : "")" href="@Url.Action("Index", "Docs", new { lang = "vi", q = Model.Query, category = Model.Category })">@Model.VietnameseLabel</a>
+                </div>
+            </div>
+        </header>
+
+        <form class="docs-search" method="get" action="@Url.Action("Index", "Docs")">
+            <input type="hidden" name="lang" value="@Model.Lang" />
+            @if (!String.IsNullOrWhiteSpace(Model.Category))
+            {
+                <input type="hidden" name="category" value="@Model.Category" />
+            }
+            <input type="search" name="q" id="docsSearchInput" class="form-control" value="@Model.Query" placeholder="@Model.SearchPlaceholder" autocomplete="off" />
+            <button type="submit" class="docs-link-button">@Model.SearchPlaceholder</button>
+        </form>
+
+        <div class="docs-layout docs-index-layout">
+            <aside class="docs-sidebar">
+                <div class="docs-sidebar-title">KCV Docs</div>
+                <nav>
+                    <a class="@(String.IsNullOrWhiteSpace(Model.Category) ? "is-active" : "")" href="@Url.Action("Index", "Docs", new { lang = Model.Lang, q = Model.Query })">All</a>
+                    @foreach (var docsCategory in allSections)
+                    {
+                        <a class="@(String.Equals(Model.Category, docsCategory.Id, StringComparison.OrdinalIgnoreCase) ? "is-active" : "")" href="@Url.Action("Index", "Docs", new { lang = Model.Lang, q = Model.Query, category = docsCategory.Id })">@docsCategory.Title</a>
+                    }
+                </nav>
+            </aside>
+
+            <main class="docs-content">
+                @if (!Model.Sections.Any())
+                {
+                    <div class="ui-empty docs-no-results">
+                        <h4>@Model.NoResultsText</h4>
+                    </div>
+                }
+
+                @foreach (var docsSection in Model.Sections)
+                {
+                    <section id="@(docsSection.Id)" class="docs-section">
+                        <div class="docs-section-heading">
+                            <a class="docs-heading-anchor" href="@("#" + docsSection.Id)">#</a>
+                            <div>
+                                <h2>@docsSection.Title</h2>
+                                <p>@docsSection.Summary</p>
+                            </div>
+                        </div>
+
+                        <div class="docs-items">
+                            @foreach (var item in docsSection.Items)
+                            {
+                                <a class="docs-item docs-item-link" href="@Url.Action("Detail", "Docs", new { id = item.Id, lang = Model.Lang })">
+                                    <div class="docs-item-copy">
+                                        <span class="docs-item-category">@docsSection.Title</span>
+                                        <h3>@item.Title</h3>
+                                        <p>@item.Summary</p>
+                                    </div>
+                                    <span class="docs-link-button">@Model.ReadGuideText</span>
+                                </a>
+                            }
+                        </div>
+                    </section>
+                }
+            </main>
+
+            <aside class="docs-toc" aria-label="@Model.TocTitle">
+                <div class="docs-sidebar-title">@Model.TocTitle</div>
+                <nav>
+                    @foreach (var tocSection in Model.Sections)
+                    {
+                        <a href="@("#" + tocSection.Id)">@tocSection.Title</a>
+                    }
+                </nav>
+            </aside>
+        </div>
+
+        <div class="docs-mobile-language-footer">
+            <span>@Model.LanguageLabel</span>
+            <div class="docs-language-actions" role="group" aria-label="@Model.LanguageLabel">
+                <a class="@(Model.Lang == "en" ? "is-active" : "")" href="@Url.Action("Index", "Docs", new { lang = "en", q = Model.Query, category = Model.Category })">@Model.EnglishLabel</a>
+                <a class="@(Model.Lang == "vi" ? "is-active" : "")" href="@Url.Action("Index", "Docs", new { lang = "vi", q = Model.Query, category = Model.Category })">@Model.VietnameseLabel</a>
+            </div>
+        </div>
+    </div>
+</div>

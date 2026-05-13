@@ -1,0 +1,19 @@
+@model JobPortalKCV.Models.UserExperience
+
+<div class="row mt-20">
+    <div class="col-md-6 form-group">
+        <input type="text" name="company_name" value="@(Model == null ? "" : Model.company_name)" class="form-control" placeholder="Company name" />
+    </div>
+    <div class="col-md-6 form-group">
+        <input type="text" name="position" value="@(Model == null ? "" : Model.position)" class="form-control" placeholder="Position" />
+    </div>
+    <div class="col-md-3 form-group">
+        <input type="date" name="start_date" value="@(Model != null && Model.start_date.HasValue ? Model.start_date.Value.ToString("yyyy-MM-dd") : "")" class="form-control" />
+    </div>
+    <div class="col-md-3 form-group">
+        <input type="date" name="end_date" value="@(Model != null && Model.end_date.HasValue ? Model.end_date.Value.ToString("yyyy-MM-dd") : "")" class="form-control" />
+    </div>
+    <div class="col-md-6 form-group">
+        <textarea name="description" class="form-control" rows="2" placeholder="Description">@(Model == null ? "" : Model.description)</textarea>
+    </div>
+</div>

@@ -1,0 +1,233 @@
+@model JobPortalKCV.Models.ViewModel.HomeIndexViewModel
+@using System.Linq
+@using JobPortalKCV.Helpers
+
+@{
+    ViewBag.Title = UiText.T("Home.Title");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Func<string, string> T = key => UiText.T(key);
+    var isEmployer = Request.IsAuthenticated && AuthRoleHelper.IsEmployer(User.Identity.Name);
+    var cvCtaText = isEmployer ? T("Button.PostJob") : T("Button.UploadCV");
+    var cvCtaUrl = isEmployer ? Url.Action("Create", "Jobs") : Url.Action("Index", "UserCVs");
+    var cvCtaLine = isEmployer ? UiText.T("Home.EmployerCtaLine", Model.TotalJobs, Model.TotalCompanies) : UiText.T("Home.ActiveJobsLine", Model.TotalJobs, Model.TotalCompanies);
+    var cvCtaHeadline = isEmployer ? T("Home.EmployerCtaHeadline") : T("Home.ResumeHeadline");
+}
+
+<main>
+    <div class="slider-area">
+        <div class="slider-active">
+            <div class="single-slider slider-height d-flex align-items-center" data-background="/img/hero/h1_hero.jpg">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-lg-9 col-md-10">
+                            <div class="hero__caption">
+                                <h1>@T("Home.HeroTitle")</h1>
+                                <p class="hero-subtitle">@T("Home.HeroSubtitle")</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-xl-8">
+                            @using (Html.BeginForm("Index", "Jobs", FormMethod.Get, new { @class = "search-box" }))
+                            {
+                                <div class="input-form">
+                                    <input type="text" name="keyword" placeholder="@T("Home.JobKeywordPlaceholder")" />
+                                </div>
+                                <div class="select-form">
+                                    <div class="select-itms">
+                                        <select name="locationId" id="locationId">
+                                            <option value="">@T("Home.AllLocations")</option>
+                                            @foreach (var location in Model.Locations)
+                                            {
+                                                <option value="@location.location_id">@location.location_name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="search-form">
+                                    <button type="submit">@T("Button.Search")</button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="our-services section-pad-t30">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-tittle text-center">
+                        <span>@T("Home.JobCategories")</span>
+                        <h2>@T("Home.BrowseTopCategories")</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row d-flex justify-contnet-center">
+                @foreach (var category in Model.Categories)
+                {
+                    <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6">
+                        <div class="single-services text-center mb-30">
+                            <div class="services-ion">
+                                <span class="@category.icon_class"></span>
+                            </div>
+                            <div class="services-cap">
+                                <h5>@Html.ActionLink(category.category_name, "Index", "Jobs", new { categoryId = category.category_id }, null)</h5>
+                                <span>(@category.job_count)</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="browse-btn2 text-center mt-50">
+                        @Html.ActionLink(T("Button.BrowseAllJobs"), "Index", "Jobs", null, new { @class = "border-btn2" })
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="online-cv cv-bg section-overly pt-90 pb-120" data-background="/img/gallery/cv_bg.jpg">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-xl-10">
+                    <div class="cv-caption text-center">
+                        <p class="pera1">@cvCtaLine</p>
+                        <p class="pera2">@cvCtaHeadline</p>
+                        <a href="@cvCtaUrl" class="border-btn2 border-btn4">@cvCtaText</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="featured-job-area feature-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-tittle text-center">
+                        <span>@T("Home.RecentJobs")</span>
+                        <h2>@T("Home.FeaturedJobs")</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-xl-10">
+                    @if (!Model.RecentJobs.Any())
+                    {
+                        <div class="ui-empty">
+                            <h4>@T("Home.NoJobsAvailable")</h4>
+                            <p>@T("Home.NoJobsHomeHint")</p>
+                            @Html.ActionLink(T("Button.PostJob"), "Create", "Jobs", null, new { @class = "btn" })
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="listing-grid listing-grid-compact">
+                            @{
+                                var iconNumber = 1;
+                            }
+                            @foreach (var job in Model.RecentJobs)
+                            {
+                                var postedText = job.posted_date.HasValue ? job.posted_date.Value.ToString("dd/MM/yyyy") : T("Jobs.NotPosted");
+                                var iconPath = String.IsNullOrWhiteSpace(job.logo_path) ? "/img/icon/job-list" + iconNumber + ".png" : job.logo_path;
+                                iconNumber = iconNumber == 4 ? 1 : iconNumber + 1;
+                                var detailsUrl = Url.Action("Details", "Jobs", new { id = job.job_id, returnUrl = Url.Action("Index", "Home") });
+
+                                <article class="listing-card">
+                                    <div class="listing-card-head">
+                                        <a class="listing-logo" href="@detailsUrl">
+                                            <img src="@iconPath" alt="@job.company_name" />
+                                        </a>
+                                        <div>
+                                            <a class="listing-title" href="@detailsUrl">@job.job_title</a>
+                                            <div class="listing-subtitle">@job.company_name</div>
+                                        </div>
+                                    </div>
+                                    <div class="listing-card-body">
+                                        <div class="listing-badges">
+                                            <span><i class="fas fa-map-marker-alt"></i>@job.location_name</span>
+                                            <span>@job.salary_range</span>
+                                            <span>@job.employment_type</span>
+                                            <span>@postedText</span>
+                                        </div>
+                                    </div>
+                                    <div class="listing-card-actions">
+                                        @Html.ActionLink(T("Button.ViewDetails"), "Details", "Jobs", new { id = job.job_id, returnUrl = Url.Action("Index", "Home") }, new { @class = "btn btn-sm" })
+                                        @using (Html.BeginForm("Toggle", "Stars", FormMethod.Post, new { @class = "listing-inline-form" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="targetId" value="@job.job_id" />
+                                            <input type="hidden" name="targetType" value="Job" />
+                                            <input type="hidden" name="returnUrl" value="@Request.RawUrl" />
+                                            <button type="submit" class="star-toggle-button @(job.is_starred_by_current_user ? "is-starred" : "")" aria-label="@(job.is_starred_by_current_user ? T("Jobs.UnstarJob") : T("Jobs.StarJob"))" title="@(job.is_starred_by_current_user ? T("Jobs.Unstar") : T("Jobs.Star"))">
+                                                <i class="@(job.is_starred_by_current_user ? "fas" : "far") fa-star"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </article>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="apply-process-area apply-bg pt-150 pb-150" data-background="/img/gallery/how-applybg.png">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="section-tittle white-text text-center">
+                        <span>@T("Home.ApplyProcess")</span>
+                        <h2>@T("Home.HowItWorks")</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4 col-md-6">
+                    <div class="single-process text-center mb-30">
+                        <div class="process-ion">
+                            <span class="flaticon-search"></span>
+                        </div>
+                        <div class="process-cap">
+                            <h5>@T("Home.StepSearchTitle")</h5>
+                            <p>@T("Home.StepSearchText")</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="single-process text-center mb-30">
+                        <div class="process-ion">
+                            <span class="flaticon-curriculum-vitae"></span>
+                        </div>
+                        <div class="process-cap">
+                            <h5>@T("Home.StepApplyTitle")</h5>
+                            <p>@T("Home.StepApplyText")</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="single-process text-center mb-30">
+                        <div class="process-ion">
+                            <span class="flaticon-tour"></span>
+                        </div>
+                        <div class="process-cap">
+                            <h5>@T("Home.StepHiredTitle")</h5>
+                            <p>@T("Home.StepHiredText")</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>

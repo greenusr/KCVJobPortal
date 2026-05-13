@@ -1,0 +1,24 @@
+@model JobPortalKCV.Models.Company
+
+@{
+    ViewBag.Title = "Delete Company";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = Request.QueryString["returnUrl"] ?? Request.Form["returnUrl"];
+    var backUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Index", "Companies");
+}
+
+<div class="container pt-120 pb-120">
+    <h2>Delete Company</h2>
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    <p>Are you sure you want to delete <strong>@Model.company_name</strong>?</p>
+
+    @using (Html.BeginForm("Delete", "Companies", new { id = Model.company_id, returnUrl = returnUrl }, FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+        <button type="submit" class="btn">Delete</button>
+        <a href="@backUrl" class="btn head-btn2">Back</a>
+    }
+</div>

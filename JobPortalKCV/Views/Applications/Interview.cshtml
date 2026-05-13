@@ -1,0 +1,79 @@
+@model JobPortalKCV.Models.ViewModel.InterviewViewModel
+
+@{
+    ViewBag.Title = "Invite to interview";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = Request.QueryString["returnUrl"] ?? Request.Form["returnUrl"];
+    var backUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Index", "Applications");
+}
+
+<div class="page-shell">
+    <div class="container">
+    <div class="section-tittle mb-35">
+        <span>Employer tools</span>
+        <h2>Invite to interview</h2>
+    </div>
+
+    <div class="ui-card ui-card-tight">
+        <strong>@Model.job_title</strong><br />
+        <span>@Model.applicant_name (@Model.applicant_email)</span>
+    </div>
+
+    <div class="ui-card">
+    @using (Html.BeginForm("Interview", "Applications", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.application_id)
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="ui-form-grid">
+        <div class="form-group">
+            @Html.LabelFor(model => model.interview_date)
+            @Html.TextBoxFor(model => model.interview_date, "{0:yyyy-MM-ddTHH:mm}", new { @class = "form-control", type = "datetime-local" })
+            @Html.ValidationMessageFor(model => model.interview_date, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.location)
+            @Html.TextBoxFor(model => model.location, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.location, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.contact_name)
+            @Html.TextBoxFor(model => model.contact_name, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.contact_name, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.contact_email)
+            @Html.TextBoxFor(model => model.contact_email, new { @class = "form-control", type = "email" })
+            @Html.ValidationMessageFor(model => model.contact_email, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.contact_phone)
+            @Html.TextBoxFor(model => model.contact_phone, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.contact_phone, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group form-group-full">
+            @Html.LabelFor(model => model.additional_info)
+            @Html.TextAreaFor(model => model.additional_info, 5, 50, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.additional_info, "", new { @class = "text-danger" })
+        </div>
+
+        </div>
+
+        <div class="ui-toolbar mt-30">
+            <button type="submit" class="btn">Send invitation</button>
+            <a href="@backUrl" class="btn btn-default">Back to applications</a>
+        </div>
+    }
+    </div>
+    </div>
+</div>

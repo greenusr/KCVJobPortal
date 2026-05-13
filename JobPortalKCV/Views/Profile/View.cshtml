@@ -1,0 +1,163 @@
+@model JobPortalKCV.Models.ViewModel.ProfileDetailsViewModel
+
+@{
+    ViewBag.Title = "Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = Request.QueryString["returnUrl"];
+    var backUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Index", "Home");
+}
+
+<div class="container pt-120 pb-120">
+    @if (TempData["ProfileMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["ProfileMessage"]</div>
+    }
+    @if (TempData["ProfileError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ProfileError"]</div>
+    }
+    @if (TempData["InvitationMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["InvitationMessage"]</div>
+    }
+    @if (TempData["InvitationError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["InvitationError"]</div>
+    }
+
+    <div class="row">
+        <div class="col-md-3">
+            <img src="@Model.AvatarPath" alt="@Model.FullName" style="width:150px;height:150px;object-fit:cover;border-radius:50%;" />
+        </div>
+        <div class="col-md-9">
+            <div class="section-tittle mb-20">
+                <span>@Model.RoleName</span>
+                <h2>@(String.IsNullOrWhiteSpace(Model.FullName) ? Model.Username : Model.FullName)</h2>
+            </div>
+            <p><strong>Email:</strong> @Model.Email</p>
+            <p><strong>Date of birth:</strong> @(Model.DateOfBirth.HasValue ? Model.DateOfBirth.Value.ToString("dd/MM/yyyy") : "")</p>
+            <p><strong>Phone:</strong> @Model.Phone</p>
+            <p><strong>Location:</strong> @Model.LocationName</p>
+            <p><strong>Address:</strong> @Model.Address</p>
+            <p>
+                <strong>Stars:</strong> @Model.StarCount
+                @if (Model.CanViewStarredBy)
+                {
+                    <span> | @Html.ActionLink("View starers", "StarredBy", "Stars", new { targetId = Model.UserId, targetType = "User" }, null)</span>
+                }
+            </p>
+            <p>@Model.AboutMe</p>
+
+            @if (Model.CanStar)
+            {
+                using (Html.BeginForm("Toggle", "Stars", FormMethod.Post, new { @class = "detail-action-form" }))
+                {
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="targetId" value="@Model.UserId" />
+                    <input type="hidden" name="targetType" value="User" />
+                    <input type="hidden" name="returnUrl" value="@Request.RawUrl" />
+                    <button type="submit" class="star-toggle-button @(Model.IsStarredByCurrentUser ? "is-starred" : "")" aria-label="@(Model.IsStarredByCurrentUser ? "Unstar profile" : "Star profile")" title="@(Model.IsStarredByCurrentUser ? "Unstar" : "Star")">
+                        <i class="@(Model.IsStarredByCurrentUser ? "fas" : "far") fa-star"></i>
+                    </button>
+                }
+            }
+
+            @if (Model.CanEdit)
+            {
+                @Html.ActionLink("Edit profile", "Edit", new { id = Model.UserId, returnUrl = Request.RawUrl }, new { @class = "btn" })
+            }
+
+            @if (Model.CanInviteCandidate)
+            {
+                @Html.ActionLink("Invite to apply", "Invite", "CandidateInvitations", new { candidateId = Model.UserId }, new { @class = "btn btn-default" })
+            }
+
+            <a href="@backUrl" class="btn btn-default">Back to list</a>
+        </div>
+    </div>
+
+    @if (Model.IsEmployer && Model.Companies.Any())
+    {
+        <div class="post-details3 mt-50">
+            <div class="small-section-tittle"><h4>Companies</h4></div>
+            <ul>
+                @foreach (var company in Model.Companies)
+                {
+                    <li>@company.company_name <span>@company.contact_email</span></li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="post-details3 mt-50">
+        <div class="small-section-tittle"><h4>Skills</h4></div>
+        @if (Model.Skills.Any())
+        {
+            <ul>
+                @foreach (var skill in Model.Skills)
+                {
+                    <li>@skill.SkillName</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No skills yet.</p>
+        }
+    </div>
+
+    <div class="post-details3 mt-30">
+        <div class="small-section-tittle"><h4>Education</h4></div>
+        @foreach (var education in Model.Educations)
+        {
+            <p><strong>@education.school_name</strong> - @education.degree @education.field_of_study</p>
+            <p>@(education.start_date.HasValue ? education.start_date.Value.ToString("MM/yyyy") : "") - @(education.end_date.HasValue ? education.end_date.Value.ToString("MM/yyyy") : "Present")</p>
+            <p>@education.description</p>
+        }
+    </div>
+
+    <div class="post-details3 mt-30">
+        <div class="small-section-tittle"><h4>Experience</h4></div>
+        @foreach (var experience in Model.Experiences)
+        {
+            <p><strong>@experience.position</strong> - @experience.company_name</p>
+            <p>@(experience.start_date.HasValue ? experience.start_date.Value.ToString("MM/yyyy") : "") - @(experience.end_date.HasValue ? experience.end_date.Value.ToString("MM/yyyy") : "Present")</p>
+            <p>@experience.description</p>
+        }
+    </div>
+
+    <div class="post-details3 mt-30">
+        <div class="small-section-tittle"><h4>Projects</h4></div>
+        @foreach (var project in Model.Projects)
+        {
+            <p><strong>@project.project_name</strong></p>
+            if (!String.IsNullOrWhiteSpace(project.project_url))
+            {
+                <p><a href="@project.project_url" target="_blank" rel="noopener">@project.project_url</a></p>
+            }
+            <p>@project.description</p>
+        }
+    </div>
+
+    @if (Model.IsCandidate)
+    {
+        <div class="post-details3 mt-30">
+            <div class="small-section-tittle"><h4>CVs</h4></div>
+            @if (Model.CVs.Any())
+            {
+                <ul>
+                    @foreach (var cv in Model.CVs)
+                    {
+                        <li><a href="@cv.file_path" target="_blank" rel="noopener">@cv.file_name</a> <span>@(cv.is_default ? "Default" : "")</span></li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No CV uploaded.</p>
+            }
+        </div>
+    }
+</div>

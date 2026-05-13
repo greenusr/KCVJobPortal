@@ -1,0 +1,137 @@
+@model JobPortalKCV.Models.ViewModel.SystemSettingsViewModel
+
+@{
+    ViewBag.Title = "System Settings";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="page-shell">
+    <div class="section-tittle mb-35">
+        <span>Admin</span>
+        <h2>System Settings</h2>
+    </div>
+
+    @if (TempData["SystemSettingsMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SystemSettingsMessage"]</div>
+    }
+    @if (TempData["SystemSettingsError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["SystemSettingsError"]</div>
+    }
+
+    @using (Html.BeginForm("Index", "AdminSystemSettings", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="ui-card">
+            <div class="small-section-tittle"><h4>General</h4></div>
+            <div class="ui-form-grid">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.SiteName, "Site name")
+                    @Html.TextBoxFor(model => model.SiteName, new { @class = "form-control", required = "required" })
+                </div>
+                <div class="form-group">
+                    <label>Site logo upload</label>
+                    @if (!String.IsNullOrWhiteSpace(Model.SiteLogoPath))
+                    {
+                        <div class="mb-2"><img src="@Model.SiteLogoPath" alt="Site logo" style="height:60px;object-fit:contain;" /></div>
+                    }
+                    <input type="file" name="siteLogo" class="form-control" accept=".jpg,.jpeg,.png" />
+                </div>
+            </div>
+        </div>
+
+        <div class="ui-card">
+            <div class="small-section-tittle"><h4>Default Images</h4></div>
+            <div class="ui-form-grid">
+                <div class="form-group">
+                    <label>Default user avatar upload</label>
+                    @if (!String.IsNullOrWhiteSpace(Model.DefaultUserAvatarPath))
+                    {
+                        <div class="mb-2"><img src="@Model.DefaultUserAvatarPath" alt="Default avatar" style="height:70px;width:70px;object-fit:cover;border-radius:50%;" /></div>
+                    }
+                    <input type="file" name="defaultUserAvatar" class="form-control" accept=".jpg,.jpeg,.png" />
+                </div>
+                <div class="form-group">
+                    <label>Default company logo upload</label>
+                    @if (!String.IsNullOrWhiteSpace(Model.DefaultCompanyLogoPath))
+                    {
+                        <div class="mb-2"><img src="@Model.DefaultCompanyLogoPath" alt="Default company logo" style="height:70px;object-fit:contain;" /></div>
+                    }
+                    <input type="file" name="defaultCompanyLogo" class="form-control" accept=".jpg,.jpeg,.png" />
+                </div>
+            </div>
+        </div>
+
+        <div class="ui-card">
+            <div class="small-section-tittle"><h4>Upload Settings</h4></div>
+            <div class="row">
+                <div class="col-md-4 form-group">
+                    @Html.LabelFor(model => model.MaxCvUploadSizeMb, "Max CV size (MB)")
+                    @Html.TextBoxFor(model => model.MaxCvUploadSizeMb, new { @class = "form-control", type = "number", min = "1", max = "100" })
+                </div>
+                <div class="col-md-4 form-group">
+                    @Html.LabelFor(model => model.MaxAvatarUploadSizeMb, "Max avatar size (MB)")
+                    @Html.TextBoxFor(model => model.MaxAvatarUploadSizeMb, new { @class = "form-control", type = "number", min = "1", max = "100" })
+                </div>
+                <div class="col-md-4 form-group">
+                    @Html.LabelFor(model => model.MaxLogoUploadSizeMb, "Max logo size (MB)")
+                    @Html.TextBoxFor(model => model.MaxLogoUploadSizeMb, new { @class = "form-control", type = "number", min = "1", max = "100" })
+                </div>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.AllowedImageTypes, "Allowed image types")
+                @Html.TextBoxFor(model => model.AllowedImageTypes, new { @class = "form-control" })
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.AllowedCvTypes, "Allowed CV types")
+                @Html.TextBoxFor(model => model.AllowedCvTypes, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="ui-card">
+            <div class="small-section-tittle"><h4>OTP Settings</h4></div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.OtpExpirationSeconds, "OTP expiration (seconds)")
+                @Html.TextBoxFor(model => model.OtpExpirationSeconds, new { @class = "form-control", type = "number", min = "30", max = "600" })
+            </div>
+        </div>
+
+        <div class="ui-card">
+            <div class="small-section-tittle"><h4>Pagination</h4></div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.DefaultPaginationSize, "Default pagination size")
+                @Html.TextBoxFor(model => model.DefaultPaginationSize, new { @class = "form-control", type = "number", min = "5", max = "100" })
+            </div>
+        </div>
+
+        <div class="ui-card">
+            <div class="small-section-tittle"><h4>Job Settings</h4></div>
+            <div class="form-check mb-2">
+                @Html.CheckBoxFor(model => model.RequireCompanyLogoToPostJob, new { @class = "form-check-input", id = "RequireCompanyLogoToPostJob" })
+                <label class="form-check-label" for="RequireCompanyLogoToPostJob">Require company logo to post job</label>
+            </div>
+            <div class="form-check mb-2">
+                @Html.CheckBoxFor(model => model.AutoCloseExpiredJobs, new { @class = "form-check-input", id = "AutoCloseExpiredJobs" })
+                <label class="form-check-label" for="AutoCloseExpiredJobs">Auto close expired jobs</label>
+            </div>
+            <div class="form-group">
+                @Html.LabelFor(model => model.DefaultJobExpirationDays, "Default job expiration days")
+                @Html.TextBoxFor(model => model.DefaultJobExpirationDays, new { @class = "form-control", type = "number", min = "1", max = "365" })
+            </div>
+        </div>
+
+        <div class="ui-card">
+            <div class="small-section-tittle"><h4>Maintenance Mode</h4></div>
+            <div class="form-check">
+                @Html.CheckBoxFor(model => model.MaintenanceMode, new { @class = "form-check-input", id = "MaintenanceMode" })
+                <label class="form-check-label" for="MaintenanceMode">Maintenance mode ON/OFF</label>
+            </div>
+        </div>
+
+        <div class="ui-toolbar">
+            <button type="submit" class="btn head-btn2">Save Changes</button>
+        </div>
+    }
+</div>

@@ -1,0 +1,78 @@
+@model JobPortalKCV.Models.ViewModel.SavedItemsViewModel
+@using System.Linq
+
+@{
+    ViewBag.Title = "Saved Items";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-shell">
+    <div class="container">
+    <div class="section-tittle mb-35">
+        <span>Favorites</span>
+        <h2>Saved Items</h2>
+    </div>
+
+    <div class="ui-card">
+        <div class="small-section-tittle"><h4>Saved Users</h4></div>
+        @if (Model.Users.Any())
+        {
+            <ul>
+                @foreach (var user in Model.Users)
+                {
+                    <li>
+                        @Html.ActionLink(String.IsNullOrWhiteSpace(user.DisplayName) ? user.Email : user.DisplayName, "View", "Profile", new { id = user.UserId, returnUrl = Request.RawUrl }, null)
+                        <span>@user.StarCount star(s)</span>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="ui-empty">No saved users.</div>
+        }
+    </div>
+
+    <div class="ui-card">
+        <div class="small-section-tittle"><h4>Saved Jobs</h4></div>
+        @if (Model.Jobs.Any())
+        {
+            <ul>
+                @foreach (var job in Model.Jobs)
+                {
+                    <li>
+                        @Html.ActionLink(job.JobTitle, "Details", "Jobs", new { id = job.JobId, returnUrl = Request.RawUrl }, null)
+                        <span>@job.CompanyName - @job.StarCount star(s)</span>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="ui-empty">No saved jobs.</div>
+        }
+    </div>
+
+    <div class="ui-card">
+        <div class="small-section-tittle"><h4>Saved Companies</h4></div>
+        @if (Model.Companies.Any())
+        {
+            <ul>
+                @foreach (var company in Model.Companies)
+                {
+                    <li>
+                        @Html.ActionLink(company.CompanyName, "Details", "Companies", new { id = company.CompanyId, returnUrl = Request.RawUrl }, null)
+                        <span>@company.Industry - @company.StarCount star(s)</span>
+                    </li>
+                }
+            </ul>
+        }
+        else
+        {
+            <div class="ui-empty">No saved companies.</div>
+        }
+    </div>
+
+    @Html.Partial("_Pagination", (JobPortalKCV.Models.ViewModel.PaginationViewModel)ViewBag.Pagination)
+    </div>
+</div>

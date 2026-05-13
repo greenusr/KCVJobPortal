@@ -1,0 +1,128 @@
+@model JobPortalKCV.Models.ViewModel.SearchResultsViewModel
+@using System.Linq
+
+@{
+    ViewBag.Title = "Search Results";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container pt-120 pb-120">
+    <div class="section-tittle mb-35">
+        <span>Search</span>
+        <h2>Search Results</h2>
+    </div>
+
+    @using (Html.BeginForm("Results", "Search", FormMethod.Get, new { @class = "mb-35" }))
+    {
+        <div class="row">
+            <div class="col-md-3 form-group">
+                <input type="text" name="keyword" value="@Model.Keyword" class="form-control" placeholder="Keyword" />
+            </div>
+            <div class="col-md-2 form-group">
+                <select name="resultType" class="form-control">
+                    <option value="all" @(Model.ResultType == "all" ? "selected" : "")>All</option>
+                    <option value="jobs" @(Model.ResultType == "jobs" ? "selected" : "")>Jobs</option>
+                    <option value="users" @(Model.ResultType == "users" ? "selected" : "")>Users</option>
+                    <option value="companies" @(Model.ResultType == "companies" ? "selected" : "")>Companies</option>
+                </select>
+            </div>
+            <div class="col-md-2 form-group">
+                <select name="categoryId" class="form-control">
+                    <option value="">All categories</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category.category_id" @(Model.CategoryId == category.category_id ? "selected" : "")>@category.category_name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 form-group">
+                <select name="locationId" class="form-control">
+                    <option value="">All locations</option>
+                    @foreach (var location in Model.Locations)
+                    {
+                        <option value="@location.location_id" @(Model.LocationId == location.location_id ? "selected" : "")>@location.city</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2 form-group">
+                <select name="skillId" class="form-control">
+                    <option value="">All skills</option>
+                    @foreach (var skill in Model.Skills)
+                    {
+                        <option value="@skill.skill_id" @(Model.SkillId == skill.skill_id ? "selected" : "")>@skill.skill_name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-1 form-group">
+                <button type="submit" class="btn">Search</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 form-group">
+                <select name="sort" class="form-control">
+                    <option value="newest" @(Model.Sort == "newest" ? "selected" : "")>Newest jobs</option>
+                    <option value="oldest" @(Model.Sort == "oldest" ? "selected" : "")>Oldest jobs</option>
+                    <option value="star_desc" @(Model.Sort == "star_desc" ? "selected" : "")>Most starred</option>
+                    <option value="star_asc" @(Model.Sort == "star_asc" ? "selected" : "")>Least starred</option>
+                </select>
+            </div>
+        </div>
+    }
+
+    @if ((Model.JobResults == null || !Model.JobResults.Any()) &&
+        (Model.UserResults == null || !Model.UserResults.Any()) &&
+        (Model.CompanyResults == null || !Model.CompanyResults.Any()))
+    {
+        <div class="alert alert-info">No records found.</div>
+    }
+
+    @if (Model.JobResults != null && Model.JobResults.Any())
+    {
+        <div class="post-details3 mb-50">
+            <div class="small-section-tittle"><h4>Jobs</h4></div>
+            <ul>
+                @foreach (var job in Model.JobResults)
+                {
+                    <li>
+                        @Html.ActionLink(job.job_title, "Details", "Jobs", new { id = job.job_id, returnUrl = Request.RawUrl }, null)
+                        <span>@job.company_name - @job.location_name - @job.star_count star(s)</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if (Model.UserResults != null && Model.UserResults.Any())
+    {
+        <div class="post-details3 mb-50">
+            <div class="small-section-tittle"><h4>Users</h4></div>
+            <ul>
+                @foreach (var user in Model.UserResults)
+                {
+                    <li>
+                        @Html.ActionLink(user.DisplayName, "View", "Profile", new { id = user.UserId, returnUrl = Request.RawUrl }, null)
+                        <span>@user.RoleName - @user.LocationName - @user.StarCount star(s)</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if (Model.CompanyResults != null && Model.CompanyResults.Any())
+    {
+        <div class="post-details3">
+            <div class="small-section-tittle"><h4>Companies</h4></div>
+            <ul>
+                @foreach (var company in Model.CompanyResults)
+                {
+                    <li>
+                        @Html.ActionLink(company.CompanyName, "Details", "Companies", new { id = company.CompanyId, returnUrl = Request.RawUrl }, null)
+                        <span>@company.Industry - @company.StarCount star(s)</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    @Html.Partial("_Pagination", (JobPortalKCV.Models.ViewModel.PaginationViewModel)ViewBag.Pagination)
+</div>

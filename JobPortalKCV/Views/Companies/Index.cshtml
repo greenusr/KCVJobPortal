@@ -1,0 +1,141 @@
+@model IEnumerable<JobPortalKCV.Models.ViewModel.CompanyListItemViewModel>
+@using System.Linq
+@using JobPortalKCV.Helpers
+
+@{
+    ViewBag.Title = UiText.T("Companies.Title");
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Func<string, string> T = key => UiText.T(key);
+    var companies = Model ?? Enumerable.Empty<JobPortalKCV.Models.ViewModel.CompanyListItemViewModel>();
+    var industries = (ViewBag.Industries as IEnumerable<string>) ?? Enumerable.Empty<string>();
+    var totalRecords = ViewBag.TotalRecords == null ? companies.Count() : (int)ViewBag.TotalRecords;
+    var selectedIndustry = ViewBag.Industry as string;
+    var selectedSort = (ViewBag.Sort as string) ?? "name";
+}
+
+<div class="job-listing-area pt-120 pb-120">
+    <div class="container">
+        <div class="row mb-35">
+            <div class="col-lg-8">
+                <div class="section-tittle">
+                    <span>@T("Companies.Title")</span>
+                    <h2>@T("Companies.Explore")</h2>
+                </div>
+            </div>
+            @if (AuthRoleHelper.CanManageJobs(User.Identity.Name))
+            {
+                <div class="col-lg-4 text-lg-right">
+                @Html.ActionLink(T("Companies.AddCompany"), "Create", new { returnUrl = Request.RawUrl }, new { @class = "btn head-btn2" })
+                </div>
+            }
+        </div>
+
+        @using (Html.BeginForm("Index", "Companies", FormMethod.Get, new { @class = "mb-35" }))
+        {
+            <div class="row">
+                <div class="col-md-3 form-group">
+                    <input type="text" name="keyword" class="form-control" value="@ViewBag.Keyword" placeholder="@T("Companies.KeywordPlaceholder")" />
+                </div>
+                <div class="col-md-3 form-group">
+                    <select name="industry" class="form-control">
+                        <option value="">@T("Companies.AllIndustries")</option>
+                        @foreach (var industry in industries)
+                        {
+                            <option value="@industry" @(String.Equals(selectedIndustry, industry, StringComparison.OrdinalIgnoreCase) ? "selected" : "")>@industry</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3 form-group">
+                    @Html.DropDownList("locationId", ViewBag.Locations as SelectList, T("Companies.AllLocations"), new { @class = "form-control" })
+                </div>
+                <div class="col-md-2 form-group">
+                    <select name="sort" class="form-control">
+                        <option value="name" @(selectedSort == "name" ? "selected" : "")>@T("Companies.NameAsc")</option>
+                        <option value="name_desc" @(selectedSort == "name_desc" ? "selected" : "")>@T("Companies.NameDesc")</option>
+                        <option value="star_desc" @(selectedSort == "star_desc" ? "selected" : "")>@T("Jobs.MostStarred")</option>
+                        <option value="star_asc" @(selectedSort == "star_asc" ? "selected" : "")>@T("Jobs.LeastStarred")</option>
+                    </select>
+                </div>
+                <div class="col-md-1 form-group">
+                    <button type="submit" class="btn">@T("Button.Filter")</button>
+                </div>
+            </div>
+        }
+
+        <div class="count-job mb-35">
+            <span>@UiText.T("Companies.FoundCount", totalRecords)</span>
+        </div>
+
+        @if (!companies.Any())
+        {
+            <div class="ui-empty">
+                <h4>@T("Companies.NoCompanies")</h4>
+                <p>@T("Companies.NoCompaniesMatching")</p>
+            </div>
+        }
+        else
+        {
+            <div class="listing-grid">
+                @foreach (var company in companies)
+                {
+                    var logoUrl = String.IsNullOrWhiteSpace(company.LogoPath) ? "/img/icon/job-list1.png" : company.LogoPath;
+                    var description = company.Description;
+
+                    if (!String.IsNullOrWhiteSpace(description) && description.Length > 120)
+                    {
+                        description = description.Substring(0, 120) + "...";
+                    }
+
+                    <article class="listing-card">
+                        <div class="listing-card-head">
+                            <a class="listing-logo" href="@Url.Action("Details", new { id = company.CompanyId, returnUrl = Request.RawUrl })">
+                                <img src="@logoUrl" alt="@company.CompanyName" />
+                            </a>
+                            <div>
+                                <a class="listing-title" href="@Url.Action("Details", new { id = company.CompanyId, returnUrl = Request.RawUrl })">@company.CompanyName</a>
+                                <div class="listing-subtitle">@company.Industry</div>
+                            </div>
+                        </div>
+
+                        <div class="listing-card-body">
+                            <div class="listing-badges">
+                                <span>@company.Industry</span>
+                                <span><i class="fas fa-map-marker-alt"></i>@company.Address</span>
+                                <span>@UiText.T("Jobs.StarsCount", company.StarCount)</span>
+                            </div>
+                            @if (!String.IsNullOrWhiteSpace(description))
+                            {
+                                <p>@description</p>
+                            }
+                        </div>
+
+                        <div class="listing-card-actions">
+                            @Html.ActionLink(T("Button.ViewDetails"), "Details", new { id = company.CompanyId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm" })
+                            @using (Html.BeginForm("Toggle", "Stars", FormMethod.Post, new { @class = "listing-inline-form" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="targetId" value="@company.CompanyId" />
+                                <input type="hidden" name="targetType" value="Company" />
+                                <input type="hidden" name="returnUrl" value="@Request.RawUrl" />
+                                <button type="submit" class="star-toggle-button @(company.IsStarredByCurrentUser ? "is-starred" : "")" aria-label="@(company.IsStarredByCurrentUser ? T("Companies.UnstarCompany") : T("Companies.StarCompany"))" title="@(company.IsStarredByCurrentUser ? T("Jobs.Unstar") : T("Jobs.Star"))">
+                                    <i class="@(company.IsStarredByCurrentUser ? "fas" : "far") fa-star"></i>
+                                </button>
+                            }
+                            @if (company.CanManage)
+                            {
+                                <a class="icon-action-button" href="@Url.Action("Settings", "CompanySettings", new { id = company.CompanyId, returnUrl = Request.RawUrl })" aria-label="@T("Companies.EditCompany")" title="@T("Button.Edit")">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a class="icon-action-button icon-action-danger" href="@Url.Action("Delete", new { id = company.CompanyId, returnUrl = Request.RawUrl })" aria-label="@T("Companies.DeleteCompany")" title="@T("Button.Delete")">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+
+        @Html.Partial("_Pagination", (JobPortalKCV.Models.ViewModel.PaginationViewModel)ViewBag.Pagination)
+    </div>
+</div>

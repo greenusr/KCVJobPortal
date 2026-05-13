@@ -1,0 +1,393 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Database Name="JobPortalDatabase" EntityNamespace="JobPortalKCV.Models" ContextNamespace="JobPortalKCV.Models" Class="JobPortalDataContext" xmlns="http://schemas.microsoft.com/linqtosql/dbml/2007">
+  <Table Name="dbo.ApplicationStatuses" Member="ApplicationStatuses">
+    <Type Name="ApplicationStatuse">
+      <Column Name="status_id" Member="status_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="status_name" Member="status_name" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Association Name="FK_JobApplications_Status" Member="JobApplications" ThisKey="status_id" OtherKey="status_id" Type="JobApplication" DeleteRule="NO ACTION" />
+    </Type>
+  </Table>
+  <Table Name="dbo.CandidateInvitations" Member="CandidateInvitations">
+    <Type Name="CandidateInvitation">
+      <Column Name="invitation_id" Member="invitation_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="employer_id" Member="employer_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="candidate_id" Member="candidate_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="job_id" Member="job_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="message" Member="message" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="status" Member="status" Type="System.String" DbType="NVarChar(30) NOT NULL" CanBeNull="false" />
+      <Column Name="created_at" Member="created_at" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="responded_at" Member="responded_at" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Association Name="FK_CandidateInvitations_Candidate" Member="User" ThisKey="candidate_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+      <Association Name="FK_CandidateInvitations_Employer" Member="Employer_" ThisKey="employer_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+      <Association Name="FK_CandidateInvitations_Jobs" Member="Job" ThisKey="job_id" OtherKey="job_id" Type="Job" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Companies" Member="Companies">
+    <Type Name="Company">
+      <Column Name="company_id" Member="company_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="company_name" Member="company_name" Type="System.String" DbType="VarChar(100)" CanBeNull="true" />
+      <Column Name="industry" Member="industry" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+      <Column Name="website" Member="website" Type="System.String" DbType="VarChar(100)" CanBeNull="true" />
+      <Column Name="contact_email" Member="contact_email" Type="System.String" DbType="VarChar(100)" CanBeNull="true" />
+      <Column Name="logo_path" Member="logo_path" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="description" Member="description" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="contact_phone" Member="contact_phone" Type="System.String" DbType="NVarChar(30)" CanBeNull="true" />
+      <Column Name="address" Member="address" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="public_company_profile" Member="public_company_profile" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="show_jobs_publicly" Member="show_jobs_publicly" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="updated_at" Member="updated_at" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Association Name="FK__CompanyUs__compa__2180FB33" Member="CompanyUsers" ThisKey="company_id" OtherKey="company_id" Type="CompanyUser" DeleteRule="NO ACTION" />
+      <Association Name="FK_CompanyJoinRequests_Companies" Member="CompanyJoinRequests" ThisKey="company_id" OtherKey="company_id" Type="CompanyJoinRequest" DeleteRule="NO ACTION" />
+    </Type>
+  </Table>
+  <Table Name="dbo.CompanyJoinRequests" Member="CompanyJoinRequests">
+    <Type Name="CompanyJoinRequest">
+      <Column Name="request_id" Member="request_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="company_id" Member="company_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="status" Member="status" Type="System.String" DbType="NVarChar(30) NOT NULL" CanBeNull="false" />
+      <Column Name="requested_at" Member="requested_at" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="responded_at" Member="responded_at" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="responded_by" Member="responded_by" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Association Name="FK_CompanyJoinRequests_Companies" Member="Company" ThisKey="company_id" OtherKey="company_id" Type="Company" IsForeignKey="true" />
+      <Association Name="FK_CompanyJoinRequests_RespondedBy" Member="User" ThisKey="responded_by" OtherKey="user_id" Type="User" IsForeignKey="true" />
+      <Association Name="FK_CompanyJoinRequests_Users" Member="User_" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.CompanyUsers" Member="CompanyUsers">
+    <Type Name="CompanyUser">
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="company_id" Member="company_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="role" Member="role" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Association Name="FK__CompanyUs__compa__2180FB33" Member="Company" ThisKey="company_id" OtherKey="company_id" Type="Company" IsForeignKey="true" />
+      <Association Name="FK__CompanyUs__user___208CD6FA" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.EmploymentTypes" Member="EmploymentTypes">
+    <Type Name="EmploymentType">
+      <Column Name="employment_type_id" Member="employment_type_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="type_name" Member="type_name" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Association Name="FK_Jobs_EmploymentTypes" Member="Jobs" ThisKey="employment_type_id" OtherKey="employment_type_id" Type="Job" DeleteRule="NO ACTION" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Interviews" Member="Interviews">
+    <Type Name="Interview">
+      <Column Name="interview_id" Member="interview_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="application_id" Member="application_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="interview_date" Member="interview_date" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="location" Member="location" Type="System.String" DbType="NVarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="contact_name" Member="contact_name" Type="System.String" DbType="NVarChar(150) NOT NULL" CanBeNull="false" />
+      <Column Name="contact_email" Member="contact_email" Type="System.String" DbType="NVarChar(150) NOT NULL" CanBeNull="false" />
+      <Column Name="contact_phone" Member="contact_phone" Type="System.String" DbType="NVarChar(30) NOT NULL" CanBeNull="false" />
+      <Column Name="additional_info" Member="additional_info" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="created_at" Member="created_at" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="FK_Interviews_JobApplications" Member="JobApplication" ThisKey="application_id" OtherKey="application_id" Type="JobApplication" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.JobApplications" Member="JobApplications">
+    <Type Name="JobApplication">
+      <Column Name="application_id" Member="application_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="job_id" Member="job_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="application_date" Member="application_date" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="cover_letter" Member="cover_letter" Type="System.String" DbType="Text" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="status_id" Member="status_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="cv_id" Member="cv_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="status" Member="status" Type="System.String" DbType="NVarChar(30)" CanBeNull="true" />
+      <Column Name="applied_date" Member="applied_date" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="completed_at" Member="completed_at" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="final_result" Member="final_result" Type="System.String" DbType="NVarChar(30)" CanBeNull="true" />
+      <Association Name="FK__JobApplic__job_i__7C4F7684" Member="Job" ThisKey="job_id" OtherKey="job_id" Type="Job" IsForeignKey="true" />
+      <Association Name="FK__JobApplic__user___787EE5A0" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+      <Association Name="FK_Interviews_JobApplications" Member="Interviews" ThisKey="application_id" OtherKey="application_id" Type="Interview" DeleteRule="NO ACTION" />
+      <Association Name="FK_JobApplications_Status" Member="ApplicationStatuse" ThisKey="status_id" OtherKey="status_id" Type="ApplicationStatuse" IsForeignKey="true" />
+      <Association Name="FK_JobApplications_UserCVs" Member="UserCV" ThisKey="cv_id" OtherKey="cv_id" Type="UserCV" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.JobCategories" Member="JobCategories">
+    <Type Name="JobCategory">
+      <Column Name="category_id" Member="category_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="category_name" Member="category_name" Type="System.String" DbType="NVarChar(100) NOT NULL" CanBeNull="false" />
+      <Association Name="FK__JobCatego__categ__282DF8C2" Member="JobCategoryMaps" ThisKey="category_id" OtherKey="category_id" Type="JobCategoryMap" DeleteRule="NO ACTION" />
+    </Type>
+  </Table>
+  <Table Name="dbo.JobCategoryMap" Member="JobCategoryMaps">
+    <Type Name="JobCategoryMap">
+      <Column Name="job_id" Member="job_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="category_id" Member="category_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Association Name="FK__JobCatego__categ__282DF8C2" Member="JobCategory" ThisKey="category_id" OtherKey="category_id" Type="JobCategory" IsForeignKey="true" />
+      <Association Name="FK__JobCatego__job_i__2739D489" Member="Job" ThisKey="job_id" OtherKey="job_id" Type="Job" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Jobs" Member="Jobs">
+    <Type Name="Job">
+      <Column Name="job_id" Member="job_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="job_title" Member="job_title" Type="System.String" DbType="VarChar(100)" CanBeNull="true" />
+      <Column Name="company_id" Member="company_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="job_description" Member="job_description" Type="System.String" DbType="Text" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="salary_range" Member="salary_range" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+      <Column Name="posted_date" Member="posted_date" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="location_id" Member="location_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="employment_type_id" Member="employment_type_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="application_deadline" Member="application_deadline" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="is_active" Member="is_active" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Association Name="FK__JobApplic__job_i__7C4F7684" Member="JobApplications" ThisKey="job_id" OtherKey="job_id" Type="JobApplication" DeleteRule="NO ACTION" />
+      <Association Name="FK__JobCatego__job_i__2739D489" Member="JobCategoryMaps" ThisKey="job_id" OtherKey="job_id" Type="JobCategoryMap" DeleteRule="NO ACTION" />
+      <Association Name="FK__JobSkills__job_i__74AE54BC" Member="JobSkills" ThisKey="job_id" OtherKey="job_id" Type="JobSkill" DeleteRule="NO ACTION" />
+      <Association Name="FK_CandidateInvitations_Jobs" Member="CandidateInvitations" ThisKey="job_id" OtherKey="job_id" Type="CandidateInvitation" DeleteRule="NO ACTION" />
+      <Association Name="FK_Jobs_EmploymentTypes" Member="EmploymentType" ThisKey="employment_type_id" OtherKey="employment_type_id" Type="EmploymentType" IsForeignKey="true" />
+      <Association Name="FK_Jobs_Location" Member="Location" ThisKey="location_id" OtherKey="location_id" Type="Location" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.JobSkills" Member="JobSkills">
+    <Type Name="JobSkill">
+      <Column Name="job_skill_id" Member="job_skill_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="job_id" Member="job_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="skill_id" Member="skill_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Association Name="FK__JobSkills__job_i__74AE54BC" Member="Job" ThisKey="job_id" OtherKey="job_id" Type="Job" IsForeignKey="true" />
+      <Association Name="FK__JobSkills__skill__71D1E811" Member="Skill" ThisKey="skill_id" OtherKey="skill_id" Type="Skill" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Locations" Member="Locations">
+    <Type Name="Location">
+      <Column Name="location_id" Member="location_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="country" Member="country" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="city" Member="city" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Association Name="FK_Jobs_Location" Member="Jobs" ThisKey="location_id" OtherKey="location_id" Type="Job" DeleteRule="NO ACTION" />
+      <Association Name="FK_UserProfiles_Location" Member="UserProfileRecords" ThisKey="location_id" OtherKey="location_id" Type="UserProfileRecord" DeleteRule="NO ACTION" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Notifications" Member="Notifications">
+    <Type Name="Notification">
+      <Column Name="notification_id" Member="notification_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="title" Member="title" Type="System.String" DbType="NVarChar(150) NOT NULL" CanBeNull="false" />
+      <Column Name="message" Member="message" Type="System.String" DbType="NVarChar(MAX) NOT NULL" CanBeNull="false" UpdateCheck="Never" />
+      <Column Name="type" Member="type" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="related_id" Member="related_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="related_type" Member="related_type" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="is_read" Member="is_read" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="created_at" Member="created_at" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="FK_Notifications_Users" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Roles" Member="Roles">
+    <Type Name="Role">
+      <Column Name="role_id" Member="role_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="role_name" Member="role_name" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Association Name="FK__UserRoles__role___1CBC4616" Member="UserRoles" ThisKey="role_id" OtherKey="role_id" Type="UserRole" DeleteRule="NO ACTION" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Skills" Member="Skills">
+    <Type Name="Skill">
+      <Column Name="skill_id" Member="skill_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="skill_name" Member="skill_name" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+      <Association Name="FK__JobSkills__skill__71D1E811" Member="JobSkills" ThisKey="skill_id" OtherKey="skill_id" Type="JobSkill" DeleteRule="NO ACTION" />
+      <Association Name="FK__UserSkill__skill__01142BA1" Member="UserSkills" ThisKey="skill_id" OtherKey="skill_id" Type="UserSkill" DeleteRule="NO ACTION" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Stars" Member="Stars">
+    <Type Name="Star">
+      <Column Name="star_id" Member="star_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="target_id" Member="target_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="target_type" Member="target_type" Type="System.String" DbType="NVarChar(20) NOT NULL" CanBeNull="false" />
+      <Column Name="created_at" Member="created_at" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="FK_Stars_Users" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.SystemSettings" Member="SystemSettings">
+    <Type Name="SystemSetting">
+      <Column Name="setting_id" Member="setting_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="site_name" Member="site_name" Type="System.String" DbType="NVarChar(150) NOT NULL" CanBeNull="false" />
+      <Column Name="site_logo_path" Member="site_logo_path" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="default_user_avatar_path" Member="default_user_avatar_path" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="default_company_logo_path" Member="default_company_logo_path" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="max_cv_upload_size_mb" Member="max_cv_upload_size_mb" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="max_avatar_upload_size_mb" Member="max_avatar_upload_size_mb" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="max_logo_upload_size_mb" Member="max_logo_upload_size_mb" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="allowed_image_types" Member="allowed_image_types" Type="System.String" DbType="NVarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="allowed_cv_types" Member="allowed_cv_types" Type="System.String" DbType="NVarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="otp_expiration_seconds" Member="otp_expiration_seconds" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="default_pagination_size" Member="default_pagination_size" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="maintenance_mode" Member="maintenance_mode" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="require_company_logo_to_post_job" Member="require_company_logo_to_post_job" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="auto_close_expired_jobs" Member="auto_close_expired_jobs" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="default_job_expiration_days" Member="default_job_expiration_days" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="created_at" Member="created_at" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="updated_at" Member="updated_at" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserActivityLogs" Member="UserActivityLogs">
+    <Type Name="UserActivityLog">
+      <Column Name="activity_log_id" Member="activity_log_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="action" Member="action" Type="System.String" DbType="NVarChar(80) NOT NULL" CanBeNull="false" />
+      <Column Name="description" Member="description" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="keyword" Member="keyword" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="filters" Member="filters" Type="System.String" DbType="NVarChar(500)" CanBeNull="true" />
+      <Column Name="related_id" Member="related_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="related_type" Member="related_type" Type="System.String" DbType="NVarChar(50)" CanBeNull="true" />
+      <Column Name="ip_address" Member="ip_address" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="user_agent" Member="user_agent" Type="System.String" DbType="NVarChar(500)" CanBeNull="true" />
+      <Column Name="created_at" Member="created_at" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="FK_UserActivityLogs_Users" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserCVs" Member="UserCVs">
+    <Type Name="UserCV">
+      <Column Name="cv_id" Member="cv_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="file_path" Member="file_path" Type="System.String" DbType="NVarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="file_name" Member="file_name" Type="System.String" DbType="NVarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="created_at" Member="created_at" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="is_default" Member="is_default" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Association Name="FK_JobApplications_UserCVs" Member="JobApplications" ThisKey="cv_id" OtherKey="cv_id" Type="JobApplication" DeleteRule="NO ACTION" />
+      <Association Name="FK_UserCVs_Users" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+      <Association Name="FK_UserSettings_UserCVs" Member="UserSettings" ThisKey="cv_id" OtherKey="default_cv_id" Type="UserSetting" DeleteRule="NO ACTION" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserEducations" Member="UserEducations">
+    <Type Name="UserEducation">
+      <Column Name="education_id" Member="education_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="school_name" Member="school_name" Type="System.String" DbType="NVarChar(150)" CanBeNull="true" />
+      <Column Name="degree" Member="degree" Type="System.String" DbType="NVarChar(150)" CanBeNull="true" />
+      <Column Name="field_of_study" Member="field_of_study" Type="System.String" DbType="NVarChar(150)" CanBeNull="true" />
+      <Column Name="start_date" Member="start_date" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="end_date" Member="end_date" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="description" Member="description" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" UpdateCheck="Never" />
+      <Association Name="FK_UserEducations_Users" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserExperiences" Member="UserExperiences">
+    <Type Name="UserExperience">
+      <Column Name="experience_id" Member="experience_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="company_name" Member="company_name" Type="System.String" DbType="NVarChar(150)" CanBeNull="true" />
+      <Column Name="position" Member="position" Type="System.String" DbType="NVarChar(150)" CanBeNull="true" />
+      <Column Name="start_date" Member="start_date" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="end_date" Member="end_date" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="description" Member="description" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" UpdateCheck="Never" />
+      <Association Name="FK_UserExperiences_Users" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserLoginLogs" Member="UserLoginLogs">
+    <Type Name="UserLoginLog">
+      <Column Name="login_log_id" Member="login_log_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="login_time" Member="login_time" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="ip_address" Member="ip_address" Type="System.String" DbType="NVarChar(100)" CanBeNull="true" />
+      <Column Name="user_agent" Member="user_agent" Type="System.String" DbType="NVarChar(500)" CanBeNull="true" />
+      <Column Name="is_success" Member="is_success" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="failure_reason" Member="failure_reason" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Association Name="FK_UserLoginLogs_Users" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserProfiles" Member="UserProfileRecords">
+    <Type Name="UserProfileRecord">
+      <Column Name="profile_id" Member="profile_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="location_id" Member="location_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="full_name" Member="full_name" Type="System.String" DbType="NVarChar(150)" CanBeNull="true" />
+      <Column Name="date_of_birth" Member="date_of_birth" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="phone" Member="phone" Type="System.String" DbType="NVarChar(30)" CanBeNull="true" />
+      <Column Name="address" Member="address" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="about_me" Member="about_me" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="avatar_path" Member="avatar_path" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="created_at" Member="created_at" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Column Name="updated_at" Member="updated_at" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Association Name="FK__UserProfi__user___76969D2E" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+      <Association Name="FK_UserProfiles_Location" Member="Location" ThisKey="location_id" OtherKey="location_id" Type="Location" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserProjects" Member="UserProjects">
+    <Type Name="UserProject">
+      <Column Name="project_id" Member="project_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="project_name" Member="project_name" Type="System.String" DbType="NVarChar(150)" CanBeNull="true" />
+      <Column Name="description" Member="description" Type="System.String" DbType="NVarChar(MAX)" CanBeNull="true" UpdateCheck="Never" />
+      <Column Name="project_url" Member="project_url" Type="System.String" DbType="NVarChar(255)" CanBeNull="true" />
+      <Column Name="start_date" Member="start_date" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="end_date" Member="end_date" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Association Name="FK_UserProjects_Users" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserRoles" Member="UserRoles">
+    <Type Name="UserRole">
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="role_id" Member="role_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Association Name="FK__UserRoles__role___1CBC4616" Member="Role" ThisKey="role_id" OtherKey="role_id" Type="Role" IsForeignKey="true" />
+      <Association Name="FK__UserRoles__user___1BC821DD" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.Users" Member="Users">
+    <Type Name="User">
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="username" Member="username" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+      <Column Name="password_hash" Member="password_hash" Type="System.String" DbType="VarChar(255)" CanBeNull="true" />
+      <Column Name="email" Member="email" Type="System.String" DbType="VarChar(100)" CanBeNull="true" />
+      <Column Name="date_of_birth" Member="date_of_birth" Type="System.DateTime" DbType="Date" CanBeNull="true" />
+      <Column Name="first_name" Member="first_name" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+      <Column Name="last_name" Member="last_name" Type="System.String" DbType="VarChar(50)" CanBeNull="true" />
+      <Column Name="is_active" Member="is_active" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Association Name="FK__CompanyUs__user___208CD6FA" Member="CompanyUsers" ThisKey="user_id" OtherKey="user_id" Type="CompanyUser" DeleteRule="NO ACTION" />
+      <Association Name="FK__JobApplic__user___787EE5A0" Member="JobApplications" ThisKey="user_id" OtherKey="user_id" Type="JobApplication" DeleteRule="NO ACTION" />
+      <Association Name="FK__UserProfi__user___76969D2E" Member="UserProfile" ThisKey="user_id" OtherKey="user_id" Type="UserProfileRecord" Cardinality="One" DeleteRule="NO ACTION" />
+      <Association Name="FK__UserRoles__user___1BC821DD" Member="UserRoles" ThisKey="user_id" OtherKey="user_id" Type="UserRole" DeleteRule="NO ACTION" />
+      <Association Name="FK__UserSkill__user___778AC167" Member="UserSkills" ThisKey="user_id" OtherKey="user_id" Type="UserSkill" DeleteRule="NO ACTION" />
+      <Association Name="FK_CandidateInvitations_Candidate" Member="CandidateInvitations" ThisKey="user_id" OtherKey="candidate_id" Type="CandidateInvitation" DeleteRule="NO ACTION" />
+      <Association Name="FK_CandidateInvitations_Employer" Member="User_s" ThisKey="user_id" OtherKey="employer_id" Type="CandidateInvitation" DeleteRule="NO ACTION" />
+      <Association Name="FK_CompanyJoinRequests_RespondedBy" Member="CompanyJoinRequests" ThisKey="user_id" OtherKey="responded_by" Type="CompanyJoinRequest" DeleteRule="NO ACTION" />
+      <Association Name="FK_CompanyJoinRequests_Users" Member="CompanyJoinRequests_Users" ThisKey="user_id" OtherKey="user_id" Type="CompanyJoinRequest" DeleteRule="NO ACTION" />
+      <Association Name="FK_Notifications_Users" Member="Notifications" ThisKey="user_id" OtherKey="user_id" Type="Notification" DeleteRule="NO ACTION" />
+      <Association Name="FK_Stars_Users" Member="Stars" ThisKey="user_id" OtherKey="user_id" Type="Star" DeleteRule="NO ACTION" />
+      <Association Name="FK_UserActivityLogs_Users" Member="UserActivityLogs" ThisKey="user_id" OtherKey="user_id" Type="UserActivityLog" DeleteRule="NO ACTION" />
+      <Association Name="FK_UserCVs_Users" Member="UserCVs" ThisKey="user_id" OtherKey="user_id" Type="UserCV" DeleteRule="NO ACTION" />
+      <Association Name="FK_UserEducations_Users" Member="UserEducations" ThisKey="user_id" OtherKey="user_id" Type="UserEducation" DeleteRule="NO ACTION" />
+      <Association Name="FK_UserExperiences_Users" Member="UserExperiences" ThisKey="user_id" OtherKey="user_id" Type="UserExperience" DeleteRule="NO ACTION" />
+      <Association Name="FK_UserLoginLogs_Users" Member="UserLoginLogs" ThisKey="user_id" OtherKey="user_id" Type="UserLoginLog" DeleteRule="NO ACTION" />
+      <Association Name="FK_UserProjects_Users" Member="UserProjects" ThisKey="user_id" OtherKey="user_id" Type="UserProject" DeleteRule="NO ACTION" />
+      <Association Name="FK_UserSettings_Users" Member="UserSetting" ThisKey="user_id" OtherKey="user_id" Type="UserSetting" Cardinality="One" DeleteRule="NO ACTION" />
+      <Association Name="FK_UserVerifications_Users" Member="UserVerifications" ThisKey="user_id" OtherKey="user_id" Type="UserVerification" DeleteRule="NO ACTION" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserSettings" Member="UserSettings">
+    <Type Name="UserSetting">
+      <Column Name="setting_id" Member="setting_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="app_notifications_enabled" Member="app_notifications_enabled" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="job_updates_enabled" Member="job_updates_enabled" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="interview_notifications_enabled" Member="interview_notifications_enabled" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="invitation_notifications_enabled" Member="invitation_notifications_enabled" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="public_profile_enabled" Member="public_profile_enabled" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="show_cv_to_employers" Member="show_cv_to_employers" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="default_cv_id" Member="default_cv_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="created_at" Member="created_at" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="updated_at" Member="updated_at" Type="System.DateTime" DbType="DateTime" CanBeNull="true" />
+      <Association Name="FK_UserSettings_UserCVs" Member="UserCV" ThisKey="default_cv_id" OtherKey="cv_id" Type="UserCV" IsForeignKey="true" />
+      <Association Name="FK_UserSettings_Users" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserSkills" Member="UserSkills">
+    <Type Name="UserSkill">
+      <Column Name="user_skill_id" Member="user_skill_id" Type="System.Int32" DbType="Int NOT NULL" IsPrimaryKey="true" CanBeNull="false" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Column Name="skill_id" Member="skill_id" Type="System.Int32" DbType="Int" CanBeNull="true" />
+      <Association Name="FK__UserSkill__skill__01142BA1" Member="Skill" ThisKey="skill_id" OtherKey="skill_id" Type="Skill" IsForeignKey="true" />
+      <Association Name="FK__UserSkill__user___778AC167" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+  <Table Name="dbo.UserVerifications" Member="UserVerifications">
+    <Type Name="UserVerification">
+      <Column Name="verification_id" Member="verification_id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="user_id" Member="user_id" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="otp_code" Member="otp_code" Type="System.String" DbType="NVarChar(6) NOT NULL" CanBeNull="false" />
+      <Column Name="type" Member="type" Type="System.String" DbType="NVarChar(50) NOT NULL" CanBeNull="false" />
+      <Column Name="is_verified" Member="is_verified" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Column Name="expired_at" Member="expired_at" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Column Name="created_at" Member="created_at" Type="System.DateTime" DbType="DateTime NOT NULL" CanBeNull="false" />
+      <Association Name="FK_UserVerifications_Users" Member="User" ThisKey="user_id" OtherKey="user_id" Type="User" IsForeignKey="true" />
+    </Type>
+  </Table>
+</Database>

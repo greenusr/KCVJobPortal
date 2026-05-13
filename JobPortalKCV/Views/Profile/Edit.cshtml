@@ -1,0 +1,226 @@
+@model JobPortalKCV.Models.ViewModel.ProfileEditViewModel
+
+@{
+    ViewBag.Title = "Edit Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = Request.QueryString["returnUrl"] ?? Request.Form["returnUrl"];
+    var backUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("View", "Profile", new { id = Model.UserId });
+}
+
+<div class="container pt-120 pb-120">
+    <div class="section-tittle mb-35">
+        <span>Account</span>
+        <h2>Edit Profile</h2>
+    </div>
+
+    @if (TempData["ProfileMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["ProfileMessage"]</div>
+    }
+    @if (TempData["ProfileError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ProfileError"]</div>
+    }
+
+    @using (Html.BeginForm("Edit", "Profile", new { id = Model.UserId, returnUrl = returnUrl }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="row">
+            <div class="col-md-3">
+                <img src="@Model.AvatarPath" alt="@Model.Username" style="width:140px;height:140px;object-fit:cover;border-radius:50%;" />
+            </div>
+            <div class="col-md-9">
+                <div class="form-group">
+                    @Html.LabelFor(model => model.FullName)
+                    @Html.TextBoxFor(model => model.FullName, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.FullName, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.DateOfBirth)
+                    @Html.TextBoxFor(model => model.DateOfBirth, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                    @Html.ValidationMessageFor(model => model.DateOfBirth, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Phone)
+                    @Html.TextBoxFor(model => model.Phone, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Phone, "", new { @class = "text-danger" })
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.LocationId)
+                    @Html.DropDownListFor(model => model.LocationId, new SelectList(Model.Locations, "location_id", "city", Model.LocationId), "-- Select location --", new { @class = "form-control" })
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Address)
+                    @Html.TextBoxFor(model => model.Address, new { @class = "form-control" })
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(model => model.AboutMe)
+                    @Html.TextAreaFor(model => model.AboutMe, new { @class = "form-control", rows = 5 })
+                </div>
+                <div class="form-group">
+                    <label>Avatar</label>
+                    <input type="file" name="avatar" class="form-control" accept=".jpg,.jpeg,.png" />
+                    <small>JPG, JPEG or PNG. Max 20MB.</small>
+                </div>
+                <button type="submit" class="btn">Save profile</button>
+                <a href="@backUrl" class="btn head-btn2">View profile</a>
+            </div>
+        </div>
+    }
+
+    @if (Model.IsCandidate)
+    {
+        <div class="post-details3 mt-50">
+            <div class="small-section-tittle"><h4>CVs</h4></div>
+            @Html.ActionLink("Manage CVs", "Index", "UserCVs", null, new { @class = "btn mb-20" })
+            <ul>
+                @foreach (var cv in Model.CVs)
+                {
+                    <li><a href="@cv.file_path" target="_blank" rel="noopener">@cv.file_name</a> <span>@(cv.is_default ? "Default" : "")</span></li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if (Model.IsEmployer && Model.Companies.Any())
+    {
+        <div class="post-details3 mt-50">
+            <div class="small-section-tittle"><h4>Companies</h4></div>
+            <ul>
+                @foreach (var company in Model.Companies)
+                {
+                    <li>@company.company_name <span>@company.contact_email</span></li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="post-details3 mt-50">
+        <div class="small-section-tittle"><h4>Skills</h4></div>
+        @using (Html.BeginForm("AddSkill", "Profile", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="userId" value="@Model.UserId" />
+            <div class="form-group">
+                <input type="text" name="skillName" class="form-control" placeholder="Skill name" />
+            </div>
+            <button type="submit" class="btn">Add skill</button>
+        }
+
+        @foreach (var skill in Model.Skills)
+        {
+            using (Html.BeginForm("UpdateSkill", "Profile", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                <input type="hidden" name="id" value="@skill.UserSkillId" />
+                <div class="form-group mt-20">
+                    <input type="text" name="skillName" value="@skill.SkillName" class="form-control" />
+                </div>
+                <button type="submit" class="btn head-btn2">Save</button>
+            }
+            using (Html.BeginForm("DeleteSkill", "Profile", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                <input type="hidden" name="id" value="@skill.UserSkillId" />
+                <button type="submit" class="btn head-btn2">Delete</button>
+            }
+        }
+    </div>
+
+    <div class="post-details3 mt-50">
+        <div class="small-section-tittle"><h4>Education</h4></div>
+        @using (Html.BeginForm("AddEducation", "Profile", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="userId" value="@Model.UserId" />
+            @Html.Partial("_EducationFields", new JobPortalKCV.Models.UserEducation())
+            <button type="submit" class="btn">Add education</button>
+        }
+
+        @foreach (var education in Model.Educations)
+        {
+            using (Html.BeginForm("UpdateEducation", "Profile", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                <input type="hidden" name="education_id" value="@education.education_id" />
+                @Html.Partial("_EducationFields", education)
+                <button type="submit" class="btn head-btn2">Save education</button>
+            }
+            using (Html.BeginForm("DeleteEducation", "Profile", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                <input type="hidden" name="id" value="@education.education_id" />
+                <button type="submit" class="btn head-btn2">Delete education</button>
+            }
+        }
+    </div>
+
+    <div class="post-details3 mt-50">
+        <div class="small-section-tittle"><h4>Experience</h4></div>
+        @using (Html.BeginForm("AddExperience", "Profile", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="userId" value="@Model.UserId" />
+            @Html.Partial("_ExperienceFields", new JobPortalKCV.Models.UserExperience())
+            <button type="submit" class="btn">Add experience</button>
+        }
+
+        @foreach (var experience in Model.Experiences)
+        {
+            using (Html.BeginForm("UpdateExperience", "Profile", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                <input type="hidden" name="experience_id" value="@experience.experience_id" />
+                @Html.Partial("_ExperienceFields", experience)
+                <button type="submit" class="btn head-btn2">Save experience</button>
+            }
+            using (Html.BeginForm("DeleteExperience", "Profile", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                <input type="hidden" name="id" value="@experience.experience_id" />
+                <button type="submit" class="btn head-btn2">Delete experience</button>
+            }
+        }
+    </div>
+
+    <div class="post-details3 mt-50">
+        <div class="small-section-tittle"><h4>Projects</h4></div>
+        @using (Html.BeginForm("AddProject", "Profile", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="userId" value="@Model.UserId" />
+            @Html.Partial("_ProjectFields", new JobPortalKCV.Models.UserProject())
+            <button type="submit" class="btn">Add project</button>
+        }
+
+        @foreach (var project in Model.Projects)
+        {
+            using (Html.BeginForm("UpdateProject", "Profile", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                <input type="hidden" name="project_id" value="@project.project_id" />
+                @Html.Partial("_ProjectFields", project)
+                <button type="submit" class="btn head-btn2">Save project</button>
+            }
+            using (Html.BeginForm("DeleteProject", "Profile", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="userId" value="@Model.UserId" />
+                <input type="hidden" name="id" value="@project.project_id" />
+                <button type="submit" class="btn head-btn2">Delete project</button>
+            }
+        }
+    </div>
+</div>

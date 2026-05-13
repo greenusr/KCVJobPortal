@@ -1,0 +1,102 @@
+@model IEnumerable<JobPortalKCV.Models.ViewModel.CompanyListItemViewModel>
+@using System.Linq
+@using JobPortalKCV.Helpers
+
+@{
+    ViewBag.Title = "Company Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var companies = Model ?? Enumerable.Empty<JobPortalKCV.Models.ViewModel.CompanyListItemViewModel>();
+    var totalRecords = ViewBag.TotalRecords == null ? companies.Count() : (int)ViewBag.TotalRecords;
+}
+
+<div class="job-listing-area pt-120 pb-120">
+    <div class="container">
+        <div class="row mb-35 align-items-center">
+            <div class="col-lg-8">
+                <div class="section-tittle">
+                    <span>Employer</span>
+                    <h2>Company Settings</h2>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-right">
+                @Html.ActionLink("Add company", "Create", "Companies", new { returnUrl = Request.RawUrl }, new { @class = "btn head-btn2" })
+            </div>
+        </div>
+
+        @if (TempData["CompanySettingsMessage"] != null)
+        {
+            <div class="alert alert-success">@TempData["CompanySettingsMessage"]</div>
+        }
+        @if (TempData["CompanySettingsError"] != null)
+        {
+            <div class="alert alert-danger">@TempData["CompanySettingsError"]</div>
+        }
+
+        <div class="count-job mb-35">
+            <span>@totalRecords company(s) available for management</span>
+        </div>
+
+        @if (!companies.Any())
+        {
+            <div class="ui-empty">
+                <h4>No managed companies</h4>
+                <p>Create a company or ask an owner to approve your company access.</p>
+                @Html.ActionLink("Create company", "Create", "Companies", new { returnUrl = Request.RawUrl }, new { @class = "btn head-btn2" })
+            </div>
+        }
+        else
+        {
+            <div class="listing-grid company-management-grid">
+                @foreach (var company in companies)
+                {
+                    var logoUrl = String.IsNullOrWhiteSpace(company.LogoPath) ? "/img/icon/job-list1.png" : company.LogoPath;
+                    var role = String.IsNullOrWhiteSpace(company.MembershipRole) ? "Member" : company.MembershipRole;
+
+                    <article class="listing-card company-management-card">
+                        <div class="listing-card-head">
+                            <a class="listing-logo" href="@Url.Action("Details", "Companies", new { id = company.CompanyId, returnUrl = Request.RawUrl })">
+                                <img src="@logoUrl" alt="@company.CompanyName" />
+                            </a>
+                            <div>
+                                <a class="listing-title" href="@Url.Action("Details", "Companies", new { id = company.CompanyId, returnUrl = Request.RawUrl })">@company.CompanyName</a>
+                                <div class="listing-subtitle">@company.Industry</div>
+                            </div>
+                        </div>
+
+                        <div class="listing-card-body">
+                            <div class="listing-badges">
+                                <span>@role</span>
+                                <span>@company.JobCount job(s)</span>
+                                @if (company.CanOwn)
+                                {
+                                    <span>@company.PendingRequestCount pending request(s)</span>
+                                }
+                                <span>@(company.PublicCompanyProfile ? "Public profile" : "Private profile")</span>
+                                <span>@(company.ShowJobsPublicly ? "Public jobs" : "Private jobs")</span>
+                            </div>
+                        </div>
+
+                        <div class="listing-card-actions company-management-actions">
+                            @Html.ActionLink("Details", "Details", "Companies", new { id = company.CompanyId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm" })
+                            @Html.ActionLink("Settings", "Settings", "CompanySettings", new { id = company.CompanyId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm head-btn2" })
+                            @Html.ActionLink("Jobs", "Index", "Jobs", new { keyword = company.CompanyName, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm" })
+                            @if (company.CanOwn)
+                            {
+                                @Html.ActionLink("Transfer Owner", "TransferOwner", "Companies", new { id = company.CompanyId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm" })
+                            }
+                            @if (company.CanManage)
+                            {
+                                @Html.ActionLink("Delete", "Delete", "Companies", new { id = company.CompanyId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm btn-danger-soft" })
+                            }
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+
+        @if (ViewBag.Pagination != null)
+        {
+            @Html.Partial("_Pagination", (JobPortalKCV.Models.ViewModel.PaginationViewModel)ViewBag.Pagination)
+        }
+    </div>
+</div>

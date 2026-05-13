@@ -1,0 +1,167 @@
+@model JobPortalKCV.Models.ViewModel.AdminTableListViewModel
+@using System.Linq
+@using System.Text.RegularExpressions
+
+@{
+    ViewBag.Title = "Admin - " + Model.DisplayName;
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var totalPages = Math.Max(1, (int)Math.Ceiling((double)Model.TotalRecords / Model.PageSize));
+    Func<string, string> previewValue = value =>
+    {
+        if (String.IsNullOrWhiteSpace(value))
+        {
+            return "";
+        }
+
+        var normalized = Regex.Replace(value, "\\s+", " ").Trim();
+        return normalized.Length > 44 ? normalized.Substring(0, 44) + "..." : normalized;
+    };
+}
+
+<div class="page-shell">
+    <div class="container">
+        <div class="section-tittle mb-35">
+            <span>Admin</span>
+            <h2>@Model.DisplayName</h2>
+        </div>
+
+        @if (TempData["AdminMessage"] != null)
+        {
+            <div class="alert alert-success">@TempData["AdminMessage"]</div>
+        }
+        @if (TempData["AdminError"] != null)
+        {
+            <div class="alert alert-danger">@TempData["AdminError"]</div>
+        }
+
+        <div class="ui-card">
+            <div class="ui-card-title">
+                <h3>Search and Filter</h3>
+                <span class="ui-subtle">@Model.TotalRecords record(s)</span>
+            </div>
+            @using (Html.BeginForm("Table", "Admin", FormMethod.Get, new { @class = "mb-0" }))
+            {
+                <input type="hidden" name="table" value="@Model.TableName" />
+                <div class="row">
+                    <div class="col-md-5 form-group">
+                        <label>Search</label>
+                        <input type="text" name="keyword" class="form-control" value="@Model.Keyword" placeholder="Search" />
+                    </div>
+                    <div class="col-md-4 form-group">
+                        <label>Sort</label>
+                        <select name="sort" class="form-control">
+                            <option value="">Default sort</option>
+                            @foreach (var column in Model.Columns)
+                            {
+                                <option value="@column:asc" @(Model.Sort == column + ":asc" ? "selected" : "")>@column asc</option>
+                                <option value="@column:desc" @(Model.Sort == column + ":desc" ? "selected" : "")>@column desc</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label>&nbsp;</label>
+                        <div class="ui-toolbar admin-filter-actions">
+                            <button type="submit" class="btn">Filter</button>
+                            @Html.ActionLink("Reset", "Table", new { table = Model.TableName }, new { @class = "btn btn-default" })
+                            @if (Model.CanCreate)
+                            {
+                                @Html.ActionLink("Create", "Create", new { table = Model.TableName, returnUrl = Request.RawUrl }, new { @class = "btn head-btn2" })
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (!Model.Rows.Any())
+        {
+            <div class="ui-empty">No records found.</div>
+        }
+        else
+        {
+            <div class="ui-card">
+                <div class="ui-table-wrap">
+                    <table class="table ui-table admin-data-table">
+                    <tr>
+                        @foreach (var column in Model.Columns)
+                        {
+                            <th>@column</th>
+                        }
+                        <th>Actions</th>
+                    </tr>
+                    @foreach (var row in Model.Rows)
+                    {
+                        <tr>
+                            @foreach (var column in Model.Columns)
+                            {
+                                var value = row.ContainsKey(column) ? row[column] : "";
+                                <td>
+                                    @if (String.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <span class="ui-badge ui-badge-success">True</span>
+                                    }
+                                    else if (String.Equals(value, "false", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        <span class="ui-badge ui-badge-muted">False</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="admin-cell-preview">@previewValue(value)</span>
+                                    }
+                                </td>
+                            }
+                            <td>
+                                <div class="ui-toolbar admin-row-actions">
+                                    @Html.ActionLink("Details", "Details", new { table = Model.TableName, key = row["_key"], returnUrl = Request.RawUrl }, new { @class = "btn btn-sm btn-default" })
+                                    @if (Model.TableName == "Users")
+                                    {
+                                        @Html.ActionLink("View Profile", "View", "Profile", new { id = row["_key"], returnUrl = Request.RawUrl }, new { @class = "btn btn-sm btn-default" })
+                                    }
+                                    @if (Model.CanEdit)
+                                    {
+                                        @Html.ActionLink("Edit", "Edit", new { table = Model.TableName, key = row["_key"], returnUrl = Request.RawUrl }, new { @class = "btn btn-sm btn-default" })
+                                    }
+                                    @if (Model.CanDelete)
+                                    {
+                                        if (Model.TableName == "Users" && row.ContainsKey("is_active") && row["is_active"] == "false")
+                                        {
+                                            using (Html.BeginForm("EnableUser", "Admin", new { key = row["_key"], returnUrl = Request.RawUrl }, FormMethod.Post, new { @class = "d-inline" }))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-default" onclick="return confirm('Are you sure?');">Enable</button>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            using (Html.BeginForm("Delete", "Admin", new { table = Model.TableName, key = row["_key"], returnUrl = Request.RawUrl }, FormMethod.Post, new { @class = "d-inline" }))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-default" onclick="return confirm('Are you sure?');">@Model.DeleteButtonText</button>
+                                            }
+                                        }
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </table>
+                </div>
+            </div>
+        }
+
+        <div class="ui-card ui-card-tight">
+            <div class="ui-toolbar">
+                <span>Page @Model.Page of @totalPages</span>
+                @if (Model.Page > 1)
+                {
+                    @Html.ActionLink("Previous", "Table", new { table = Model.TableName, keyword = Model.Keyword, sort = Model.Sort, page = Model.Page - 1 }, new { @class = "btn btn-sm btn-default" })
+                }
+                @if (Model.Page < totalPages)
+                {
+                    @Html.ActionLink("Next", "Table", new { table = Model.TableName, keyword = Model.Keyword, sort = Model.Sort, page = Model.Page + 1 }, new { @class = "btn btn-sm btn-default" })
+                }
+                @Html.ActionLink("Back to Admin", "Index", null, new { @class = "btn btn-sm btn-default" })
+            </div>
+        </div>
+    </div>
+</div>

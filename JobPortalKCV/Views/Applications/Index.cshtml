@@ -1,0 +1,115 @@
+@model IEnumerable<JobPortalKCV.Models.ViewModel.ApplicationViewModel>
+
+@{
+    ViewBag.Title = "Applications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-shell">
+    <div class="container">
+    <div class="section-tittle mb-35">
+        <span>Employer tools</span>
+        <h2>Applications</h2>
+    </div>
+
+    @if (TempData["ApplicationMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["ApplicationMessage"]</div>
+    }
+    @if (TempData["ApplicationError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ApplicationError"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="ui-empty">No records found.</div>
+    }
+    else
+    {
+        <div class="ui-card">
+            <div class="ui-table-wrap">
+                <table class="table ui-table">
+                    <tr>
+                        <th>Job</th>
+                        <th>Company</th>
+                        <th>Applicant</th>
+                        <th>Email</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Result</th>
+                        <th>CV</th>
+                        <th>Cover letter</th>
+                        <th>Actions</th>
+                    </tr>
+                    @foreach (var application in Model)
+        {
+            var status = String.IsNullOrWhiteSpace(application.status_name) ? "Pending" : application.status_name;
+            var statusBadge = status == "Completed" ? "ui-badge-success" : (status == "Interview" ? "ui-badge-info" : "ui-badge-warning");
+            <tr>
+                <td>@application.job_title</td>
+                <td>@application.company_name</td>
+                <td>@application.applicant_name</td>
+                <td>@application.applicant_email</td>
+                <td>@(application.application_date.HasValue ? application.application_date.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
+                <td><span class="ui-badge @statusBadge">@status</span></td>
+                <td>
+                    @if (!String.IsNullOrWhiteSpace(application.final_result))
+                    {
+                        <span class="ui-badge @(application.final_result == "Accepted" ? "ui-badge-success" : "ui-badge-danger")">@application.final_result</span>
+                    }
+                </td>
+                <td>
+                    @if (!String.IsNullOrWhiteSpace(application.cv_file_path))
+                    {
+                        <a href="@application.cv_file_path" target="_blank" rel="noopener">@application.cv_file_name</a>
+                    }
+                    else
+                    {
+                        <span>No CV</span>
+                    }
+                </td>
+                <td>
+                    @if (!String.IsNullOrWhiteSpace(application.cover_letter))
+                    {
+                        <div style="max-width: 260px; white-space: pre-wrap;">@application.cover_letter</div>
+                    }
+                </td>
+                <td>
+                    <div class="ui-toolbar">
+                    @if (application.can_invite_interview)
+                    {
+                        @Html.ActionLink("Interview", "Interview", new { id = application.application_id, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm btn-primary mb-10" })
+
+                        using (Html.BeginForm("Reject", "Applications", new { id = application.application_id, returnUrl = Request.RawUrl }, FormMethod.Post, new { @class = "d-inline" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-default mb-10">Reject</button>
+                        }
+                    }
+                    else if (application.can_complete_interview)
+                    {
+                        using (Html.BeginForm("Complete", "Applications", new { id = application.application_id, result = "Accepted", returnUrl = Request.RawUrl }, FormMethod.Post, new { @class = "d-inline" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-success mb-10">Accept</button>
+                        }
+
+                        using (Html.BeginForm("Complete", "Applications", new { id = application.application_id, result = "Rejected", returnUrl = Request.RawUrl }, FormMethod.Post, new { @class = "d-inline" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-default mb-10">Reject</button>
+                        }
+                    }
+                    </div>
+                </td>
+            </tr>
+        }
+                </table>
+            </div>
+        </div>
+    }
+
+    @Html.Partial("_Pagination", (JobPortalKCV.Models.ViewModel.PaginationViewModel)ViewBag.Pagination)
+    </div>
+</div>

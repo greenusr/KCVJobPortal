@@ -1,0 +1,62 @@
+@model JobPortalKCV.Models.ViewModel.RegisterCandidateViewModel
+
+@{
+    ViewBag.Title = "Candidate Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container pt-120 pb-120">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="small-section-tittle">
+                <h4>Candidate Register</h4>
+            </div>
+
+            @using (Html.BeginForm("RegisterCandidate", "Account", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        @Html.LabelFor(model => model.Username)
+                        @Html.TextBoxFor(model => model.Username, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Username, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-6 form-group">
+                        @Html.LabelFor(model => model.Email)
+                        @Html.TextBoxFor(model => model.Email, new { @class = "form-control", type = "email" })
+                        @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-6 form-group">
+                        @Html.LabelFor(model => model.FirstName)
+                        @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.FirstName, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-6 form-group">
+                        @Html.LabelFor(model => model.LastName)
+                        @Html.TextBoxFor(model => model.LastName, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.LastName, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-6 form-group">
+                        @Html.LabelFor(model => model.Password)
+                        @Html.PasswordFor(model => model.Password, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.Password, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-6 form-group">
+                        @Html.LabelFor(model => model.ConfirmPassword)
+                        @Html.PasswordFor(model => model.ConfirmPassword, new { @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.ConfirmPassword, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">Create Candidate Account</button>
+                @Html.ActionLink("Choose another type", "Register", null, new { @class = "btn head-btn2" })
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

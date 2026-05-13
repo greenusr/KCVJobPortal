@@ -1,0 +1,67 @@
+@model JobPortalKCV.Models.ViewModel.NotificationIndexViewModel
+@using System
+@using System.Linq
+
+@{
+    ViewBag.Title = "Notifications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var totalPages = Math.Max(1, (int)Math.Ceiling((double)Model.TotalRecords / Model.PageSize));
+}
+
+<div class="container pt-120 pb-120">
+    <div class="section-tittle mb-35">
+        <span>Account</span>
+        <h2>Notifications</h2>
+    </div>
+
+    @if (TempData["NotificationMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["NotificationMessage"]</div>
+    }
+    @if (TempData["NotificationError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["NotificationError"]</div>
+    }
+
+    <div class="mb-30">
+        @Html.ActionLink("All", "Index", new { filter = "all" }, new { @class = Model.Filter == "all" ? "btn" : "btn btn-default" })
+        @Html.ActionLink("Unread", "Index", new { filter = "unread" }, new { @class = Model.Filter == "unread" ? "btn" : "btn btn-default" })
+        @Html.ActionLink("Read", "Index", new { filter = "read" }, new { @class = Model.Filter == "read" ? "btn" : "btn btn-default" })
+
+        @using (Html.BeginForm("MarkAllAsRead", "Notifications", new { filter = Model.Filter, page = Model.Page }, FormMethod.Post, new { @class = "d-inline" }))
+        {
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-default">Mark all as read</button>
+        }
+    </div>
+
+    @if (!Model.Notifications.Any())
+    {
+        <div class="alert alert-info">No notifications yet.</div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var notification in Model.Notifications)
+            {
+                <a href="@Url.Action("Open", "Notifications", new { id = notification.NotificationId, returnUrl = Request.RawUrl })" class="list-group-item @(notification.IsRead ? "" : "active")">
+                    <h4 class="list-group-item-heading">@notification.Title</h4>
+                    <p class="list-group-item-text">@notification.Message</p>
+                    <small>@notification.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                </a>
+            }
+        </div>
+    }
+
+    <div class="mt-30">
+        <span>Page @Model.Page of @totalPages</span>
+        @if (Model.Page > 1)
+        {
+            @Html.ActionLink("Previous", "Index", new { filter = Model.Filter, page = Model.Page - 1 }, new { @class = "btn btn-sm btn-default" })
+        }
+        @if (Model.Page < totalPages)
+        {
+            @Html.ActionLink("Next", "Index", new { filter = Model.Filter, page = Model.Page + 1 }, new { @class = "btn btn-sm btn-default" })
+        }
+    </div>
+</div>

@@ -1,0 +1,176 @@
+@model JobPortalKCV.Models.ViewModel.AdminRecordFormViewModel
+
+@{
+    ViewBag.Title = Model.IsCreate ? "Create " + Model.DisplayName : (Model.CanEdit ? "Edit " + Model.DisplayName : "View " + Model.DisplayName);
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var returnUrl = Request.QueryString["returnUrl"] ?? Request.Form["returnUrl"];
+    var backUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Table", "Admin", new { table = Model.TableName });
+}
+
+<div class="page-shell">
+    <div class="container">
+        <div class="section-tittle mb-35">
+            <span>Admin</span>
+            <h2>@ViewBag.Title</h2>
+        </div>
+
+        @if (TempData["AdminError"] != null)
+        {
+            <div class="alert alert-danger">@TempData["AdminError"]</div>
+        }
+        else if (!Model.IsCreate && !Model.CanEdit)
+        {
+            <div class="alert alert-info">Logs cannot be modified.</div>
+        }
+
+        <div class="ui-card">
+            @using (Html.BeginForm(Model.IsCreate ? "Create" : "Edit", "Admin", new { table = Model.TableName, key = Model.Key, returnUrl = returnUrl }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                <div class="ui-form-grid">
+                    @foreach (var field in Model.Fields)
+                    {
+                        <div class="form-group @(field.DataType == "text" || field.DataType == "ntext" ? "form-group-full" : "")">
+                            <label for="@field.Name">@field.Label</label>
+                            @if (!field.IsEditable)
+                            {
+                                <input type="text" class="form-control" value="@(String.IsNullOrWhiteSpace(field.DisplayValue) ? field.Value : field.DisplayValue)" readonly="readonly" />
+                            }
+                            else if (field.Options != null && field.Options.Any())
+                            {
+                                <input type="text" class="form-control admin-lookup-search mb-2" data-target="@field.Name" placeholder="Search @field.Label" autocomplete="off" />
+                                <select name="@field.Name" id="@field.Name" class="form-control admin-lookup-select">
+                                    @if (!field.IsRequired)
+                                    {
+                                        <option value="">-- Select --</option>
+                                    }
+                                    @foreach (var option in field.Options)
+                                    {
+                                        <option value="@option.Value" @(field.Value == option.Value ? "selected" : "")>@option.Text</option>
+                                    }
+                                </select>
+                            }
+                            else if (field.DataType == "bit")
+                            {
+                                <input type="hidden" name="@field.Name" value="false" />
+                                <label class="admin-switch">
+                                    <input type="checkbox" name="@field.Name" id="@field.Name" value="true" @(field.Value == "true" ? "checked=\"checked\"" : "") />
+                                    <span class="ui-badge @(field.Value == "true" ? "ui-badge-success" : "ui-badge-muted")">@(field.Value == "true" ? "true" : "false")</span>
+                                </label>
+                            }
+                            else if (field.DataType == "date")
+                            {
+                                <input type="date" name="@field.Name" id="@field.Name" class="form-control" value="@field.Value" />
+                            }
+                            else if (field.DataType == "datetime")
+                            {
+                                <input type="datetime-local" name="@field.Name" id="@field.Name" class="form-control" value="@field.Value.Replace(" ", "T")" />
+                            }
+                            else if (field.DataType == "text" || field.DataType == "ntext" || field.DataType == "nvarchar")
+                            {
+                                <textarea name="@field.Name" id="@field.Name" class="form-control" rows="4">@field.Value</textarea>
+                            }
+                            else
+                            {
+                                <input type="text" name="@field.Name" id="@field.Name" class="form-control" value="@field.Value" />
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="ui-toolbar mt-30">
+                    @if (Model.IsCreate || Model.CanEdit)
+                    {
+                        <button type="submit" class="btn">Save Changes</button>
+                    }
+                    <a href="@backUrl" class="btn btn-default">Back</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-lookup-search {
+        margin-bottom: 8px;
+    }
+
+    .admin-lookup-select + .nice-select {
+        width: 100%;
+    }
+
+    .admin-lookup-select + .nice-select .list {
+        max-height: 260px;
+        overflow-y: auto;
+        width: 100%;
+    }
+
+    .admin-switch {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 42px;
+        font-weight: normal;
+    }
+
+    .admin-switch input {
+        width: 18px;
+        height: 18px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        (function () {
+            function normalize(value) {
+                return (value || "").toString().toLowerCase();
+            }
+
+            function filterLookup(searchInput) {
+                var targetId = searchInput.getAttribute("data-target");
+                var select = document.getElementById(targetId);
+                var keyword = normalize(searchInput.value);
+
+                if (!select) {
+                    return;
+                }
+
+                Array.prototype.forEach.call(select.options, function (option) {
+                    var isMatch = !keyword || normalize(option.text).indexOf(keyword) >= 0;
+                    option.hidden = !isMatch;
+                });
+
+                var niceSelect = select.nextElementSibling;
+                if (niceSelect && niceSelect.className.indexOf("nice-select") >= 0) {
+                    var options = niceSelect.querySelectorAll(".option");
+                    Array.prototype.forEach.call(options, function (option) {
+                        var isMatch = !keyword || normalize(option.textContent).indexOf(keyword) >= 0;
+                        option.style.display = isMatch ? "" : "none";
+                    });
+                }
+            }
+
+            var searchInputs = document.querySelectorAll(".admin-lookup-search");
+            Array.prototype.forEach.call(searchInputs, function (input) {
+                input.addEventListener("input", function () {
+                    filterLookup(input);
+                });
+            });
+
+            var switches = document.querySelectorAll(".admin-switch input[type='checkbox']");
+            Array.prototype.forEach.call(switches, function (input) {
+                input.addEventListener("change", function () {
+                    var label = input.parentNode.querySelector("span");
+                    if (label) {
+                        label.textContent = input.checked ? "true" : "false";
+                        label.className = input.checked ? "ui-badge ui-badge-success" : "ui-badge ui-badge-muted";
+                    }
+                });
+            });
+        })();
+    </script>
+}

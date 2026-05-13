@@ -1,0 +1,59 @@
+@model JobPortalKCV.Models.Company
+
+@{
+    ViewBag.Title = "Edit Company";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = Request.QueryString["returnUrl"] ?? Request.Form["returnUrl"];
+    var backUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Details", "Companies", new { id = Model.company_id });
+}
+
+<div class="container pt-120 pb-120">
+    <h2>Edit Company</h2>
+
+    @using (Html.BeginForm("Edit", "Companies", new { id = Model.company_id, returnUrl = returnUrl }, FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.company_name, "Company name")
+            @Html.TextBoxFor(model => model.company_name, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.industry, "Industry")
+            @Html.TextBoxFor(model => model.industry, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.website, "Website")
+            @Html.TextBoxFor(model => model.website, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.contact_email, "Contact email")
+            @Html.TextBoxFor(model => model.contact_email, new { @class = "form-control", type = "email" })
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.description, "Description")
+            @Html.TextAreaFor(model => model.description, 5, 50, new { @class = "form-control" })
+        </div>
+        <div class="form-group">
+            <label>Logo</label>
+            @{
+                var logoUrl = String.IsNullOrWhiteSpace(Model.logo_path) ? null : Model.logo_path;
+            }
+            @if (!String.IsNullOrWhiteSpace(logoUrl))
+            {
+                <div class="mb-10">
+                    <img src="@logoUrl" alt="@Model.company_name" style="height:64px;" />
+                </div>
+            }
+            <input type="file" name="logo" class="form-control" accept="image/*" />
+            <small>JPG, PNG, GIF or WEBP. Max 20MB.</small>
+        </div>
+
+        <button type="submit" class="btn">Save</button>
+        <a href="@backUrl" class="btn head-btn2">Back</a>
+    }
+</div>

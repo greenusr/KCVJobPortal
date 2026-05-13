@@ -1,0 +1,981 @@
+.admin-shell {
+    background: #f4f6f8;
+    min-height: 100vh;
+}
+
+.admin-shell a {
+    text-decoration: none;
+}
+
+.admin-sidebar {
+    background: #fff;
+    border-right: 1px solid #e5e7eb;
+    bottom: 0;
+    left: 0;
+    overflow-y: auto;
+    padding: 22px 18px;
+    position: fixed;
+    top: 0;
+    width: 280px;
+    z-index: 1030;
+}
+
+.admin-brand {
+    align-items: center;
+    color: #111827;
+    display: flex;
+    font-size: 20px;
+    font-weight: 800;
+    gap: 10px;
+    margin-bottom: 28px;
+}
+
+.admin-brand img {
+    height: 34px;
+    width: 34px;
+}
+
+.admin-nav-label {
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    margin: 22px 14px 8px;
+    text-transform: uppercase;
+}
+
+.admin-nav-link {
+    align-items: center;
+    border-radius: 12px;
+    color: #4b5563;
+    display: flex;
+    font-size: 14px;
+    font-weight: 600;
+    gap: 11px;
+    margin-bottom: 4px;
+    padding: 11px 14px;
+    width: 100%;
+}
+
+.admin-nav-link:hover,
+.admin-nav-link.active {
+    background: #eaf8f3;
+    color: #00a76f;
+}
+
+.admin-nav-link span:last-child {
+    display: block;
+    line-height: 1.25;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.admin-nav-icon {
+    align-items: center;
+    background: #f3f4f6;
+    border-radius: 10px;
+    color: #00a76f;
+    display: inline-flex;
+    font-size: 12px;
+    font-weight: 800;
+    height: 28px;
+    justify-content: center;
+    width: 28px;
+}
+
+.admin-content {
+    margin-left: 280px;
+    min-height: 100vh;
+}
+
+.admin-topbar {
+    align-items: center;
+    background: rgba(255, 255, 255, .92);
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    gap: 16px;
+    justify-content: space-between;
+    min-height: 76px;
+    padding: 16px 28px;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+}
+
+.admin-topbar h1 {
+    color: #111827;
+    font-size: 24px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.admin-topbar p {
+    color: #6b7280;
+    margin: 2px 0 0;
+}
+
+.admin-user-pill {
+    align-items: center;
+    background: #f3f4f6;
+    border-radius: 999px;
+    color: #111827;
+    display: inline-flex;
+    font-weight: 700;
+    gap: 9px;
+    padding: 8px 12px;
+}
+
+.admin-user-avatar {
+    align-items: center;
+    background: #00a76f;
+    border-radius: 50%;
+    color: #fff;
+    display: inline-flex;
+    height: 32px;
+    justify-content: center;
+    width: 32px;
+}
+
+.admin-page {
+    padding: 28px;
+}
+
+.admin-shell .page-shell {
+    max-width: none;
+    padding: 0;
+}
+
+.admin-shell .page-shell > .container,
+.admin-shell .container {
+    max-width: none;
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
+}
+
+.admin-shell .section-tittle span {
+    color: #00a76f;
+}
+
+.admin-shell .section-tittle h2 {
+    color: #111827;
+    font-size: 28px;
+    margin-bottom: 0;
+}
+
+.admin-shell .ui-sidebar {
+    display: none;
+}
+
+.admin-shell .ui-card,
+.admin-shell .ui-stat-card,
+.admin-shell .single-job-items {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+}
+
+.admin-shell .ui-stat-card {
+    align-items: center;
+    gap: 14px;
+    min-height: 120px;
+}
+
+.admin-shell .ui-stat-icon {
+    background: #eaf8f3;
+    color: #00a76f;
+}
+
+.admin-shell .btn,
+.admin-shell .head-btn2,
+.admin-shell .btn-default {
+    border-radius: 10px;
+    font-weight: 700;
+    padding: 10px 16px;
+}
+
+.admin-shell .btn,
+.admin-shell .head-btn2 {
+    background: #00a76f;
+    border-color: #00a76f;
+    color: #fff !important;
+}
+
+.admin-shell .btn-default,
+.admin-shell .btn-light {
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+    color: #374151 !important;
+}
+
+.admin-shell .btn-danger {
+    background: #ef4444;
+    border-color: #ef4444;
+    color: #fff !important;
+}
+
+.admin-shell .form-control {
+    border-color: #d1d5db;
+    border-radius: 10px;
+    min-height: 44px;
+}
+
+.admin-shell .ui-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.admin-shell .ui-table th {
+    background: #f9fafb;
+    color: #374151;
+}
+
+.admin-shell .ui-empty {
+    background: #fff;
+    border: 1px dashed #cbd5e1;
+    border-radius: 16px;
+}
+
+.admin-mobile-toggle {
+    display: none;
+}
+
+@media (max-width: 991px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+        transition: transform .2s ease;
+    }
+
+    .admin-sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    .admin-content {
+        margin-left: 0;
+    }
+
+    .admin-mobile-toggle {
+        display: inline-flex;
+    }
+
+    .admin-topbar {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 18px;
+    }
+
+    .admin-page {
+        padding: 18px;
+    }
+}
+
+/* KCV admin dark theme */
+.admin-shell {
+    background:
+        radial-gradient(circle at 14% 8%, rgba(240, 106, 166, .14), transparent 28%),
+        radial-gradient(circle at 92% 12%, rgba(49, 93, 232, .18), transparent 30%),
+        linear-gradient(180deg, #211b32 0%, #090711 38%, #090711 100%) !important;
+    color: var(--kcv-text);
+}
+
+.admin-sidebar {
+    background: rgba(12, 10, 19, .94) !important;
+    border-right-color: var(--kcv-line) !important;
+    box-shadow: 14px 0 60px rgba(0, 0, 0, .24);
+}
+
+.admin-brand,
+.admin-topbar h1,
+.admin-shell .section-tittle h2,
+.admin-shell h1,
+.admin-shell h2,
+.admin-shell h3,
+.admin-shell h4,
+.admin-shell h5,
+.admin-shell label {
+    color: var(--kcv-text) !important;
+}
+
+.admin-topbar p,
+.admin-nav-label,
+.admin-shell .ui-subtle,
+.admin-shell p,
+.admin-shell small {
+    color: var(--kcv-muted) !important;
+}
+
+.admin-nav-link {
+    color: var(--kcv-muted) !important;
+}
+
+.admin-nav-link:hover,
+.admin-nav-link.active {
+    background: rgba(139, 108, 255, .16) !important;
+    color: var(--kcv-text) !important;
+}
+
+.admin-nav-icon,
+.admin-user-avatar,
+.admin-shell .ui-stat-icon {
+    background: var(--kcv-gradient) !important;
+    color: #fff !important;
+}
+
+.admin-content,
+.admin-page,
+.admin-shell .page-shell {
+    background: transparent !important;
+}
+
+.admin-topbar {
+    background: rgba(9, 7, 17, .9) !important;
+    border-bottom-color: var(--kcv-line) !important;
+    backdrop-filter: blur(18px);
+}
+
+.admin-shell .ui-card,
+.admin-shell .ui-stat-card,
+.admin-shell .single-job-items,
+.admin-user-pill,
+.admin-chart-legend li {
+    background: rgba(23, 19, 33, .92) !important;
+    border-color: var(--kcv-line) !important;
+    box-shadow: var(--kcv-glow);
+    color: var(--kcv-text) !important;
+}
+
+.admin-shell .ui-stat-value,
+.admin-shell .admin-chart-legend strong,
+.admin-shell .admin-chart-label {
+    color: var(--kcv-text) !important;
+}
+
+.admin-shell .btn,
+.admin-shell .head-btn2 {
+    background: var(--kcv-gradient) !important;
+    border: 0 !important;
+    box-shadow: 0 10px 30px rgba(139, 108, 255, .24);
+    color: #fff !important;
+}
+
+.admin-shell .btn-default,
+.admin-shell .btn-light {
+    background: rgba(255, 255, 255, .06) !important;
+    border: 1px solid var(--kcv-line-strong) !important;
+    color: var(--kcv-text) !important;
+}
+
+.admin-shell .btn-danger {
+    background: linear-gradient(135deg, #ef4444, #f06aa6) !important;
+    border: 0 !important;
+}
+
+.admin-shell .form-control,
+.admin-shell input,
+.admin-shell select,
+.admin-shell textarea {
+    background: rgba(12, 10, 19, .9) !important;
+    border-color: var(--kcv-line-strong) !important;
+    color: var(--kcv-text) !important;
+}
+
+.admin-shell .form-control:focus,
+.admin-shell input:focus,
+.admin-shell select:focus,
+.admin-shell textarea:focus {
+    border-color: var(--kcv-pink) !important;
+    box-shadow: 0 0 0 4px rgba(240, 106, 166, .16) !important;
+}
+
+.admin-shell .ui-table,
+.admin-shell .table {
+    background: rgba(23, 19, 33, .92) !important;
+    color: var(--kcv-text) !important;
+}
+
+.admin-shell .ui-table th,
+.admin-shell .table th {
+    background: rgba(31, 26, 43, .98) !important;
+    color: var(--kcv-text) !important;
+}
+
+.admin-shell .ui-table td,
+.admin-shell .ui-table th,
+.admin-shell .table td,
+.admin-shell .table th {
+    border-color: var(--kcv-line) !important;
+}
+
+.admin-shell .ui-empty {
+    background: rgba(23, 19, 33, .75) !important;
+    border-color: var(--kcv-line-strong) !important;
+    color: var(--kcv-muted) !important;
+}
+
+.admin-shell .nav-tabs {
+    border-color: var(--kcv-line) !important;
+}
+
+.admin-shell .nav-tabs .nav-link {
+    color: var(--kcv-muted) !important;
+}
+
+.admin-shell .nav-tabs .nav-link.active {
+    background: var(--kcv-gradient) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+}
+
+/* KCV admin final color pass */
+.admin-shell {
+    --jn-primary: #8b6cff;
+    --jn-primary-dark: #f06aa6;
+    --jn-primary-soft: rgba(139, 108, 255, .16);
+}
+
+.admin-shell .section-tittle span,
+.admin-shell a:not(.btn):not(.admin-nav-link),
+.admin-shell .ui-stat-icon i,
+.admin-shell .admin-nav-icon,
+.admin-shell .admin-user-avatar {
+    color: #fff !important;
+}
+
+.admin-shell a:not(.btn):not(.admin-nav-link) {
+    color: #c38bff !important;
+}
+
+.admin-shell a:not(.btn):not(.admin-nav-link):hover {
+    color: #ff80ba !important;
+}
+
+.admin-nav-link:hover,
+.admin-nav-link.active {
+    background: linear-gradient(135deg, rgba(109, 93, 252, .2), rgba(240, 106, 166, .16)) !important;
+    box-shadow: inset 0 0 0 1px rgba(240, 106, 166, .18);
+}
+
+.admin-nav-link:hover .admin-nav-icon,
+.admin-nav-link.active .admin-nav-icon,
+.admin-nav-icon,
+.admin-user-avatar,
+.admin-shell .ui-stat-icon {
+    background: linear-gradient(135deg, #6d5dfc 0%, #8b6cff 45%, #f06aa6 100%) !important;
+    border: 0 !important;
+}
+
+.admin-shell .ui-badge-info,
+.admin-shell .ui-badge-warning,
+.admin-shell .ui-badge-success,
+.admin-shell .ui-badge-danger,
+.admin-shell .ui-badge-muted,
+.admin-shell .badge,
+.admin-shell .alert-success,
+.admin-shell .alert-info,
+.admin-shell .alert-warning,
+.admin-shell .alert-danger {
+    background: rgba(139, 108, 255, .14) !important;
+    border-color: rgba(240, 106, 166, .24) !important;
+    color: var(--kcv-text) !important;
+}
+
+.admin-shell .nice-select,
+.admin-shell .nice-select .list,
+.admin-shell .dropdown-menu {
+    background: rgba(18, 15, 30, .98) !important;
+    border-color: var(--kcv-line-strong) !important;
+    color: var(--kcv-text) !important;
+}
+
+.admin-shell .nice-select .option:hover,
+.admin-shell .nice-select .option.focus,
+.admin-shell .nice-select .option.selected.focus,
+.admin-shell .dropdown-item:hover {
+    background: rgba(139, 108, 255, .18) !important;
+    color: #fff !important;
+}
+
+.admin-shell .nice-select-search {
+    background: rgba(18, 15, 30, .98) !important;
+    border: 0 !important;
+    box-sizing: border-box !important;
+    cursor: default;
+    display: block !important;
+    height: auto !important;
+    line-height: normal !important;
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 8px 10px 10px !important;
+    position: relative !important;
+    top: auto !important;
+    z-index: 1;
+}
+
+.admin-shell .nice-select-search input {
+    background: rgba(5, 4, 10, .82) !important;
+    border: 1px solid rgba(255, 255, 255, .16) !important;
+    border-radius: 9px !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+    color: var(--kcv-text) !important;
+    display: block !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    margin: 0 !important;
+    max-width: none !important;
+    min-height: 36px !important;
+    outline: 0;
+    padding: 0 12px !important;
+    width: 100% !important;
+}
+
+.admin-shell {
+    background:
+        radial-gradient(circle at 14% 8%, rgba(240, 106, 166, .14), transparent 28%),
+        radial-gradient(circle at 92% 12%, rgba(109, 93, 252, .18), transparent 30%),
+        linear-gradient(180deg, #211b32 0%, #090711 38%, #090711 100%) !important;
+}
+
+/* KCV admin contrast pass: black-first surface */
+.admin-shell {
+    background:
+        radial-gradient(circle at 14% 8%, rgba(240, 106, 166, .08), transparent 24%),
+        radial-gradient(circle at 92% 10%, rgba(139, 108, 255, .08), transparent 24%),
+        #05040a !important;
+    color: #fff;
+}
+
+.admin-sidebar,
+.admin-topbar {
+    background: rgba(5, 4, 10, .78) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+}
+
+.admin-shell .ui-card,
+.admin-shell .ui-stat-card,
+.admin-shell .single-job-items,
+.admin-user-pill,
+.admin-chart-legend li {
+    background: rgba(19, 16, 28, .96) !important;
+    border-color: rgba(255, 255, 255, .22) !important;
+    box-shadow: 0 18px 54px rgba(0, 0, 0, .42) !important;
+}
+
+.admin-shell .form-control,
+.admin-shell input,
+.admin-shell select,
+.admin-shell textarea,
+.admin-shell .nice-select {
+    background: #0b0911 !important;
+    border-color: rgba(255, 255, 255, .28) !important;
+    color: #fff !important;
+}
+
+.admin-shell .ui-table,
+.admin-shell .table {
+    background: rgba(19, 16, 28, .96) !important;
+}
+
+.admin-shell .ui-table th,
+.admin-shell .table th {
+    background: #1b1626 !important;
+}
+
+.admin-shell .ui-table td,
+.admin-shell .ui-table th,
+.admin-shell .table td,
+.admin-shell .table th {
+    border-color: rgba(255, 255, 255, .16) !important;
+}
+
+.admin-shell .admin-nav-link {
+    color: #d4cde2 !important;
+}
+
+.admin-shell .admin-nav-label,
+.admin-shell .ui-subtle,
+.admin-shell p,
+.admin-shell small {
+    color: #d4cde2 !important;
+}
+
+.admin-shell .section-tittle span {
+    color: #ff80ba !important;
+}
+
+/* KCV admin global dark/readability pass */
+html,
+body.admin-shell {
+    background: #05040a !important;
+}
+
+.admin-shell {
+    color: #f7f3ff !important;
+    font-size: 16px !important;
+    line-height: 1.62;
+}
+
+.admin-shell .admin-layout,
+.admin-shell .admin-main,
+.admin-shell .admin-content,
+.admin-shell .page-content,
+.admin-shell .content-wrapper,
+.admin-shell main {
+    background:
+        radial-gradient(circle at 12% 8%, rgba(240, 106, 166, .07), transparent 24%),
+        radial-gradient(circle at 88% 10%, rgba(109, 93, 252, .08), transparent 26%),
+        #05040a !important;
+    color: #f7f3ff !important;
+}
+
+.admin-shell .ui-empty,
+.admin-shell .empty-state,
+.admin-shell .no-results,
+.admin-shell .alert,
+.admin-shell .well,
+.admin-shell .panel,
+.admin-shell .modal-content,
+.admin-shell .dropdown-menu,
+.admin-shell .ui-card,
+.admin-shell .ui-stat-card,
+.admin-shell .single-job-items,
+.admin-user-pill,
+.admin-chart-legend li,
+.admin-shell .table,
+.admin-shell .ui-table,
+.admin-shell .ui-table-wrap,
+.admin-shell .card {
+    background: rgba(19, 16, 28, .96) !important;
+    border-color: rgba(255, 255, 255, .16) !important;
+    color: #f7f3ff !important;
+    transition:
+        background-color .24s ease,
+        border-color .24s ease,
+        box-shadow .24s ease,
+        color .18s ease,
+        transform .18s ease;
+}
+
+.admin-shell .ui-empty {
+    border-style: dashed !important;
+    box-shadow: 0 18px 54px rgba(0, 0, 0, .34) !important;
+    font-size: 16px !important;
+}
+
+.admin-shell .table th,
+.admin-shell .ui-table th {
+    background: #1b1626 !important;
+    color: #fff !important;
+}
+
+.admin-shell .table td,
+.admin-shell .table th,
+.admin-shell .ui-table td,
+.admin-shell .ui-table th {
+    border-color: rgba(255, 255, 255, .14) !important;
+    color: #f7f3ff !important;
+    font-size: 15px !important;
+}
+
+.admin-shell p,
+.admin-shell li,
+.admin-shell dd,
+.admin-shell dt,
+.admin-shell small,
+.admin-shell label,
+.admin-shell .text-muted,
+.admin-shell .ui-subtle {
+    color: #ddd6ea !important;
+    font-size: 15.5px;
+}
+
+.admin-shell h1,
+.admin-shell h2,
+.admin-shell h3,
+.admin-shell h4,
+.admin-shell h5,
+.admin-shell h6 {
+    color: #fff !important;
+}
+
+.admin-shell .form-control,
+.admin-shell input,
+.admin-shell select,
+.admin-shell textarea,
+.admin-shell .nice-select {
+    background: rgba(8, 6, 13, .96) !important;
+    border-color: rgba(255, 255, 255, .22) !important;
+    color: #fff !important;
+    font-size: 15.5px !important;
+    min-height: 46px;
+    transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, color .18s ease;
+}
+
+.admin-shell .btn,
+.admin-shell .page-link,
+.admin-shell .admin-nav-link {
+    font-size: 15px !important;
+    min-height: 40px;
+    transition: background .22s ease, border-color .22s ease, box-shadow .22s ease, color .18s ease, transform .18s ease;
+}
+
+/* Admin dashboard/table final polish */
+.admin-shell .ui-card-title h3,
+.admin-shell .ui-mini-list strong,
+.admin-shell .ui-table strong,
+.admin-shell .table strong {
+    color: #fff !important;
+}
+
+.admin-shell .ui-table,
+.admin-shell .table {
+    border-collapse: separate !important;
+    border-spacing: 0 8px !important;
+}
+
+.admin-shell .ui-table thead th,
+.admin-shell .table thead th,
+.admin-shell .ui-table tr:first-child th,
+.admin-shell .table tr:first-child th {
+    background: #1b1626 !important;
+    border-bottom: 0 !important;
+    color: #fff !important;
+    letter-spacing: .01em;
+    padding: 13px 16px !important;
+}
+
+.admin-shell .ui-table td,
+.admin-shell .table td {
+    background: rgba(19, 16, 28, .9) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, .1) !important;
+    border-top: 1px solid rgba(255, 255, 255, .1) !important;
+    color: #f7f3ff !important;
+    padding: 14px 16px !important;
+}
+
+.admin-shell .ui-table tr td:first-child,
+.admin-shell .table tr td:first-child {
+    border-left: 1px solid rgba(255, 255, 255, .1) !important;
+    border-radius: 12px 0 0 12px;
+}
+
+.admin-shell .ui-table tr td:last-child,
+.admin-shell .table tr td:last-child {
+    border-radius: 0 12px 12px 0;
+    border-right: 1px solid rgba(255, 255, 255, .1) !important;
+}
+
+.admin-shell .ui-table td *,
+.admin-shell .table td *,
+.admin-shell .ui-mini-list li *,
+.admin-shell .admin-chart-legend li * {
+    color: inherit;
+}
+
+.admin-shell .ui-table a:not(.btn),
+.admin-shell .table a:not(.btn),
+.admin-shell .ui-mini-list a:not(.btn) {
+    color: #d9ccff !important;
+    font-weight: 800;
+}
+
+.admin-shell .ui-table a:not(.btn):hover,
+.admin-shell .table a:not(.btn):hover,
+.admin-shell .ui-mini-list a:not(.btn):hover {
+    color: #ff80ba !important;
+}
+
+.admin-shell .btn.btn-default,
+.admin-shell .btn.btn-light,
+.admin-shell .ui-table .btn,
+.admin-shell .table .btn,
+.admin-shell .ui-card .btn-block {
+    align-items: center;
+    background: linear-gradient(135deg, rgba(109, 93, 252, .22), rgba(240, 106, 166, .18)) !important;
+    border: 1px solid rgba(240, 106, 166, .26) !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    display: inline-flex;
+    font-weight: 850;
+    justify-content: center;
+    min-height: 42px;
+    padding: 10px 15px !important;
+}
+
+.admin-shell .ui-card .btn-block {
+    width: 100%;
+}
+
+.admin-shell .btn.btn-default:hover,
+.admin-shell .btn.btn-light:hover,
+.admin-shell .ui-table .btn:hover,
+.admin-shell .table .btn:hover,
+.admin-shell .ui-card .btn-block:hover {
+    background: linear-gradient(135deg, #6d5dfc, #f06aa6) !important;
+    border-color: transparent !important;
+    box-shadow: 0 14px 36px rgba(139, 108, 255, .28) !important;
+    transform: translateY(-1px);
+}
+
+.admin-shell .ui-stat-label,
+.admin-shell .admin-chart-label,
+.admin-shell .ui-subtle,
+.admin-shell .text-muted {
+    color: #ddd6ea !important;
+}
+
+/* Admin table long-value previews */
+.admin-shell .admin-data-table {
+    table-layout: fixed;
+    min-width: 1180px;
+}
+
+.admin-shell .admin-data-table th,
+.admin-shell .admin-data-table td {
+    max-width: 220px;
+}
+
+.admin-shell .admin-data-table th:last-child,
+.admin-shell .admin-data-table td:last-child {
+    max-width: 340px;
+    width: 340px;
+}
+
+.admin-shell .admin-cell-preview {
+    color: #f7f3ff !important;
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.admin-shell .admin-detail-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.admin-shell .admin-detail-table th {
+    width: 260px;
+}
+
+.admin-shell .admin-detail-value {
+    color: #f7f3ff !important;
+    display: block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+/* Admin controls: keep desktop header clean and table actions stable */
+.admin-shell .admin-mobile-toggle {
+    display: none !important;
+}
+
+.admin-shell .admin-topbar {
+    gap: 18px;
+}
+
+.admin-shell .admin-topbar > .d-flex:first-child {
+    min-width: 0;
+}
+
+.admin-shell .admin-topbar h1 {
+    line-height: 1.15;
+}
+
+.admin-shell .admin-topbar-actions {
+    gap: 10px !important;
+    justify-content: flex-end;
+}
+
+.admin-shell .admin-topbar-actions .btn {
+    min-height: 36px;
+    padding: 8px 13px !important;
+    white-space: nowrap;
+}
+
+.admin-shell .ui-card .form-group label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.admin-shell .ui-card .nice-select,
+.admin-shell .ui-card select.form-control {
+    width: 100% !important;
+}
+
+.admin-shell .admin-filter-actions {
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 10px;
+    justify-content: flex-start;
+}
+
+.admin-shell .admin-filter-actions .btn {
+    min-height: 36px;
+    padding: 8px 13px !important;
+    white-space: nowrap;
+}
+
+.admin-shell .admin-data-table th:last-child,
+.admin-shell .admin-data-table td:last-child {
+    max-width: 280px;
+    min-width: 280px;
+    position: sticky;
+    right: 0;
+    width: 280px;
+    z-index: 2;
+}
+
+.admin-shell .admin-data-table th:last-child {
+    background: #191324 !important;
+    box-shadow: -12px 0 24px rgba(5, 4, 10, .42);
+    z-index: 4;
+}
+
+.admin-shell .admin-data-table td:last-child {
+    background: #130f1d !important;
+    box-shadow: -12px 0 24px rgba(5, 4, 10, .34);
+}
+
+.admin-shell .admin-row-actions {
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+.admin-shell .admin-row-actions form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.admin-shell .admin-row-actions .btn {
+    border-radius: 9px !important;
+    font-size: 13px !important;
+    letter-spacing: 0;
+    min-height: 34px;
+    padding: 7px 10px !important;
+    white-space: nowrap;
+}
+
+@media (max-width: 991px) {
+    .admin-shell .admin-mobile-toggle {
+        display: inline-flex !important;
+    }
+
+    .admin-shell .admin-topbar-actions {
+        justify-content: flex-start;
+        width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    .admin-shell .admin-filter-actions {
+        flex-wrap: wrap;
+    }
+}

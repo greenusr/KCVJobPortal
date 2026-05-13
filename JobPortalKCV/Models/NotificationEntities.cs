@@ -1,0 +1,4 @@
+﻿namespace JobPortalKCV.Models
+{
+}
+

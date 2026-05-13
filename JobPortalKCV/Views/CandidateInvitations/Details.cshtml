@@ -1,0 +1,45 @@
+@model JobPortalKCV.Models.ViewModel.CandidateInvitationListItemViewModel
+
+@{
+    ViewBag.Title = "Invitation Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = Request.QueryString["returnUrl"];
+    var backUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Sent", "CandidateInvitations");
+}
+
+<div class="container pt-120 pb-120">
+    <div class="section-tittle mb-35">
+        <span>Employer tools</span>
+        <h2>Invitation Details</h2>
+    </div>
+
+    <div class="post-details3">
+        <div class="mb-20">
+            <img src="@Model.CandidateAvatarPath" alt="@Model.CandidateName" style="width:72px;height:72px;object-fit:cover;border-radius:50%;margin-right:12px;" />
+            <strong>@Model.CandidateName</strong>
+            <br />
+            <span>@Model.CandidateEmail</span>
+        </div>
+
+        <ul>
+            <li>Job <span>@Model.JobTitle</span></li>
+            <li>Company <span>@Model.CompanyName</span></li>
+            <li>Status <span>@Model.Status</span></li>
+            <li>Created date <span>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span></li>
+            <li>Responded date <span>@(Model.RespondedAt.HasValue ? Model.RespondedAt.Value.ToString("dd/MM/yyyy HH:mm") : "")</span></li>
+        </ul>
+
+        <div class="mt-20">
+            <strong>Message</strong>
+            <p style="white-space:pre-wrap;">@Model.Message</p>
+        </div>
+
+        <div class="mt-20">
+            @Html.ActionLink("View Candidate", "View", "Profile", new { id = Model.CandidateId, returnUrl = Request.RawUrl }, new { @class = "btn btn-default" })
+            @Html.ActionLink("View Job", "Details", "Jobs", new { id = Model.JobId, returnUrl = Request.RawUrl }, new { @class = "btn btn-default" })
+            <a href="@backUrl" class="btn btn-default">Back to Sent Invitations</a>
+        </div>
+    </div>
+</div>

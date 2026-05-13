@@ -1,0 +1,216 @@
+@model JobPortalKCV.Models.ViewModel.JobDetailViewModel
+@using System.Linq
+@using JobPortalKCV.Helpers
+
+@{
+    ViewBag.Title = Model.job_title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var logoUrl = String.IsNullOrWhiteSpace(Model.logo_path) ? "/img/icon/job-list1.png" : Model.logo_path;
+    Func<string, string> T = key => UiText.T(key);
+    var postedText = Model.posted_date.HasValue ? Model.posted_date.Value.ToString("dd/MM/yyyy") : T("Jobs.NotPosted");
+    var deadlineText = Model.application_deadline.HasValue ? Model.application_deadline.Value.ToString("dd/MM/yyyy") : T("Jobs.NotSet");
+    var websiteUrl = Model.website;
+    var canManageThisJob = AuthRoleHelper.CanManageCompany(User.Identity.Name, Model.company_id);
+    var isCandidate = AuthRoleHelper.IsCandidate(User.Identity.Name);
+    var returnUrl = Request.QueryString["returnUrl"];
+    var backToJobsUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Index", "Jobs");
+
+    if (!String.IsNullOrWhiteSpace(websiteUrl) && !websiteUrl.StartsWith("http://") && !websiteUrl.StartsWith("https://"))
+    {
+        websiteUrl = "https://" + websiteUrl;
+    }
+}
+
+<div class="job-post-company pt-120 pb-120">
+    <div class="container">
+        <div class="row justify-content-between">
+            <div class="col-xl-7 col-lg-8">
+                <div class="single-job-items mb-50">
+                    <div class="job-items">
+                        <div class="company-img company-img-details">
+                            <img src="@logoUrl" alt="@Model.company_name" />
+                        </div>
+                        <div class="job-tittle">
+                            <h4>@Model.job_title</h4>
+                            <ul>
+                                <li>@Html.ActionLink(Model.company_name, "Details", "Companies", new { id = Model.company_id, returnUrl = Request.RawUrl }, null)</li>
+                                <li><i class="fas fa-map-marker-alt"></i>@Model.location_name</li>
+                                <li>@Model.salary_range</li>
+                            </ul>
+
+                            @if (Model.categories != null && Model.categories.Any())
+                            {
+                                <div class="mt-15">
+                                    @foreach (var category in Model.categories)
+                                    {
+                                        <span class="badge badge-success mr-10">@category</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="job-post-details">
+                    <div class="small-section-tittle">
+                        <h4>@T("Jobs.Description")</h4>
+                    </div>
+
+                    @if (String.IsNullOrWhiteSpace(Model.job_description))
+                    {
+                        <p>@T("Jobs.NoDescription")</p>
+                    }
+                    else
+                    {
+                        <p>@Html.Raw(System.Web.HttpUtility.HtmlEncode(Model.job_description).Replace("\n", "<br />"))</p>
+                    }
+                </div>
+
+                <div class="post-details2 mt-50">
+                    <div class="small-section-tittle">
+                        <h4>@T("Jobs.RequiredSkills")</h4>
+                    </div>
+
+                    @if (Model.skills != null && Model.skills.Any())
+                    {
+                        <ul>
+                            @foreach (var skill in Model.skills)
+                            {
+                                <li>@skill</li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>@T("Jobs.NoSkills")</p>
+                    }
+                </div>
+            </div>
+
+            <div class="col-xl-4 col-lg-4">
+                <div class="post-details3 mb-50">
+                    @if (TempData["JobMessage"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["JobMessage"]</div>
+                    }
+                    @if (TempData["JobError"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["JobError"]</div>
+                    }
+                    <div class="small-section-tittle">
+                        <h4>@T("Jobs.Overview")</h4>
+                    </div>
+                    <ul>
+                        <li>@T("Jobs.PostedDate") <span>@postedText</span></li>
+                        <li>@T("Jobs.Location") <span>@Model.location_name</span></li>
+                        <li>@T("Jobs.JobNature") <span>@Model.employment_type</span></li>
+                        <li>@T("Jobs.Salary") <span>@Model.salary_range</span></li>
+                        <li>@T("Jobs.Deadline") <span>@deadlineText</span></li>
+                        <li>
+                            @T("Jobs.Stars") <span>@Model.star_count</span>
+                        </li>
+                    </ul>
+                    @if (Model.can_view_starred_by)
+                    {
+                        <div class="mb-20">
+                            @Html.ActionLink(T("Jobs.ViewStarers"), "StarredBy", "Stars", new { targetId = Model.job_id, targetType = "Job" }, null)
+                        </div>
+                    }
+                    @using (Html.BeginForm("Toggle", "Stars", FormMethod.Post, new { @class = "detail-action-form mb-20" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="targetId" value="@Model.job_id" />
+                        <input type="hidden" name="targetType" value="Job" />
+                        <input type="hidden" name="returnUrl" value="@Request.RawUrl" />
+                        <button type="submit" class="star-toggle-button @(Model.is_starred_by_current_user ? "is-starred" : "")" aria-label="@(Model.is_starred_by_current_user ? T("Jobs.UnstarJob") : T("Jobs.StarJob"))" title="@(Model.is_starred_by_current_user ? T("Jobs.Unstar") : T("Jobs.Star"))">
+                            <i class="@(Model.is_starred_by_current_user ? "fas" : "far") fa-star"></i>
+                        </button>
+                    }
+                    <div class="apply-btn2">
+                        @if (!Request.IsAuthenticated)
+                        {
+                            @Html.ActionLink(T("Jobs.LoginToApply"), "Login", "Account", new { returnUrl = Request.RawUrl }, new { @class = "btn" })
+                        }
+                        else if (isCandidate)
+                        {
+                            using (Html.BeginForm("Apply", "Jobs", new { id = Model.job_id }, FormMethod.Post))
+                            {
+                                @Html.AntiForgeryToken()
+                                <div class="form-group">
+                                    <label>@T("Jobs.SelectCv")</label>
+                                    @{
+                                        var cvOptions = ViewBag.UserCVs as SelectList;
+                                        var addCvUrl = Url.Action("Index", "UserCVs");
+                                    }
+                                    <select name="cvId" id="cvId" class="form-control" data-select-action-value="__add_cv" data-select-action-url="@addCvUrl" data-select-action-label="+ @T("Button.UploadNewCV")">
+                                        <option value="">@T("Jobs.UseDefaultCv")</option>
+                                        @if (cvOptions != null)
+                                        {
+                                            foreach (var option in cvOptions)
+                                            {
+                                                <option value="@option.Value" @(option.Selected ? "selected" : "")>@option.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>@T("Jobs.CoverLetter")</label>
+                                    <textarea name="coverLetter" class="form-control" rows="5"></textarea>
+                                </div>
+                                <div class="mb-20">
+                                    @Html.ActionLink(T("Jobs.ManageCvs"), "Index", "UserCVs")
+                                </div>
+                                <button type="submit" class="btn">@T("Jobs.ApplyNow")</button>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">@T("Jobs.CandidateOnly")</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="post-details4 mb-50">
+                    <div class="small-section-tittle">
+                        <h4>@T("Jobs.CompanyInformation")</h4>
+                    </div>
+                    <span>@Html.ActionLink(Model.company_name, "Details", "Companies", new { id = Model.company_id, returnUrl = Request.RawUrl }, null)</span>
+                    <p>@Model.industry</p>
+                    <ul>
+                        <li>@T("Jobs.Name"): <span>@Html.ActionLink(Model.company_name, "Details", "Companies", new { id = Model.company_id, returnUrl = Request.RawUrl }, null)</span></li>
+                        @if (!String.IsNullOrWhiteSpace(Model.website))
+                        {
+                            <li>@T("Jobs.Web"): <span><a href="@websiteUrl" target="_blank" rel="noopener">@Model.website</a></span></li>
+                        }
+                        @if (!String.IsNullOrWhiteSpace(Model.contact_email))
+                        {
+                            <li>@T("Jobs.Email"): <span><a href="mailto:@Model.contact_email">@Model.contact_email</a></span></li>
+                        }
+                    </ul>
+                </div>
+
+                @if (canManageThisJob)
+                {
+                    <div class="post-details4 mb-50">
+                        <div class="detail-action-row">
+                            @Html.ActionLink(T("Jobs.EditJob"), "Edit", new { id = Model.job_id, returnUrl = Request.RawUrl }, new { @class = "btn btn-primary" })
+                            @Html.ActionLink(T("Button.Delete"), "Delete", new { id = Model.job_id, returnUrl = Request.RawUrl }, new { @class = "btn btn-default" })
+                            <a href="@backToJobsUrl" class="btn btn-default">@T("Jobs.BackToJobs")</a>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="post-details4 mb-50">
+                        <div class="detail-action-row">
+                            <a href="@backToJobsUrl" class="btn btn-default">@T("Jobs.BackToJobs")</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

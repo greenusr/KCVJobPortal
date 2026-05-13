@@ -1,0 +1,39 @@
+@model JobPortalKCV.Models.ViewModel.CandidateApplicationInterviewViewModel
+
+@{
+    ViewBag.Title = "Interview Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var returnUrl = Request.QueryString["returnUrl"];
+    var backUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Index", "CandidateApplications");
+}
+
+<div class="container pt-120 pb-120">
+    <div class="section-tittle mb-35">
+        <span>Candidate</span>
+        <h2>Interview Details</h2>
+    </div>
+
+    <div class="post-details3">
+        <ul>
+            <li>Job <span>@Model.JobTitle</span></li>
+            <li>Company <span>@Model.CompanyName</span></li>
+            <li>Interview date <span>@Model.InterviewDate.ToString("dd/MM/yyyy HH:mm")</span></li>
+            <li>Location <span>@Model.Location</span></li>
+            <li>Contact name <span>@Model.ContactName</span></li>
+            <li>Contact email <span><a href="mailto:@Model.ContactEmail">@Model.ContactEmail</a></span></li>
+            <li>Contact phone <span>@Model.ContactPhone</span></li>
+        </ul>
+
+        @if (!String.IsNullOrWhiteSpace(Model.AdditionalInfo))
+        {
+            <div class="mt-20">
+                <strong>Additional info</strong>
+                <p style="white-space:pre-wrap;">@Model.AdditionalInfo</p>
+            </div>
+        }
+
+        <a href="@backUrl" class="btn btn-default">Back to My Applications</a>
+    </div>
+</div>

@@ -1,0 +1,45 @@
+@model JobPortalKCV.Models.ViewModel.ProfileViewModel
+
+@{
+    ViewBag.Title = "Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var avatarPath = String.IsNullOrWhiteSpace(Model.AvatarPath) ? "/img/blog/author.png" : Model.AvatarPath;
+}
+
+<div class="container pt-120 pb-120">
+    <div class="section-tittle mb-35">
+        <span>Account</span>
+        <h2>Profile</h2>
+    </div>
+
+    @if (TempData["ProfileMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["ProfileMessage"]</div>
+    }
+    @if (TempData["ProfileError"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ProfileError"]</div>
+    }
+
+    <div class="row">
+        <div class="col-md-4">
+            <img src="@avatarPath" alt="@Model.Username" style="width:140px;height:140px;object-fit:cover;border-radius:50%;" />
+        </div>
+        <div class="col-md-8">
+            <p><strong>Username:</strong> @Model.Username</p>
+            <p><strong>Email:</strong> @Model.Email</p>
+            <p><strong>Name:</strong> @Model.FirstName @Model.LastName</p>
+
+            @using (Html.BeginForm("UploadAvatar", "Account", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <label>Avatar</label>
+                    <input type="file" name="avatar" class="form-control" accept="image/*" />
+                    <small>JPG, PNG, GIF or WEBP. Max 20MB.</small>
+                </div>
+                <button type="submit" class="btn">Upload avatar</button>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,77 @@
+@model IEnumerable<JobPortalKCV.Models.ViewModel.CandidateInvitationListItemViewModel>
+@using System.Linq
+
+@{
+    ViewBag.Title = "Invitations";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-shell">
+    <div class="container">
+    <div class="section-tittle mb-35">
+        <span>Candidate</span>
+        <h2>Invitations</h2>
+    </div>
+
+    @if (TempData["InvitationMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["InvitationMessage"]</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="ui-empty">No records found.</div>
+    }
+    else
+    {
+        <div class="ui-card">
+        <div class="ui-table-wrap">
+        <table class="table ui-table">
+            <tr>
+                <th>Job</th>
+                <th>Company</th>
+                <th>Employer</th>
+                <th>Message</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th></th>
+            </tr>
+            @foreach (var invitation in Model)
+            {
+                <tr>
+                    <td>@Html.ActionLink(invitation.JobTitle, "Details", "Jobs", new { id = invitation.JobId, returnUrl = Request.RawUrl }, null)</td>
+                    <td>@invitation.CompanyName</td>
+                    <td>@invitation.EmployerName<br /><small>@invitation.EmployerEmail</small></td>
+                    <td style="max-width:300px;white-space:pre-wrap;">@invitation.Message</td>
+                    <td><span class="ui-badge @(invitation.Status == "Accepted" ? "ui-badge-success" : (invitation.Status == "Declined" ? "ui-badge-danger" : "ui-badge-warning"))">@invitation.Status</span></td>
+                    <td>@invitation.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td><div class="ui-toolbar">
+                        @if (invitation.Status == "Pending")
+                        {
+                            using (Html.BeginForm("Accept", "CandidateInvitations", new { id = invitation.InvitationId, returnUrl = Request.RawUrl }, FormMethod.Post, new { @class = "d-inline" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-primary mb-10">Accept</button>
+                            }
+
+                            using (Html.BeginForm("Decline", "CandidateInvitations", new { id = invitation.InvitationId, returnUrl = Request.RawUrl }, FormMethod.Post, new { @class = "d-inline" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-default mb-10">Decline</button>
+                            }
+                        }
+                        else if (invitation.RespondedAt.HasValue)
+                        {
+                            <span>@invitation.RespondedAt.Value.ToString("dd/MM/yyyy HH:mm")</span>
+                        }
+                    </div></td>
+                </tr>
+            }
+        </table>
+        </div>
+        </div>
+    }
+
+    @Html.Partial("_Pagination", (JobPortalKCV.Models.ViewModel.PaginationViewModel)ViewBag.Pagination)
+    </div>
+</div>

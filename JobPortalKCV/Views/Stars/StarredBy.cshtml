@@ -1,0 +1,39 @@
+@model JobPortalKCV.Models.ViewModel.StarredByViewModel
+@using System.Linq
+
+@{
+    ViewBag.Title = "Starred By";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container pt-120 pb-120">
+    <div class="section-tittle mb-35">
+        <span>@Model.TargetType</span>
+        <h2>Starred By: @Model.TargetName</h2>
+    </div>
+
+    @if (Model.Users.Any())
+    {
+        <table class="table">
+            <tr>
+                <th>User</th>
+                <th>Email</th>
+                <th>Date</th>
+            </tr>
+            @foreach (var user in Model.Users)
+            {
+                <tr>
+                    <td>@Html.ActionLink(String.IsNullOrWhiteSpace(user.DisplayName) ? user.Email : user.DisplayName, "View", "Profile", new { id = user.UserId, returnUrl = Request.RawUrl }, null)</td>
+                    <td>@user.Email</td>
+                    <td>@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+            }
+        </table>
+    }
+    else
+    {
+        <p>No stars yet.</p>
+    }
+
+    @Html.Partial("_Pagination", (JobPortalKCV.Models.ViewModel.PaginationViewModel)ViewBag.Pagination)
+</div>

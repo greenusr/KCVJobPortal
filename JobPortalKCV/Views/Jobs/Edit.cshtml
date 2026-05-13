@@ -1,0 +1,128 @@
+@model JobPortalKCV.Models.Job
+@using System.Collections.Generic
+@using System.Linq
+@using System.Web.Mvc
+@using JobPortalKCV.Helpers
+
+@{
+    ViewBag.Title = "Edit Job";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Func<string, string> T = key => UiText.T(key);
+    var returnUrl = Request.QueryString["returnUrl"] ?? Request.Form["returnUrl"];
+    var backUrl = !String.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
+        ? returnUrl
+        : Url.Action("Index", "Jobs");
+    var companyOptions = ViewBag.company_id as IEnumerable<SelectListItem>;
+    var skillOptions = ViewBag.SkillOptions as IEnumerable<SelectListItem>;
+    var addCompanyUrl = Url.Action("Create", "Companies", new { returnUrl = Request.RawUrl });
+}
+
+<div class="page-shell">
+    <div class="container">
+    <div class="section-tittle mb-35">
+        <span>Employer tools</span>
+        <h2>Edit Job</h2>
+    </div>
+
+    @using (Html.BeginForm("Edit", "Jobs", new { id = Model.job_id, returnUrl = returnUrl }, FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+        <div class="ui-card">
+            @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+            <div class="ui-form-grid">
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.job_title, "Job title")
+                    @Html.EditorFor(model => model.job_title, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.job_title, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.company_id, "Company")
+                    <select name="company_id" id="company_id" class="form-control" data-select-action-value="__add_company" data-select-action-url="@addCompanyUrl" data-select-action-label="+ @T("Button.AddNewCompany")">
+                        <option value="">-- Select company --</option>
+                        @if (companyOptions != null)
+                        {
+                            foreach (var option in companyOptions)
+                            {
+                                <option value="@option.Value" @(option.Selected ? "selected" : "")>@option.Text</option>
+                            }
+                        }
+                    </select>
+                    @Html.ValidationMessageFor(model => model.company_id, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.location_id, "Location")
+                    @Html.DropDownList("location_id", null, "-- Select location --", htmlAttributes: new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.location_id, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.employment_type_id, "Employment type")
+                    @Html.DropDownList("employment_type_id", null, "-- Select type --", htmlAttributes: new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.employment_type_id, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group form-group-full">
+                <label>Required skills</label>
+                <div class="job-skill-picker">
+                    @if (skillOptions != null && skillOptions.Any())
+                    {
+                        foreach (var skill in skillOptions)
+                        {
+                            <label class="job-skill-option">
+                                <input type="checkbox" name="skillIds" value="@skill.Value" @(skill.Selected ? "checked" : "") />
+                                <span>@skill.Text</span>
+                            </label>
+                        }
+                    }
+                    else
+                    {
+                        <p class="ui-subtle">No skills have been created yet.</p>
+                    }
+                </div>
+                <label class="mt-20">Add new skills</label>
+                <textarea name="newSkills" class="form-control" rows="2" placeholder="Example: ASP.NET MVC, SQL Server, Communication">@ViewBag.NewSkills</textarea>
+                <small class="ui-subtle">Separate skills with commas or new lines.</small>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.salary_range, "Salary range")
+                    @Html.EditorFor(model => model.salary_range, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.salary_range, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.posted_date, "Posted date")
+                    @Html.TextBoxFor(model => model.posted_date, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                    @Html.ValidationMessageFor(model => model.posted_date, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.application_deadline, "Application deadline")
+                    @Html.TextBoxFor(model => model.application_deadline, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+                    @Html.ValidationMessageFor(model => model.application_deadline, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group form-group-full">
+                @Html.LabelFor(model => model.job_description, "Description")
+                    @Html.TextAreaFor(model => model.job_description, new { @class = "form-control", rows = 8 })
+                    @Html.ValidationMessageFor(model => model.job_description, "", new { @class = "text-danger" })
+            </div>
+            </div>
+
+            <div class="ui-toolbar mt-30">
+                    <input type="submit" value="Save Changes" class="btn" />
+                    <a href="@backUrl" class="btn btn-default">Back to list</a>
+            </div>
+        </div>
+    }
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

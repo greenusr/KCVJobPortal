@@ -1,0 +1,33 @@
+@model JobPortalKCV.Models.ViewModel.TransferCompanyOwnerViewModel
+
+@{
+    ViewBag.Title = "Transfer Owner";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container pt-120 pb-120">
+    <div class="section-tittle mb-35">
+        <span>@Model.CompanyName</span>
+        <h2>Transfer Owner</h2>
+    </div>
+
+    @using (Html.BeginForm("TransferOwner", "Companies", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(model => model.CompanyId)
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.NewOwnerUserId)
+            @Html.DropDownListFor(
+                model => model.NewOwnerUserId,
+                new SelectList(Model.Members, "UserId", "DisplayName"),
+                "-- Select member --",
+                new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.NewOwnerUserId, "", new { @class = "text-danger" })
+        </div>
+
+        <button type="submit" class="btn">Transfer</button>
+        @Html.ActionLink("Back", "Details", new { id = Model.CompanyId }, new { @class = "btn btn-default" })
+    }
+</div>
