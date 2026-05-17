@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Web.Mvc;
 using JobPortalKCV.Helpers;
 using JobPortalKCV.Models;
@@ -54,13 +53,15 @@ namespace JobPortalKCV.Controllers
                 return RedirectToAction("Index", new { tab = "security" });
             }
 
-            if (!VerifyPassword(model.CurrentPassword, user.password_hash))
+            var passwordResult = PasswordHashService.VerifyPassword(model.CurrentPassword, user.password_hash);
+
+            if (!passwordResult.Success)
             {
                 TempData["AccountSettingsError"] = "Current password is incorrect.";
                 return RedirectToAction("Index", new { tab = "security" });
             }
 
-            user.password_hash = HashPassword(model.NewPassword);
+            user.password_hash = PasswordHashService.HashPassword(model.NewPassword);
             AccountLogService.LogActivity(data, user.user_id, "ChangePassword", "Password changed successfully.", Request);
             data.SubmitChanges();
 
@@ -415,49 +416,5 @@ namespace JobPortalKCV.Controllers
             return data.Users.FirstOrDefault(user => user.username == User.Identity.Name);
         }
 
-        private string HashPassword(string password)
-        {
-            var salt = new byte[16];
-
-            using (var rng = RandomNumberGenerator.Create())
-                rng.GetBytes(salt);
-
-            using (var deriveBytes = new Rfc2898DeriveBytes(password, salt, 10000))
-            {
-                var hash = deriveBytes.GetBytes(32);
-                return "PBKDF2$10000$" + Convert.ToBase64String(salt) + "$" + Convert.ToBase64String(hash);
-            }
-        }
-
-        private bool VerifyPassword(string password, string storedHash)
-        {
-            if (String.IsNullOrWhiteSpace(storedHash))
-                return false;
-
-            var parts = storedHash.Split('$');
-
-            if (parts.Length != 4 || parts[0] != "PBKDF2")
-                return password == storedHash;
-
-            var iterations = Int32.Parse(parts[1]);
-            var salt = Convert.FromBase64String(parts[2]);
-            var expectedHash = Convert.FromBase64String(parts[3]);
-
-            using (var deriveBytes = new Rfc2898DeriveBytes(password, salt, iterations))
-            {
-                var actualHash = deriveBytes.GetBytes(expectedHash.Length);
-                return SlowEquals(actualHash, expectedHash);
-            }
-        }
-
-        private bool SlowEquals(byte[] a, byte[] b)
-        {
-            var diff = (uint)a.Length ^ (uint)b.Length;
-
-            for (var i = 0; i < a.Length && i < b.Length; i++)
-                diff |= (uint)(a[i] ^ b[i]);
-
-            return diff == 0;
-        }
     }
 }

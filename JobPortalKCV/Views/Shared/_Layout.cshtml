@@ -233,7 +233,7 @@
                                                 else if (isEmployer)
                                                 {
                                                     <li class="mobile-nav-only">@Html.ActionLink(T("Nav.MyProfile"), "Me", "Profile")</li>
-                                                    <li class="mobile-nav-only">@Html.ActionLink(T("Nav.ManageJobs"), "Index", "Jobs")</li>
+                                                    <li class="mobile-nav-only">@Html.ActionLink(T("Nav.ManageJobs"), "Index", "Jobs", new { managed = true }, null)</li>
                                                     <li class="mobile-nav-only">@Html.ActionLink(T("Nav.Applications"), "Index", "Applications")</li>
                                                     <li class="mobile-nav-only">@Html.ActionLink(T("Nav.CompanySettings"), "Index", "CompanySettings")</li>
                                                 }
@@ -291,7 +291,7 @@
                                                 else if (isEmployer)
                                                 {
                                                     <li>@Html.ActionLink(T("Nav.MyProfile"), "Me", "Profile")</li>
-                                                    <li>@Html.ActionLink(T("Nav.ManageJobs"), "Index", "Jobs")</li>
+                                                    <li>@Html.ActionLink(T("Nav.ManageJobs"), "Index", "Jobs", new { managed = true }, null)</li>
                                                     <li>@Html.ActionLink(T("Nav.Applications"), "Index", "Applications")</li>
                                                     <li>@Html.ActionLink(T("Nav.SentInvitations"), "Sent", "CandidateInvitations")</li>
                                                     <li>@Html.ActionLink(T("Nav.SavedCandidates"), "Saved", "Stars")</li>

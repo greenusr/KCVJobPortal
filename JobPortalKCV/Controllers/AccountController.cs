@@ -1,13 +1,12 @@
 using System;
-using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Net.Mail;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
+using JobPortalKCV.Helpers;
 using JobPortalKCV.Models;
 using JobPortalKCV.Models.ViewModel;
 using JobPortalKCV.Services;
@@ -36,7 +35,11 @@ namespace JobPortalKCV.Controllers
             var account = model.UserNameOrEmail.Trim();
             var user = data.Users.FirstOrDefault(u => u.email == account || u.username == account);
 
-            if (user == null || !VerifyPassword(model.Password, user.password_hash))
+            var passwordResult = user == null
+                ? new PasswordVerificationResult()
+                : PasswordHashService.VerifyPassword(model.Password, user.password_hash);
+
+            if (user == null || !passwordResult.Success)
             {
                 AccountLogService.LogLogin(data, user == null ? (int?)null : user.user_id, false, "Invalid username/email or password.", Request);
                 data.SubmitChanges();
@@ -74,6 +77,10 @@ namespace JobPortalKCV.Controllers
             }
 
             FormsAuthentication.SetAuthCookie(user.username, model.RememberMe);
+
+            if (passwordResult.NeedsRehash)
+                user.password_hash = PasswordHashService.HashPassword(model.Password);
+
             AccountLogService.LogLogin(data, user.user_id, true, null, Request);
             AccountLogService.LogActivity(data, user.user_id, "Login", "User logged in.", Request);
             data.SubmitChanges();
@@ -311,7 +318,7 @@ namespace JobPortalKCV.Controllers
                 return View(model);
             }
 
-            user.password_hash = HashPassword(model.Password);
+            user.password_hash = PasswordHashService.HashPassword(model.Password);
             data.SubmitChanges();
 
             TempData["AuthMessage"] = "Your password has been reset. Please sign in.";
@@ -407,7 +414,7 @@ namespace JobPortalKCV.Controllers
             {
                 username = model.Username.Trim(),
                 email = model.Email.Trim(),
-                password_hash = HashPassword(model.Password),
+                password_hash = PasswordHashService.HashPassword(model.Password),
                 is_active = true
             };
         }
@@ -585,69 +592,9 @@ namespace JobPortalKCV.Controllers
             }
         }
 
-        private string HashPassword(string password)
-        {
-            var salt = new byte[16];
-
-            using (var rng = RandomNumberGenerator.Create())
-                rng.GetBytes(salt);
-
-            using (var deriveBytes = new Rfc2898DeriveBytes(password, salt, 10000))
-            {
-                var hash = deriveBytes.GetBytes(32);
-                return "PBKDF2$10000$" + Convert.ToBase64String(salt) + "$" + Convert.ToBase64String(hash);
-            }
-        }
-
-        private bool VerifyPassword(string password, string storedHash)
-        {
-            if (String.IsNullOrWhiteSpace(storedHash))
-                return false;
-
-            var parts = storedHash.Split('$');
-
-            if (parts.Length != 4 || parts[0] != "PBKDF2")
-                return password == storedHash;
-
-            var iterations = Int32.Parse(parts[1]);
-            var salt = Convert.FromBase64String(parts[2]);
-            var expectedHash = Convert.FromBase64String(parts[3]);
-
-            using (var deriveBytes = new Rfc2898DeriveBytes(password, salt, iterations))
-            {
-                var actualHash = deriveBytes.GetBytes(expectedHash.Length);
-                return SlowEquals(actualHash, expectedHash);
-            }
-        }
-
-        private bool SlowEquals(byte[] a, byte[] b)
-        {
-            var diff = (uint)a.Length ^ (uint)b.Length;
-
-            for (var i = 0; i < a.Length && i < b.Length; i++)
-                diff |= (uint)(a[i] ^ b[i]);
-
-            return diff == 0;
-        }
-
         private void SendEmail(string to, string subject, string body)
         {
-            using (var message = new MailMessage())
-            {
-                message.To.Add(to);
-                message.Subject = subject;
-                message.Body = body;
-                message.SubjectEncoding = Encoding.UTF8;
-                message.BodyEncoding = Encoding.UTF8;
-                message.HeadersEncoding = Encoding.UTF8;
-                message.From = new MailAddress(
-                    ConfigurationManager.AppSettings["MailFrom"] ?? "noreply@jobportalkcv.local",
-                    ConfigurationManager.AppSettings["MailFromDisplayName"] ?? "KCV Job Portal",
-                    Encoding.UTF8);
-
-                using (var client = new SmtpClient())
-                    client.Send(message);
-            }
+            EmailHelper.Send(to, subject, body);
         }
 
         private string BuildOtpEmail(User user, string otp, string purpose)

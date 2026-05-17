@@ -15,10 +15,20 @@ namespace JobPortalKCV.Controllers
         JobPortalDataContext data = new JobPortalDataContext();
 
         // GET: Jobs
-        public ActionResult Index(string keyword, int? locationId, int? categoryId, int? skillId, string sort = "newest", int page = 1)
+        public ActionResult Index(string keyword, int? locationId, int? categoryId, int? skillId, string sort = "newest", int page = 1, bool managed = false)
         {
             SystemSettingsService.AutoCloseExpiredJobs(data);
             var currentUser = GetCurrentUser();
+            var isAdmin = AuthRoleHelper.IsAdmin(User.Identity.Name);
+            var isEmployer = AuthRoleHelper.IsEmployer(User.Identity.Name);
+            var canManageJobs = isAdmin || isEmployer;
+            var currentUserCompanyIds = currentUser == null
+                ? new List<int>()
+                : data.CompanyUsers
+                    .Where(companyUser => companyUser.user_id == currentUser.user_id)
+                    .Select(companyUser => companyUser.company_id)
+                    .ToList();
+
             var query = from j in data.Jobs
                         join c in data.Companies on j.company_id equals c.company_id
                         join l in data.Locations on j.location_id equals l.location_id
@@ -31,8 +41,23 @@ namespace JobPortalKCV.Controllers
                             EmploymentType = t
                         };
 
-            if (!AuthRoleHelper.CanManageJobs(User.Identity.Name))
+            if (!canManageJobs)
                 query = query.Where(x => x.Job.is_active);
+
+            if (managed && isEmployer && !isAdmin)
+            {
+                query = currentUserCompanyIds.Any()
+                    ? query.Where(x => x.Job.company_id.HasValue && currentUserCompanyIds.Contains(x.Job.company_id.Value))
+                    : query.Where(x => false);
+            }
+            else if (!isAdmin)
+            {
+                query = currentUserCompanyIds.Any()
+                    ? query.Where(x =>
+                        x.Company.show_jobs_publicly ||
+                        (x.Job.company_id.HasValue && currentUserCompanyIds.Contains(x.Job.company_id.Value)))
+                    : query.Where(x => x.Company.show_jobs_publicly);
+            }
 
             if (!String.IsNullOrWhiteSpace(keyword))
             {
@@ -62,17 +87,58 @@ namespace JobPortalKCV.Controllers
                     jobSkill.skill_id == skillId.Value));
             }
 
+            var oldestPostedDate = new DateTime(1900, 1, 1);
+
+            switch ((sort ?? "newest").ToLower())
+            {
+                case "oldest":
+                    query = query.OrderBy(x => x.Job.posted_date ?? oldestPostedDate);
+                    break;
+                case "star_desc":
+                    query = query
+                        .OrderByDescending(x => data.Stars.Count(star => star.target_type == "Job" && star.target_id == x.Job.job_id))
+                        .ThenByDescending(x => x.Job.posted_date ?? oldestPostedDate);
+                    break;
+                case "star_asc":
+                    query = query
+                        .OrderBy(x => data.Stars.Count(star => star.target_type == "Job" && star.target_id == x.Job.job_id))
+                        .ThenByDescending(x => x.Job.posted_date ?? oldestPostedDate);
+                    break;
+                default:
+                    query = query.OrderByDescending(x => x.Job.posted_date ?? oldestPostedDate);
+                    break;
+            }
+
+            var pageSize = SystemSettingsService.GetPaginationSize(data);
+            var totalRecords = query.Count();
+            var totalPages = Math.Max(1, (int)Math.Ceiling(totalRecords / (double)pageSize));
+            page = Math.Max(1, Math.Min(page, totalPages));
+
             var jobRows = query
-                .ToList()
-                .Where(x => CanViewCompanyJobs(x.Company))
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToList();
 
-            var starredJobIds = currentUser == null
+            var pageJobIds = jobRows.Select(x => x.Job.job_id).ToList();
+
+            var starredJobIds = currentUser == null || !pageJobIds.Any()
                 ? new List<int>()
                 : data.Stars
-                    .Where(star => star.user_id == currentUser.user_id && star.target_type == "Job")
+                    .Where(star => star.user_id == currentUser.user_id && star.target_type == "Job" && pageJobIds.Contains(star.target_id))
                     .Select(star => star.target_id)
                     .ToList();
+
+            var starredJobIdSet = new HashSet<int>(starredJobIds);
+
+            var starCounts = !pageJobIds.Any()
+                ? new Dictionary<int, int>()
+                : data.Stars
+                    .Where(star => star.target_type == "Job" && pageJobIds.Contains(star.target_id))
+                    .GroupBy(star => star.target_id)
+                    .Select(group => new { JobId = group.Key, Count = group.Count() })
+                    .ToDictionary(item => item.JobId, item => item.Count);
+
+            var defaultCompanyLogoPath = SystemSettingsService.GetCompanyLogoOrDefault(data, null);
 
             var jobs = jobRows
                 .Select(x => new JobViewModel
@@ -87,32 +153,34 @@ namespace JobPortalKCV.Controllers
                     location_id = x.Job.location_id,
 
                     company_name = x.Company.company_name,
-                    logo_path = SystemSettingsService.GetCompanyLogoOrDefault(data, x.Company.logo_path),
+                    logo_path = String.IsNullOrWhiteSpace(x.Company.logo_path) ? defaultCompanyLogoPath : x.Company.logo_path,
                     location_name = x.Location.city,
                     employment_type = x.EmploymentType.type_name,
-                    star_count = data.Stars.Count(star => star.target_type == "Job" && star.target_id == x.Job.job_id),
-                    is_starred_by_current_user = starredJobIds.Contains(x.Job.job_id)
+                    star_count = starCounts.ContainsKey(x.Job.job_id) ? starCounts[x.Job.job_id] : 0,
+                    is_starred_by_current_user = starredJobIdSet.Contains(x.Job.job_id)
                 }).ToList();
 
-            jobs = SortJobs(jobs, sort);
-            jobs = PaginationService.Paginate(
-                jobs,
-                page,
-                SystemSettingsService.GetPaginationSize(data),
-                out PaginationViewModel pagination,
-                "Index",
-                "Jobs",
-                new { keyword, locationId, categoryId, skillId, sort });
+            var pagination = new PaginationViewModel
+            {
+                Page = page,
+                TotalPages = totalPages,
+                TotalRecords = totalRecords,
+                ActionName = "Index",
+                ControllerName = "Jobs",
+                RouteValues = new { keyword, locationId, categoryId, skillId, sort, managed }
+            };
 
             ViewBag.Keyword = keyword;
             ViewBag.LocationId = locationId;
             ViewBag.CategoryId = categoryId;
             ViewBag.SkillId = skillId;
             ViewBag.Sort = sort;
+            ViewBag.Managed = managed;
             ViewBag.TotalRecords = pagination.TotalRecords;
             ViewBag.Pagination = pagination;
             LoadFilterSelectLists(locationId, categoryId, skillId);
-            LogSearchIfNeeded(currentUser, keyword, locationId, categoryId, skillId, sort);
+            if (!managed)
+                LogSearchIfNeeded(currentUser, keyword, locationId, categoryId, skillId, sort);
 
             return View(jobs);
         }
@@ -246,7 +314,7 @@ namespace JobPortalKCV.Controllers
                 SyncJobSkills(job.job_id, ResolveSkillIds(skillIds, newSkills));
                 data.SubmitChanges();
 
-                return RedirectToJobsContext(returnUrl);
+                return RedirectToAction("Details", new { id = job.job_id, returnUrl = returnUrl });
             }
 
             LoadJobSelectLists(job, skillIds);
@@ -303,7 +371,7 @@ namespace JobPortalKCV.Controllers
                 SyncJobSkills(job.job_id, ResolveSkillIds(skillIds, newSkills));
                 data.SubmitChanges();
 
-                return RedirectToJobsContext(returnUrl);
+                return RedirectToAction("Details", new { id = job.job_id, returnUrl = returnUrl });
             }
 
             LoadJobSelectLists(formJob, skillIds);

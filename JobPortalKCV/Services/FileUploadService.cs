@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web;
+using System.Xml;
+using System.Xml.Linq;
 using JobPortalKCV.Models;
 
 namespace JobPortalKCV.Services
@@ -126,6 +128,11 @@ namespace JobPortalKCV.Services
             if (!allowedTypes[extension].Any(type => type.Equals(contentType, StringComparison.OrdinalIgnoreCase)))
                 return Fail(invalidFormatMessage);
 
+            byte[] uploadedBytes = null;
+
+            if (extension == ".svg" && !IsSafeSvg(file, out uploadedBytes))
+                return Fail(invalidFormatMessage);
+
             var folder = server.MapPath(virtualFolder);
             Directory.CreateDirectory(folder);
 
@@ -139,7 +146,14 @@ namespace JobPortalKCV.Services
             }
             while (File.Exists(fullPath));
 
-            file.SaveAs(fullPath);
+            if (uploadedBytes == null)
+            {
+                file.SaveAs(fullPath);
+            }
+            else
+            {
+                File.WriteAllBytes(fullPath, uploadedBytes);
+            }
 
             return new FileUploadResult
             {
@@ -172,6 +186,83 @@ namespace JobPortalKCV.Services
                 .ToDictionary(item => item.Key, item => item.Value);
 
             return filtered.Any() ? filtered : knownTypes;
+        }
+
+        private static bool IsSafeSvg(HttpPostedFileBase file, out byte[] uploadedBytes)
+        {
+            uploadedBytes = null;
+
+            try
+            {
+                using (var memory = new MemoryStream())
+                {
+                    file.InputStream.CopyTo(memory);
+                    uploadedBytes = memory.ToArray();
+                }
+
+                var settings = new XmlReaderSettings
+                {
+                    DtdProcessing = DtdProcessing.Prohibit,
+                    XmlResolver = null,
+                    MaxCharactersFromEntities = 0,
+                    MaxCharactersInDocument = Math.Max(uploadedBytes.Length, 1024)
+                };
+
+                using (var stream = new MemoryStream(uploadedBytes))
+                using (var reader = XmlReader.Create(stream, settings))
+                {
+                    var document = XDocument.Load(reader, LoadOptions.PreserveWhitespace);
+
+                    if (document.Root == null || !IsElement(document.Root, "svg"))
+                        return false;
+
+                    foreach (var element in document.Descendants())
+                    {
+                        if (IsElement(element, "script") ||
+                            IsElement(element, "foreignObject") ||
+                            IsElement(element, "iframe") ||
+                            IsElement(element, "object") ||
+                            IsElement(element, "embed"))
+                            return false;
+
+                        foreach (var attribute in element.Attributes())
+                        {
+                            var name = attribute.Name.LocalName;
+                            var value = (attribute.Value ?? "").Trim();
+                            var lowerValue = value.ToLowerInvariant();
+
+                            if (name.StartsWith("on", StringComparison.OrdinalIgnoreCase))
+                                return false;
+
+                            if (lowerValue.Contains("javascript:") ||
+                                lowerValue.Contains("vbscript:") ||
+                                lowerValue.Contains("data:"))
+                                return false;
+
+                            if (name.Equals("style", StringComparison.OrdinalIgnoreCase) &&
+                                (lowerValue.Contains("url(") ||
+                                 lowerValue.Contains("@import") ||
+                                 lowerValue.Contains("expression(")))
+                                return false;
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (XmlException)
+            {
+                return false;
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+        }
+
+        private static bool IsElement(XElement element, string localName)
+        {
+            return element.Name.LocalName.Equals(localName, StringComparison.OrdinalIgnoreCase);
         }
 
         private static int ToBytes(int megabytes)

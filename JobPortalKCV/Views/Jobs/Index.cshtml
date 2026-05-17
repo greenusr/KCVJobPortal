@@ -7,6 +7,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var jobs = Model ?? Enumerable.Empty<JobPortalKCV.Models.ViewModel.JobViewModel>();
     var canManageJobs = AuthRoleHelper.CanManageJobs(User.Identity.Name);
+    var managed = ViewBag.Managed != null && (bool)ViewBag.Managed;
     var totalRecords = ViewBag.TotalRecords == null ? jobs.Count() : (int)ViewBag.TotalRecords;
     Func<string, string> T = key => UiText.T(key);
 }
@@ -17,7 +18,7 @@
             <div class="col-lg-8">
                 <div class="section-tittle">
                     <span>@T("Jobs.RecentJobs")</span>
-                    <h2>@T("Jobs.FindNext")</h2>
+                    <h2>@(managed ? T("Nav.ManageJobs") : T("Jobs.FindNext"))</h2>
                 </div>
             </div>
             @if (canManageJobs)
@@ -32,6 +33,10 @@
             <div class="col-lg-12">
                 @using (Html.BeginForm("Index", "Jobs", FormMethod.Get, new { @class = "mb-35" }))
                 {
+                    if (managed)
+                    {
+                        <input type="hidden" name="managed" value="true" />
+                    }
                     <div class="row">
                         <div class="col-md-3 form-group">
                             <input type="text" name="keyword" class="form-control" value="@ViewBag.Keyword" placeholder="@T("Jobs.Keyword")" />
