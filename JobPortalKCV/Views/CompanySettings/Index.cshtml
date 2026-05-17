@@ -78,15 +78,20 @@
 
                         <div class="listing-card-actions company-management-actions">
                             @Html.ActionLink("Details", "Details", "Companies", new { id = company.CompanyId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm" })
-                            @Html.ActionLink("Settings", "Settings", "CompanySettings", new { id = company.CompanyId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm head-btn2" })
                             @Html.ActionLink("Jobs", "Index", "Jobs", new { keyword = company.CompanyName, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm" })
                             @if (company.CanOwn)
                             {
+                                @Html.ActionLink("Settings", "Settings", "CompanySettings", new { id = company.CompanyId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm head-btn2" })
                                 @Html.ActionLink("Transfer Owner", "TransferOwner", "Companies", new { id = company.CompanyId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm" })
-                            }
-                            @if (company.CanManage)
-                            {
                                 @Html.ActionLink("Delete", "Delete", "Companies", new { id = company.CompanyId, returnUrl = Request.RawUrl }, new { @class = "btn btn-sm btn-danger-soft" })
+                            }
+                            else if (company.CanLeave)
+                            {
+                                using (Html.BeginForm("Leave", "Companies", new { id = company.CompanyId, returnUrl = Request.RawUrl }, FormMethod.Post, new { @class = "listing-inline-form" }))
+                                {
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-danger-soft" onclick="return confirm('Leave this company?');">Leave company</button>
+                                }
                             }
                         </div>
                     </article>

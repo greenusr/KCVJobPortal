@@ -61,15 +61,28 @@ namespace JobPortalKCV.Controllers
                 "flaticon-content"
             };
 
-            var categories = data.JobCategories
-                .OrderBy(c => c.category_name)
+            var categoryRows = (from category in data.JobCategories
+                                join map in data.JobCategoryMaps on category.category_id equals map.category_id
+                                join job in data.Jobs on map.job_id equals job.job_id
+                                join company in data.Companies on job.company_id equals company.company_id
+                                where job.is_active && company.show_jobs_publicly
+                                group category by new { category.category_id, category.category_name } into categoryGroup
+                                orderby categoryGroup.Count() descending, categoryGroup.Key.category_name
+                                select new
+                                {
+                                    categoryGroup.Key.category_id,
+                                    categoryGroup.Key.category_name,
+                                    job_count = categoryGroup.Count()
+                                })
                 .Take(8)
-                .AsEnumerable()
+                .ToList();
+
+            var categories = categoryRows
                 .Select((category, index) => new HomeCategoryViewModel
                 {
                     category_id = category.category_id,
                     category_name = category.category_name,
-                    job_count = data.JobCategoryMaps.Count(map => map.category_id == category.category_id),
+                    job_count = category.job_count,
                     icon_class = iconClasses[index % iconClasses.Length]
                 }).ToList();
 

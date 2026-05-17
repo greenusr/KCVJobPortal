@@ -8,7 +8,7 @@ namespace JobPortalKCV
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
-            filters.Add(new HandleErrorAttribute());
+            filters.Add(new FriendlyErrorResultFilter());
             filters.Add(new MaintenanceModeFilter());
         }
     }

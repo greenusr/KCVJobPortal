@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Web;
 using System.Web.Mvc;
 using JobPortalKCV.Models;
 using JobPortalKCV.Models.ViewModel;
@@ -283,6 +284,11 @@ namespace JobPortalKCV.Controllers
                 TempData["AdminMessage"] = "Changes saved successfully.";
                 return RedirectToAdminContext(definition.TableName, returnUrl);
             }
+            catch (InvalidOperationException ex)
+            {
+                TempData["AdminError"] = ex.Message;
+                return View("Form", BuildFormModel(definition, null, FormToDictionary(form), true, true));
+            }
             catch
             {
                 TempData["AdminError"] = "Something went wrong. Please try again.";
@@ -331,6 +337,11 @@ namespace JobPortalKCV.Controllers
                 UpdateRecord(definition, key, form);
                 TempData["AdminMessage"] = "Record updated successfully.";
                 return RedirectToAdminContext(definition.TableName, returnUrl);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["AdminError"] = ex.Message;
+                return View("Form", BuildFormModel(definition, key, FormToDictionary(form), false, true));
             }
             catch
             {
@@ -653,6 +664,8 @@ ORDER BY ORDINAL_POSITION", connection))
                         DataType = column.DataType,
                         IsRequired = !column.IsNullable && (isCreate || !definition.KeyColumns.Contains(column.Name)),
                         IsEditable = definition.CanEdit && editable && !definition.ReadOnlyColumns.Contains(column.Name) && (isCreate || !definition.KeyColumns.Contains(column.Name)),
+                        IsImageUpload = IsImagePathField(column.Name),
+                        UploadInputName = GetUploadInputName(column.Name),
                         Options = options
                     };
                 }).ToList()
@@ -848,7 +861,7 @@ ORDER BY a.application_id DESC";
                 {
                     var parameterName = "@p" + i;
                     valueSql.Add(parameterName);
-                    parameters.Add(new SqlParameter(parameterName, ConvertFormValue(form[columns[i].Name], columns[i])));
+                    parameters.Add(new SqlParameter(parameterName, ConvertFormValue(GetPostedValue(definition, columns[i], form), columns[i])));
                 }
 
                 var sql = "INSERT INTO dbo." + Quote(definition.TableName) + " (" + String.Join(", ", insertColumns.Select(Quote)) + ") VALUES (" + String.Join(", ", valueSql) + ")";
@@ -862,7 +875,7 @@ ORDER BY a.application_id DESC";
                 {
                     var parameterName = "@p" + i;
                     setSql.Add(Quote(columns[i].Name) + " = " + parameterName);
-                    parameters.Add(new SqlParameter(parameterName, ConvertFormValue(form[columns[i].Name], columns[i])));
+                    parameters.Add(new SqlParameter(parameterName, ConvertFormValue(GetPostedValue(definition, columns[i], form), columns[i])));
                 }
 
                 var whereParameters = new List<SqlParameter>();
@@ -871,6 +884,51 @@ ORDER BY a.application_id DESC";
                 var sql = "UPDATE dbo." + Quote(definition.TableName) + " SET " + String.Join(", ", setSql) + " WHERE " + whereClause;
                 ExecuteNonQuery(sql, parameters.ToArray());
             }
+        }
+
+        private string GetPostedValue(AdminTableDefinition definition, AdminColumnDefinition column, FormCollection form)
+        {
+            if (!IsImagePathField(column.Name))
+                return form[column.Name];
+
+            var file = Request.Files[GetUploadInputName(column.Name)];
+
+            if (file == null || file.ContentLength == 0)
+                return form[column.Name];
+
+            var result = SaveAdminImage(column.Name, file);
+
+            if (!result.Success)
+                throw new InvalidOperationException(result.ErrorMessage);
+
+            return result.FilePath;
+        }
+
+        private FileUploadResult SaveAdminImage(string columnName, HttpPostedFileBase file)
+        {
+            if (columnName.Equals("avatar_path", StringComparison.OrdinalIgnoreCase) ||
+                columnName.Equals("default_user_avatar_path", StringComparison.OrdinalIgnoreCase))
+                return FileUploadService.SaveProfileAvatar(file, Server);
+
+            if (columnName.Equals("site_logo_path", StringComparison.OrdinalIgnoreCase) ||
+                columnName.Equals("default_company_logo_path", StringComparison.OrdinalIgnoreCase))
+                return FileUploadService.SaveSystemImage(file, Server);
+
+            return FileUploadService.SaveCompanyLogo(file, Server);
+        }
+
+        private static bool IsImagePathField(string columnName)
+        {
+            return columnName.Equals("logo_path", StringComparison.OrdinalIgnoreCase) ||
+                   columnName.Equals("avatar_path", StringComparison.OrdinalIgnoreCase) ||
+                   columnName.Equals("site_logo_path", StringComparison.OrdinalIgnoreCase) ||
+                   columnName.Equals("default_user_avatar_path", StringComparison.OrdinalIgnoreCase) ||
+                   columnName.Equals("default_company_logo_path", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string GetUploadInputName(string columnName)
+        {
+            return "__upload_" + columnName;
         }
 
         private Dictionary<string, object> GetHiddenCreateValues(AdminTableDefinition definition)

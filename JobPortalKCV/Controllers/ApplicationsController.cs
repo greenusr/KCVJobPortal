@@ -13,9 +13,9 @@ namespace JobPortalKCV.Controllers
     {
         private readonly JobPortalDataContext data = new JobPortalDataContext();
 
-        public ActionResult Index(int page = 1)
+        public ActionResult Index(int page = 1, int? applicationId = null)
         {
-            if (!AuthRoleHelper.CanManageJobs(User.Identity.Name))
+            if (!AuthRoleHelper.CanManageJobs(User.Identity.Name) && !CanOpenApplicationList(applicationId))
                 return new HttpStatusCodeResult(403);
 
             var query = from application in data.JobApplications
@@ -43,6 +43,9 @@ namespace JobPortalKCV.Controllers
                         where companyUser.User.username == User.Identity.Name
                         select item;
             }
+
+            if (applicationId.HasValue)
+                query = query.Where(item => item.Application.application_id == applicationId.Value);
 
             var applications = query
                 .OrderByDescending(item => item.Application.applied_date ?? item.Application.application_date)
@@ -72,6 +75,7 @@ namespace JobPortalKCV.Controllers
                 "Index",
                 "Applications");
             ViewBag.Pagination = pagination;
+            ViewBag.SelectedApplicationId = applicationId;
 
             return View(applications);
         }
@@ -263,6 +267,21 @@ namespace JobPortalKCV.Controllers
                 return null;
 
             return application;
+        }
+
+        private bool CanOpenApplicationList(int? applicationId)
+        {
+            if (!applicationId.HasValue)
+                return false;
+
+            var application = data.JobApplications.FirstOrDefault(item => item.application_id == applicationId.Value);
+
+            if (application == null)
+                return false;
+
+            var job = data.Jobs.FirstOrDefault(item => item.job_id == application.job_id);
+
+            return job != null && AuthRoleHelper.CanManageCompany(User.Identity.Name, job.company_id);
         }
 
         private InterviewViewModel BuildInterviewModel(int id)

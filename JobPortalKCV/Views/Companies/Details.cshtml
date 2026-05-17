@@ -26,6 +26,13 @@
     {
         <div class="alert alert-danger">@TempData["CompanyError"]</div>
     }
+    @if (Model.CurrentUserPendingRequest != null)
+    {
+        <div class="alert alert-info" id="join-request-status">
+            Your request to join this company is pending owner approval.
+            Requested at @Model.CurrentUserPendingRequest.RequestedAt.ToString("dd/MM/yyyy HH:mm").
+        </div>
+    }
 
     <div class="row">
         <div class="col-md-3">
@@ -63,9 +70,17 @@
                     @Html.ActionLink("Transfer owner", "TransferOwner", new { id = Model.CompanyId }, new { @class = "btn btn-default" })
                 }
 
-                @if (Model.CanManage)
+                @if (Model.CanOwn)
                 {
                     @Html.ActionLink("Edit", "Settings", "CompanySettings", new { id = Model.CompanyId, returnUrl = Request.RawUrl }, new { @class = "btn" })
+                }
+                else if (Model.CanLeave)
+                {
+                    using (Html.BeginForm("Leave", "Companies", new { id = Model.CompanyId, returnUrl = backToListUrl }, FormMethod.Post, new { @class = "detail-action-form" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn head-btn2" onclick="return confirm('Leave this company?');">Leave company</button>
+                    }
                 }
                 <a href="@backToListUrl" class="btn btn-default">Back to companies</a>
             </div>
@@ -146,7 +161,7 @@
 
     @if (Model.CanOwn)
     {
-        <div class="post-details3 mt-30">
+        <div class="post-details3 mt-30" id="join-requests">
             <div class="small-section-tittle"><h4>Pending join requests</h4></div>
             @if (Model.PendingRequests.Any())
             {
@@ -159,7 +174,7 @@
                     </tr>
                     @foreach (var request in Model.PendingRequests)
                     {
-                        <tr>
+                        <tr id="join-request-@request.RequestId">
                             <td>@Html.ActionLink(String.IsNullOrWhiteSpace(request.DisplayName) ? request.Email : request.DisplayName, "View", "Profile", new { id = request.UserId, returnUrl = Request.RawUrl }, null)</td>
                             <td>@request.Email</td>
                             <td>@request.RequestedAt.ToString("dd/MM/yyyy HH:mm")</td>

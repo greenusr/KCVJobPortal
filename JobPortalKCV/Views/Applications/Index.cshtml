@@ -3,6 +3,7 @@
 @{
     ViewBag.Title = "Applications";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    int? selectedApplicationId = ViewBag.SelectedApplicationId as int?;
 }
 
 <div class="page-shell">
@@ -19,6 +20,13 @@
     @if (TempData["ApplicationError"] != null)
     {
         <div class="alert alert-danger">@TempData["ApplicationError"]</div>
+    }
+    @if (selectedApplicationId.HasValue)
+    {
+        <div class="alert alert-info">
+            Showing the application opened from your notification.
+            @Html.ActionLink("View all applications", "Index", "Applications", null, new { @class = "ml-10" })
+        </div>
     }
 
     @if (!Model.Any())
@@ -46,7 +54,7 @@
         {
             var status = String.IsNullOrWhiteSpace(application.status_name) ? "Pending" : application.status_name;
             var statusBadge = status == "Completed" ? "ui-badge-success" : (status == "Interview" ? "ui-badge-info" : "ui-badge-warning");
-            <tr>
+            <tr id="application-@application.application_id" class="@(selectedApplicationId == application.application_id ? "table-warning" : "")">
                 <td>@application.job_title</td>
                 <td>@application.company_name</td>
                 <td>@application.applicant_name</td>

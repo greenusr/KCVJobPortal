@@ -121,7 +121,7 @@
                                     <i class="@(company.IsStarredByCurrentUser ? "fas" : "far") fa-star"></i>
                                 </button>
                             }
-                            @if (company.CanManage)
+                            @if (company.CanOwn)
                             {
                                 <a class="icon-action-button" href="@Url.Action("Settings", "CompanySettings", new { id = company.CompanyId, returnUrl = Request.RawUrl })" aria-label="@T("Companies.EditCompany")" title="@T("Button.Edit")">
                                     <i class="fas fa-edit"></i>

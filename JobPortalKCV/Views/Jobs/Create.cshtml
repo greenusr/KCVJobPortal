@@ -13,6 +13,7 @@
         ? returnUrl
         : Url.Action("Index", "Jobs");
     var companyOptions = ViewBag.company_id as IEnumerable<SelectListItem>;
+    var categoryOptions = ViewBag.CategoryOptions as IEnumerable<SelectListItem>;
     var skillOptions = ViewBag.SkillOptions as IEnumerable<SelectListItem>;
     var addCompanyUrl = Url.Action("Create", "Companies", new { returnUrl = Request.RawUrl });
 }
@@ -64,6 +65,29 @@
                 @Html.LabelFor(model => model.employment_type_id, "Employment type")
                     @Html.DropDownList("employment_type_id", null, "-- Select type --", htmlAttributes: new { @class = "form-control" })
                     @Html.ValidationMessageFor(model => model.employment_type_id, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="form-group form-group-full">
+                <label>Job categories</label>
+                <div class="job-skill-picker">
+                    @if (categoryOptions != null && categoryOptions.Any())
+                    {
+                        foreach (var category in categoryOptions)
+                        {
+                            <label class="job-skill-option">
+                                <input type="checkbox" name="categoryIds" value="@category.Value" @(category.Selected ? "checked" : "") />
+                                <span>@category.Text</span>
+                            </label>
+                        }
+                    }
+                    else
+                    {
+                        <p class="ui-subtle">No job categories have been created yet.</p>
+                    }
+                </div>
+                <label class="mt-20">Add new categories</label>
+                <textarea name="newCategories" class="form-control" rows="2" placeholder="Example: Software Engineering, Data Science">@ViewBag.NewCategories</textarea>
+                <small class="ui-subtle">Separate categories with commas or new lines.</small>
             </div>
 
             <div class="form-group form-group-full">

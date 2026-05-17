@@ -123,6 +123,43 @@ namespace JobPortalKCV.Services
                 "Invitation");
         }
 
+        public static void NotifyCompanyJoinRequested(JobPortalDataContext data, CompanyJoinRequest request)
+        {
+            var company = data.Companies.FirstOrDefault(item => item.company_id == request.company_id);
+            var requester = data.Users.FirstOrDefault(item => item.user_id == request.user_id);
+
+            if (company == null || requester == null)
+                return;
+
+            var requesterName = GetUserDisplayName(data, requester);
+            var message = requesterName + " requested to join " + company.company_name + ".";
+            var ownerIds = data.CompanyUsers
+                .Where(item => item.company_id == company.company_id && item.role == "Owner")
+                .Select(item => item.user_id)
+                .Distinct()
+                .ToList();
+
+            foreach (var ownerId in ownerIds)
+                Create(data, ownerId, "Company join request", message, "Company", request.request_id, "CompanyJoinRequest");
+        }
+
+        public static void NotifyCompanyJoinRequestPending(JobPortalDataContext data, CompanyJoinRequest request)
+        {
+            var company = data.Companies.FirstOrDefault(item => item.company_id == request.company_id);
+
+            if (company == null)
+                return;
+
+            Create(
+                data,
+                request.user_id,
+                "Company join request pending",
+                "Your request to join " + company.company_name + " is pending owner approval.",
+                "Company",
+                request.request_id,
+                "CompanyJoinRequest");
+        }
+
         private static ApplicationDetails GetApplicationDetails(JobPortalDataContext data, JobApplication application)
         {
             return (from item in data.JobApplications

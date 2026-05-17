@@ -292,7 +292,7 @@ namespace JobPortalKCV.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "job_title,company_id,job_description,salary_range,posted_date,location_id,employment_type_id,application_deadline")] Job job, int[] skillIds, string newSkills, string returnUrl = null)
+        public ActionResult Create([Bind(Include = "job_title,company_id,job_description,salary_range,posted_date,location_id,employment_type_id,application_deadline")] Job job, int[] skillIds, int[] categoryIds, string newSkills, string newCategories, string returnUrl = null)
         {
             if (!AuthRoleHelper.CanManageJobs(User.Identity.Name))
                 return new HttpStatusCodeResult(403);
@@ -312,13 +312,15 @@ namespace JobPortalKCV.Controllers
                 data.SubmitChanges();
 
                 SyncJobSkills(job.job_id, ResolveSkillIds(skillIds, newSkills));
+                SyncJobCategories(job.job_id, ResolveCategoryIds(categoryIds, newCategories));
                 data.SubmitChanges();
 
                 return RedirectToAction("Details", new { id = job.job_id, returnUrl = returnUrl });
             }
 
-            LoadJobSelectLists(job, skillIds);
+            LoadJobSelectLists(job, skillIds, categoryIds);
             ViewBag.NewSkills = newSkills;
+            ViewBag.NewCategories = newCategories;
             return View(job);
         }
 
@@ -341,7 +343,7 @@ namespace JobPortalKCV.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, [Bind(Include = "job_title,company_id,job_description,salary_range,posted_date,location_id,employment_type_id,application_deadline")] Job formJob, int[] skillIds, string newSkills, string returnUrl = null)
+        public ActionResult Edit(int id, [Bind(Include = "job_title,company_id,job_description,salary_range,posted_date,location_id,employment_type_id,application_deadline")] Job formJob, int[] skillIds, int[] categoryIds, string newSkills, string newCategories, string returnUrl = null)
         {
             if (!AuthRoleHelper.CanManageJobs(User.Identity.Name))
                 return new HttpStatusCodeResult(403);
@@ -369,13 +371,15 @@ namespace JobPortalKCV.Controllers
                 job.application_deadline = formJob.application_deadline;
 
                 SyncJobSkills(job.job_id, ResolveSkillIds(skillIds, newSkills));
+                SyncJobCategories(job.job_id, ResolveCategoryIds(categoryIds, newCategories));
                 data.SubmitChanges();
 
                 return RedirectToAction("Details", new { id = job.job_id, returnUrl = returnUrl });
             }
 
-            LoadJobSelectLists(formJob, skillIds);
+            LoadJobSelectLists(formJob, skillIds, categoryIds);
             ViewBag.NewSkills = newSkills;
+            ViewBag.NewCategories = newCategories;
             return View(formJob);
         }
 
@@ -489,6 +493,17 @@ namespace JobPortalKCV.Controllers
             };
 
             data.JobApplications.InsertOnSubmit(application);
+            data.SubmitChanges();
+
+            if (application.application_id == 0)
+            {
+                application = data.JobApplications
+                    .Where(item => item.job_id == id && item.user_id == user.user_id)
+                    .OrderByDescending(item => item.applied_date ?? item.application_date)
+                    .ThenByDescending(item => item.application_id)
+                    .FirstOrDefault() ?? application;
+            }
+
             NotificationService.NotifyApplicationSubmitted(data, application);
             AccountLogService.LogActivity(data, user.user_id, "ApplyJob", "Applied for " + job.job_title + ".", Request, relatedId: application.application_id, relatedType: "Application");
             data.SubmitChanges();
@@ -560,7 +575,7 @@ namespace JobPortalKCV.Controllers
             return job;
         }
 
-        private void LoadJobSelectLists(Job job = null, IEnumerable<int> selectedSkillIds = null)
+        private void LoadJobSelectLists(Job job = null, IEnumerable<int> selectedSkillIds = null, IEnumerable<int> selectedCategoryIds = null)
         {
             var companies = data.Companies.AsQueryable();
 
@@ -597,6 +612,28 @@ namespace JobPortalKCV.Controllers
                     Selected = selectedSet.Contains(skill.skill_id)
                 })
                 .ToList();
+
+            var selectedCategorySet = selectedCategoryIds != null
+                ? new HashSet<int>(selectedCategoryIds)
+                : new HashSet<int>();
+
+            if ((selectedCategoryIds == null || !selectedCategorySet.Any()) && job != null && job.job_id > 0)
+            {
+                selectedCategorySet = new HashSet<int>(data.JobCategoryMaps
+                    .Where(map => map.job_id == job.job_id)
+                    .Select(map => map.category_id));
+            }
+
+            ViewBag.CategoryOptions = data.JobCategories
+                .OrderBy(category => category.category_name)
+                .ToList()
+                .Select(category => new SelectListItem
+                {
+                    Value = category.category_id.ToString(),
+                    Text = category.category_name,
+                    Selected = selectedCategorySet.Contains(category.category_id)
+                })
+                .ToList();
         }
 
         private IEnumerable<int> ResolveSkillIds(IEnumerable<int> selectedSkillIds, string newSkills)
@@ -624,11 +661,38 @@ namespace JobPortalKCV.Controllers
             return skillIds;
         }
 
+        private IEnumerable<int> ResolveCategoryIds(IEnumerable<int> selectedCategoryIds, string newCategories)
+        {
+            var categoryIds = selectedCategoryIds == null
+                ? new HashSet<int>()
+                : new HashSet<int>(selectedCategoryIds);
+
+            if (String.IsNullOrWhiteSpace(newCategories))
+                return categoryIds;
+
+            var names = newCategories
+                .Split(new[] { ',', ';', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(name => name.Trim())
+                .Where(name => !String.IsNullOrWhiteSpace(name))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            foreach (var name in names)
+            {
+                var category = FindOrCreateCategory(name);
+                categoryIds.Add(category.category_id);
+            }
+
+            return categoryIds;
+        }
+
         private Skill FindOrCreateSkill(string skillName)
         {
             var normalizedName = skillName.Trim();
-            var lowerName = normalizedName.ToLower();
-            var skill = data.Skills.FirstOrDefault(item => item.skill_name != null && item.skill_name.ToLower() == lowerName);
+            var normalizedKey = NormalizeLookupKey(normalizedName);
+            var skill = data.Skills
+                .ToList()
+                .FirstOrDefault(item => NormalizeLookupKey(item.skill_name) == normalizedKey);
 
             if (skill != null)
                 return skill;
@@ -642,6 +706,39 @@ namespace JobPortalKCV.Controllers
             data.SubmitChanges();
 
             return skill;
+        }
+
+        private JobCategory FindOrCreateCategory(string categoryName)
+        {
+            var normalizedName = categoryName.Trim();
+            var normalizedKey = NormalizeLookupKey(normalizedName);
+            var category = data.JobCategories
+                .ToList()
+                .FirstOrDefault(item => NormalizeLookupKey(item.category_name) == normalizedKey);
+
+            if (category != null)
+                return category;
+
+            category = new JobCategory
+            {
+                category_name = normalizedName
+            };
+
+            data.JobCategories.InsertOnSubmit(category);
+            data.SubmitChanges();
+
+            return category;
+        }
+
+        private static string NormalizeLookupKey(string value)
+        {
+            if (String.IsNullOrWhiteSpace(value))
+                return String.Empty;
+
+            return new string(value
+                .Where(character => !Char.IsWhiteSpace(character))
+                .Select(Char.ToUpperInvariant)
+                .ToArray());
         }
 
         private void SyncJobSkills(int jobId, IEnumerable<int> skillIds)
@@ -666,6 +763,32 @@ namespace JobPortalKCV.Controllers
                 {
                     job_id = jobId,
                     skill_id = skillId
+                });
+            }
+        }
+
+        private void SyncJobCategories(int jobId, IEnumerable<int> categoryIds)
+        {
+            var existing = data.JobCategoryMaps.Where(map => map.job_id == jobId).ToList();
+            data.JobCategoryMaps.DeleteAllOnSubmit(existing);
+
+            if (categoryIds == null)
+                return;
+
+            var requestedCategoryIds = categoryIds.Distinct().ToList();
+
+            var validCategoryIds = data.JobCategories
+                .Where(category => requestedCategoryIds.Contains(category.category_id))
+                .Select(category => category.category_id)
+                .Distinct()
+                .ToList();
+
+            foreach (var categoryId in validCategoryIds)
+            {
+                data.JobCategoryMaps.InsertOnSubmit(new JobCategoryMap
+                {
+                    job_id = jobId,
+                    category_id = categoryId
                 });
             }
         }

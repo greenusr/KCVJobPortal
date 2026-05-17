@@ -1,13 +1,27 @@
-﻿<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width" />
-    <title>Error</title>
-</head>
-<body>
-    <hgroup>
-        <h1>Error.</h1>
-        <h2>An error occurred while processing your request.</h2>
-    </hgroup>
-</body>
-</html>
+@model JobPortalKCV.Models.ViewModel.ErrorViewModel
+
+@{
+    ViewBag.Title = Model == null ? "Error" : Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var statusCode = Model == null ? 500 : Model.StatusCode;
+    var title = Model == null ? "Something went wrong" : Model.Title;
+    var message = Model == null ? "An unexpected error occurred. Please try again later." : Model.Message;
+}
+
+<div class="page-shell">
+    <div class="container">
+        <div class="ui-card text-center">
+            <div class="section-tittle mb-35">
+                <span>Error @statusCode</span>
+                <h2>@title</h2>
+            </div>
+
+            <p class="ui-subtle mb-30">@message</p>
+
+            <div class="ui-toolbar justify-content-center">
+                @Html.ActionLink("Back to home", "Index", "Home", null, new { @class = "btn" })
+                <button type="button" class="btn head-btn2" onclick="window.history.back()">Go back</button>
+            </div>
+        </div>
+    </div>
+</div>

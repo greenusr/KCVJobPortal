@@ -125,19 +125,25 @@ namespace JobPortalKCV.Controllers
                 ? returnUrl
                 : Url.Action("Index", "Notifications");
 
-            if (!notification.related_id.HasValue || String.IsNullOrWhiteSpace(notification.related_type))
+            var relatedType = !String.IsNullOrWhiteSpace(notification.related_type)
+                ? notification.related_type
+                : notification.type;
+
+            if (!notification.related_id.HasValue || String.IsNullOrWhiteSpace(relatedType))
                 return returnUrl;
 
-            switch (notification.related_type)
+            switch (relatedType.ToLowerInvariant())
             {
-                case "Job":
+                case "job":
                     return Url.Action("Details", "Jobs", new { id = notification.related_id.Value, returnUrl = returnUrl });
-                case "Invitation":
+                case "invitation":
                     return Url.Action("Index", "CandidateInvitations");
-                case "Application":
+                case "application":
                     return ResolveApplicationUrl(notification.related_id.Value, returnUrl);
-                case "Interview":
+                case "interview":
                     return ResolveInterviewUrl(notification.related_id.Value, returnUrl);
+                case "companyjoinrequest":
+                    return ResolveCompanyJoinRequestUrl(notification.related_id.Value, returnUrl);
                 default:
                     return returnUrl;
             }
@@ -150,11 +156,14 @@ namespace JobPortalKCV.Controllers
             if (application == null)
                 return returnUrl;
 
+            var job = data.Jobs.FirstOrDefault(item => item.job_id == application.job_id);
+
             if (AuthRoleHelper.IsCandidate(User.Identity.Name) && IsCurrentUser(application.user_id))
                 return Url.Action("Details", "Jobs", new { id = application.job_id, returnUrl = returnUrl });
 
-            if (AuthRoleHelper.CanManageJobs(User.Identity.Name))
-                return Url.Action("Index", "Applications");
+            if (AuthRoleHelper.IsAdmin(User.Identity.Name) ||
+                (job != null && AuthRoleHelper.CanManageCompany(User.Identity.Name, job.company_id)))
+                return Url.Action("Index", "Applications", new { applicationId = application.application_id }) + "#application-" + application.application_id;
 
             return returnUrl;
         }
@@ -167,6 +176,19 @@ namespace JobPortalKCV.Controllers
                 return returnUrl;
 
             return ResolveApplicationUrl(interview.application_id, returnUrl);
+        }
+
+        private string ResolveCompanyJoinRequestUrl(int requestId, string returnUrl)
+        {
+            var request = data.CompanyJoinRequests.FirstOrDefault(item => item.request_id == requestId);
+
+            if (request == null)
+                return returnUrl;
+
+            if (IsCurrentUser(request.user_id))
+                return Url.Action("Details", "Companies", new { id = request.company_id, returnUrl = returnUrl }) + "#join-request-status";
+
+            return Url.Action("Details", "Companies", new { id = request.company_id, returnUrl = returnUrl }) + "#join-request-" + request.request_id;
         }
 
         private bool IsCurrentUser(int? userId)

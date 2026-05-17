@@ -26,7 +26,7 @@
         }
 
         <div class="ui-card">
-            @using (Html.BeginForm(Model.IsCreate ? "Create" : "Edit", "Admin", new { table = Model.TableName, key = Model.Key, returnUrl = returnUrl }, FormMethod.Post))
+            @using (Html.BeginForm(Model.IsCreate ? "Create" : "Edit", "Admin", new { table = Model.TableName, key = Model.Key, returnUrl = returnUrl }, FormMethod.Post, new { enctype = "multipart/form-data" }))
             {
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="returnUrl" value="@returnUrl" />
@@ -34,11 +34,29 @@
                 <div class="ui-form-grid">
                     @foreach (var field in Model.Fields)
                     {
-                        <div class="form-group @(field.DataType == "text" || field.DataType == "ntext" ? "form-group-full" : "")">
+                        <div class="form-group @(field.DataType == "text" || field.DataType == "ntext" || field.IsImageUpload ? "form-group-full" : "")">
                             <label for="@field.Name">@field.Label</label>
                             @if (!field.IsEditable)
                             {
+                                if (field.IsImageUpload && !String.IsNullOrWhiteSpace(field.Value))
+                                {
+                                    <div class="admin-image-preview">
+                                        <img src="@Url.Content(field.Value)" alt="@field.Label" />
+                                    </div>
+                                }
                                 <input type="text" class="form-control" value="@(String.IsNullOrWhiteSpace(field.DisplayValue) ? field.Value : field.DisplayValue)" readonly="readonly" />
+                            }
+                            else if (field.IsImageUpload)
+                            {
+                                <input type="hidden" name="@field.Name" id="@field.Name" value="@field.Value" />
+                                if (!String.IsNullOrWhiteSpace(field.Value))
+                                {
+                                    <div class="admin-image-preview">
+                                        <img src="@Url.Content(field.Value)" alt="@field.Label" />
+                                    </div>
+                                }
+                                <input type="file" name="@field.UploadInputName" id="@field.UploadInputName" class="form-control admin-file-input" accept=".jpg,.jpeg,.png,.gif,.webp,.svg,image/jpeg,image/png,image/gif,image/webp,image/svg+xml" />
+                                <input type="text" class="form-control admin-path-preview" value="@field.Value" readonly="readonly" />
                             }
                             else if (field.Options != null && field.Options.Any())
                             {
@@ -120,6 +138,33 @@
     .admin-switch input {
         width: 18px;
         height: 18px;
+    }
+
+    .admin-image-preview {
+        align-items: center;
+        background: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 6px;
+        display: flex;
+        height: 96px;
+        justify-content: center;
+        margin-bottom: 10px;
+        max-width: 220px;
+        padding: 12px;
+    }
+
+    .admin-image-preview img {
+        max-height: 72px;
+        max-width: 180px;
+        object-fit: contain;
+    }
+
+    .admin-file-input {
+        padding: 10px;
+    }
+
+    .admin-path-preview {
+        margin-top: 8px;
     }
 </style>
 

@@ -140,6 +140,7 @@
     <Compile Include="Controllers\CompanySettingsController.cs" />
     <Compile Include="Controllers\CompaniesController.cs" />
     <Compile Include="Controllers\DocsController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\JobsController.cs" />
     <Compile Include="Controllers\LanguageController.cs" />
@@ -151,6 +152,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Filters\FriendlyErrorResultFilter.cs" />
     <Compile Include="Filters\MaintenanceModeFilter.cs" />
     <Compile Include="Helpers\AuthRoleHelper.cs" />
     <Compile Include="Helpers\EmailHelper.cs" />
@@ -182,6 +184,7 @@
     <Compile Include="Models\ViewModel\CandidateInvitationViewModels.cs" />
     <Compile Include="Models\ViewModel\CompanyViewModels.cs" />
     <Compile Include="Models\ViewModel\DocsViewModel.cs" />
+    <Compile Include="Models\ViewModel\ErrorViewModel.cs" />
     <Compile Include="Models\ViewModel\HomeIndexViewModel.cs" />
     <Compile Include="Models\ViewModel\JobDetailViewModel.cs" />
     <Compile Include="Models\ViewModel\JobsViewModel.cs" />

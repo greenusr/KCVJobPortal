@@ -21,6 +21,7 @@ namespace JobPortalKCV.Models.ViewModel
         public bool IsStarredByCurrentUser { get; set; }
         public bool CanManage { get; set; }
         public bool CanOwn { get; set; }
+        public bool CanLeave { get; set; }
         public string MembershipRole { get; set; }
         public int JobCount { get; set; }
         public int PendingRequestCount { get; set; }
@@ -30,6 +31,7 @@ namespace JobPortalKCV.Models.ViewModel
     {
         public List<CompanyMemberViewModel> Members { get; set; }
         public List<CompanyJoinRequestViewModel> PendingRequests { get; set; }
+        public CompanyJoinRequestViewModel CurrentUserPendingRequest { get; set; }
         public List<JobViewModel> Jobs { get; set; }
     }
 

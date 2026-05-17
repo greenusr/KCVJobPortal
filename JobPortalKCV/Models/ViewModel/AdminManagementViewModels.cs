@@ -45,6 +45,8 @@ namespace JobPortalKCV.Models.ViewModel
         public string DataType { get; set; }
         public bool IsEditable { get; set; }
         public bool IsRequired { get; set; }
+        public bool IsImageUpload { get; set; }
+        public string UploadInputName { get; set; }
         public List<AdminSelectOptionViewModel> Options { get; set; }
     }
 

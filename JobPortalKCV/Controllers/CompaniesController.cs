@@ -69,7 +69,9 @@ namespace JobPortalKCV.Controllers
                 StarCount = data.Stars.Count(star => star.target_type == "Company" && star.target_id == company.company_id),
                 IsStarredByCurrentUser = currentUser != null && data.Stars.Any(star => star.user_id == currentUser.user_id && star.target_type == "Company" && star.target_id == company.company_id),
                 CanManage = AuthRoleHelper.CanManageCompany(User.Identity.Name, company.company_id),
-                CanOwn = IsCompanyOwner(company.company_id)
+                CanOwn = IsCompanyOwner(company.company_id),
+                CanLeave = CanLeaveCompany(company.company_id),
+                MembershipRole = GetCompanyMembershipRole(company.company_id)
             }).ToList();
 
             models = SortCompanies(models, sort);
@@ -180,7 +182,7 @@ namespace JobPortalKCV.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(int id, [Bind(Include = "company_name,industry,website,contact_email,description")] Company formCompany, HttpPostedFileBase logo, string returnUrl = null)
         {
-            if (!AuthRoleHelper.CanManageCompany(User.Identity.Name, id))
+            if (!IsCompanyOwner(id))
                 return new HttpStatusCodeResult(403);
 
             var company = data.Companies.FirstOrDefault(c => c.company_id == id);
@@ -217,7 +219,7 @@ namespace JobPortalKCV.Controllers
 
         public ActionResult Delete(int id)
         {
-            if (!AuthRoleHelper.CanManageCompany(User.Identity.Name, id))
+            if (!IsCompanyOwner(id))
                 return new HttpStatusCodeResult(403);
 
             var company = data.Companies.FirstOrDefault(c => c.company_id == id);
@@ -232,7 +234,7 @@ namespace JobPortalKCV.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id, string returnUrl = null)
         {
-            if (!AuthRoleHelper.CanManageCompany(User.Identity.Name, id))
+            if (!IsCompanyOwner(id))
                 return new HttpStatusCodeResult(403);
 
             var company = data.Companies.FirstOrDefault(c => c.company_id == id);
@@ -250,6 +252,38 @@ namespace JobPortalKCV.Controllers
             data.Companies.DeleteOnSubmit(company);
             data.SubmitChanges();
 
+            return RedirectToCompaniesContext(returnUrl);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Leave(int id, string returnUrl = null)
+        {
+            var currentUser = GetCurrentUser();
+
+            if (currentUser == null)
+                return new HttpStatusCodeResult(403);
+
+            var membership = data.CompanyUsers.FirstOrDefault(item =>
+                item.company_id == id &&
+                item.user_id == currentUser.user_id);
+
+            if (membership == null)
+                return new HttpStatusCodeResult(403, "You are not a member of this company.");
+
+            if (membership.role == "Owner")
+            {
+                TempData["CompanyError"] = "Owners must transfer ownership before leaving the company.";
+                return RedirectToAction("Details", new { id = id });
+            }
+
+            data.CompanyUsers.DeleteOnSubmit(membership);
+            AccountLogService.LogActivity(data, currentUser.user_id, "LeaveCompany", "Left company membership.", Request, relatedId: id, relatedType: "Company");
+            data.SubmitChanges();
+
+            TempData["CompanySettingsMessage"] = "You have left the company.";
+            TempData["CompanyMessage"] = "You have left the company.";
             return RedirectToCompaniesContext(returnUrl);
         }
 
@@ -425,8 +459,11 @@ namespace JobPortalKCV.Controllers
                 IsStarredByCurrentUser = currentUser != null && data.Stars.Any(star => star.user_id == currentUser.user_id && star.target_type == "Company" && star.target_id == company.company_id),
                 CanManage = AuthRoleHelper.CanManageCompany(User.Identity.Name, company.company_id),
                 CanOwn = IsCompanyOwner(company.company_id),
+                CanLeave = CanLeaveCompany(company.company_id),
+                MembershipRole = GetCompanyMembershipRole(company.company_id),
                 Members = GetMembers(company.company_id),
                 PendingRequests = GetPendingRequests(company.company_id),
+                CurrentUserPendingRequest = GetCurrentUserPendingRequest(company.company_id),
                 Jobs = GetCompanyJobs(company)
             };
         }
@@ -506,6 +543,30 @@ namespace JobPortalKCV.Controllers
                     }).ToList();
         }
 
+        private CompanyJoinRequestViewModel GetCurrentUserPendingRequest(int companyId)
+        {
+            var currentUser = GetCurrentUser();
+
+            if (currentUser == null)
+                return null;
+
+            return (from request in data.CompanyJoinRequests
+                    join user in data.Users on request.user_id equals user.user_id
+                    join profile in data.UserProfileRecords on user.user_id equals profile.user_id into profileJoin
+                    from profile in profileJoin.DefaultIfEmpty()
+                    where request.company_id == companyId &&
+                          request.user_id == currentUser.user_id &&
+                          request.status == "Pending"
+                    select new CompanyJoinRequestViewModel
+                    {
+                        RequestId = request.request_id,
+                        UserId = user.user_id,
+                        DisplayName = String.IsNullOrEmpty(profile.full_name) ? user.username : profile.full_name,
+                        Email = user.email,
+                        RequestedAt = request.requested_at
+                    }).FirstOrDefault();
+        }
+
         private bool IsCompanyOwner(int companyId)
         {
             if (AuthRoleHelper.IsAdmin(User.Identity.Name))
@@ -517,6 +578,32 @@ namespace JobPortalKCV.Controllers
                 item.company_id == companyId &&
                 item.user_id == currentUser.user_id &&
                 item.role == "Owner");
+        }
+
+        private bool CanLeaveCompany(int companyId)
+        {
+            if (AuthRoleHelper.IsAdmin(User.Identity.Name))
+                return false;
+
+            var currentUser = GetCurrentUser();
+
+            return currentUser != null && data.CompanyUsers.Any(item =>
+                item.company_id == companyId &&
+                item.user_id == currentUser.user_id &&
+                item.role != "Owner");
+        }
+
+        private string GetCompanyMembershipRole(int companyId)
+        {
+            var currentUser = GetCurrentUser();
+
+            if (currentUser == null)
+                return null;
+
+            return data.CompanyUsers
+                .Where(item => item.company_id == companyId && item.user_id == currentUser.user_id)
+                .Select(item => item.role)
+                .FirstOrDefault();
         }
 
         private bool CanViewCompanyProfile(Company company)

@@ -39,6 +39,7 @@ namespace JobPortalKCV.Controllers
                     ShowJobsPublicly = item.Company.show_jobs_publicly,
                     CanManage = AuthRoleHelper.CanManageCompany(User.Identity.Name, item.Company.company_id),
                     CanOwn = IsCompanyOwner(item.Company.company_id),
+                    CanLeave = CanLeaveCompany(item.Company.company_id),
                     MembershipRole = item.Role,
                     JobCount = data.Jobs.Count(job => job.company_id == item.Company.company_id),
                     PendingRequestCount = data.CompanyJoinRequests.Count(request => request.company_id == item.Company.company_id && request.status == "Pending")
@@ -153,10 +154,7 @@ namespace JobPortalKCV.Controllers
 
         private bool CanUpdateCompany(int companyId)
         {
-            if (AuthRoleHelper.IsAdmin(User.Identity.Name))
-                return true;
-
-            return AuthRoleHelper.CanManageCompany(User.Identity.Name, companyId);
+            return IsCompanyOwner(companyId);
         }
 
         private bool IsCompanyOwner(int companyId)
@@ -170,6 +168,19 @@ namespace JobPortalKCV.Controllers
                 item.company_id == companyId &&
                 item.user_id == currentUser.user_id &&
                 item.role == "Owner");
+        }
+
+        private bool CanLeaveCompany(int companyId)
+        {
+            if (AuthRoleHelper.IsAdmin(User.Identity.Name))
+                return false;
+
+            var currentUser = GetCurrentUser();
+
+            return currentUser != null && data.CompanyUsers.Any(item =>
+                item.company_id == companyId &&
+                item.user_id == currentUser.user_id &&
+                item.role != "Owner");
         }
 
         private List<CompanyManagementRow> GetManageableCompanies()

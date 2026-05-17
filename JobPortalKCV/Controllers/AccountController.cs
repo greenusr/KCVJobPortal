@@ -465,6 +465,7 @@ namespace JobPortalKCV.Controllers
         private void CreateCompanyForEmployer(User user, RegisterEmployerViewModel model)
         {
             Company company;
+            CompanyJoinRequest joinRequest = null;
 
             if (model.UseExistingCompany)
             {
@@ -501,12 +502,14 @@ namespace JobPortalKCV.Controllers
                     request.status == "Pending") &&
                     !data.CompanyUsers.Any(cu => cu.user_id == user.user_id && cu.company_id == company.company_id))
                 {
-                    data.CompanyJoinRequests.InsertOnSubmit(new CompanyJoinRequest
+                    joinRequest = new CompanyJoinRequest
                     {
                         user_id = user.user_id,
                         company_id = company.company_id,
                         status = "Pending"
-                    });
+                    };
+
+                    data.CompanyJoinRequests.InsertOnSubmit(joinRequest);
                 }
             }
             else if (!data.CompanyUsers.Any(cu => cu.user_id == user.user_id && cu.company_id == company.company_id))
@@ -521,6 +524,13 @@ namespace JobPortalKCV.Controllers
 
             AssignRole(user.user_id, "Employer");
             data.SubmitChanges();
+
+            if (joinRequest != null)
+            {
+                NotificationService.NotifyCompanyJoinRequested(data, joinRequest);
+                NotificationService.NotifyCompanyJoinRequestPending(data, joinRequest);
+                data.SubmitChanges();
+            }
         }
 
         private void AssignRole(int userId, string roleName)
