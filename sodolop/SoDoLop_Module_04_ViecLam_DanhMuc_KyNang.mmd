@@ -1,0 +1,73 @@
+classDiagram
+direction LR
+
+class Job {
+  +int job_id
+  +string job_title
+  +int company_id
+  +string job_description
+  +string salary_range
+  +DateTime posted_date
+  +int location_id
+  +int employment_type_id
+  +DateTime application_deadline
+  +bool is_active
+}
+
+class Company {
+  +int company_id
+  +string company_name
+  +string industry
+  +string logo_path
+}
+
+class Location {
+  +int location_id
+  +string country
+  +string city
+}
+
+class EmploymentType {
+  +int employment_type_id
+  +string type_name
+}
+
+class JobCategory {
+  +int category_id
+  +string category_name
+}
+
+class JobCategoryMap {
+  +int job_id
+  +int category_id
+}
+
+class Skill {
+  +int skill_id
+  +string skill_name
+}
+
+class JobSkill {
+  +int job_skill_id
+  +int job_id
+  +int skill_id
+}
+
+Company "1" --> "0..*" Job : so huu tin tuyen dung
+Job "*" --> "0..1" Company : FK company_id
+
+Location "1" --> "0..*" Job : dia diem lam viec
+Job "*" --> "1" Location : FK location_id
+
+EmploymentType "1" --> "0..*" Job : hinh thuc lam viec
+Job "*" --> "0..1" EmploymentType : FK employment_type_id
+
+Job "1" --> "0..*" JobCategoryMap : gan danh muc
+JobCategory "1" --> "0..*" JobCategoryMap : gom cac viec
+JobCategoryMap "*" --> "1" Job : FK job_id
+JobCategoryMap "*" --> "1" JobCategory : FK category_id
+
+Job "1" --> "0..*" JobSkill : yeu cau ky nang
+Skill "1" --> "0..*" JobSkill : duoc yeu cau boi job
+JobSkill "*" --> "0..1" Job : FK job_id
+JobSkill "*" --> "0..1" Skill : FK skill_id

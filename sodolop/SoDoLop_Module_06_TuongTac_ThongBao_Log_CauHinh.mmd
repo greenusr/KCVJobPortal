@@ -1,0 +1,100 @@
+classDiagram
+direction LR
+
+class User {
+  +int user_id
+  +string username
+  +string email
+  +bool is_active
+}
+
+class Job {
+  +int job_id
+  +string job_title
+}
+
+class Company {
+  +int company_id
+  +string company_name
+}
+
+class Notification {
+  +int notification_id
+  +int user_id
+  +string title
+  +string message
+  +string type
+  +int related_id
+  +string related_type
+  +bool is_read
+  +DateTime created_at
+}
+
+class Star {
+  +int star_id
+  +int user_id
+  +int target_id
+  +string target_type
+  +DateTime created_at
+}
+
+class UserActivityLog {
+  +int activity_log_id
+  +int user_id
+  +string action
+  +string description
+  +string keyword
+  +string filters
+  +int related_id
+  +string related_type
+  +string ip_address
+  +string user_agent
+  +DateTime created_at
+}
+
+class UserLoginLog {
+  +int login_log_id
+  +int user_id
+  +DateTime login_time
+  +string ip_address
+  +string user_agent
+  +bool is_success
+  +string failure_reason
+}
+
+class SystemSetting {
+  +int setting_id
+  +string site_name
+  +string site_logo_path
+  +string default_user_avatar_path
+  +string default_company_logo_path
+  +int max_cv_upload_size_mb
+  +int max_avatar_upload_size_mb
+  +int max_logo_upload_size_mb
+  +string allowed_image_types
+  +string allowed_cv_types
+  +int otp_expiration_seconds
+  +int default_pagination_size
+  +bool maintenance_mode
+  +bool require_company_logo_to_post_job
+  +bool auto_close_expired_jobs
+  +int default_job_expiration_days
+}
+
+User "1" --> "0..*" Notification : nhan thong bao
+Notification "*" --> "1" User : FK user_id
+
+User "1" --> "0..*" Star : luu yeu thich
+Star "*" --> "1" User : FK user_id
+Star ..> User : target_type User
+Star ..> Job : target_type Job
+Star ..> Company : target_type Company
+
+User "1" --> "0..*" UserActivityLog : ghi nhat ky hoat dong
+UserActivityLog "*" --> "1" User : FK user_id
+
+User "1" --> "0..*" UserLoginLog : ghi nhat ky dang nhap
+UserLoginLog "*" --> "0..1" User : FK user_id
+
+SystemSetting ..> User : cau hinh mac dinh avatar
+SystemSetting ..> Company : cau hinh mac dinh logo

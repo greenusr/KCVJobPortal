@@ -1,0 +1,40 @@
+flowchart TB
+
+Candidate[Khu vuc ung vien]
+
+Candidate --> ProfileMe[Ho so cua toi /Profile/Me]
+Candidate --> UserCVs[Quan ly CV /UserCVs]
+Candidate --> CandidateApps[Don ung tuyen cua toi /CandidateApplications]
+Candidate --> CandidateInvitations[Loi moi nhan duoc /CandidateInvitations]
+Candidate --> SavedItems[Muc da luu /Stars/Saved]
+Candidate --> Notifications[Thong bao /Notifications]
+Candidate --> AccountSettings[Cai dat tai khoan /AccountSettings]
+
+ProfileMe --> ProfileView[Xem ho so /Profile/ViewProfile/:id]
+ProfileMe --> ProfileEdit[Cap nhat ho so /Profile/Edit/:id]
+
+ProfileEdit --> AddEducation[Them hoc van /Profile/AddEducation]
+ProfileEdit --> UpdateEducation[Cap nhat hoc van /Profile/UpdateEducation]
+ProfileEdit --> DeleteEducation[Xoa hoc van /Profile/DeleteEducation]
+ProfileEdit --> AddExperience[Them kinh nghiem /Profile/AddExperience]
+ProfileEdit --> UpdateExperience[Cap nhat kinh nghiem /Profile/UpdateExperience]
+ProfileEdit --> DeleteExperience[Xoa kinh nghiem /Profile/DeleteExperience]
+ProfileEdit --> AddProject[Them du an /Profile/AddProject]
+ProfileEdit --> UpdateProject[Cap nhat du an /Profile/UpdateProject]
+ProfileEdit --> DeleteProject[Xoa du an /Profile/DeleteProject]
+ProfileEdit --> AddSkill[Them ky nang /Profile/AddSkill]
+ProfileEdit --> UpdateSkill[Cap nhat ky nang /Profile/UpdateSkill]
+ProfileEdit --> DeleteSkill[Xoa ky nang /Profile/DeleteSkill]
+
+UserCVs --> UploadCV[Tai CV /UserCVs/Upload]
+UserCVs --> SetDefaultCV[Dat CV mac dinh /UserCVs/SetDefault/:id]
+
+CandidateApps --> InterviewDetails[Chi tiet phong van /CandidateApplications/InterviewDetails/:id]
+
+CandidateInvitations --> InvitationDetails[Chi tiet loi moi /CandidateInvitations/Details/:id]
+CandidateInvitations --> AcceptInvitation[Chap nhan loi moi /CandidateInvitations/Accept/:id]
+CandidateInvitations --> DeclineInvitation[Tu choi loi moi /CandidateInvitations/Decline/:id]
+
+SavedItems --> StarredBy[Danh sach nguoi da luu /Stars/StarredBy]
+Notifications --> OpenNotification[Mo thong bao /Notifications/Open/:id]
+Notifications --> MarkAllRead[Danh dau da doc /Notifications/MarkAllAsRead]

@@ -1,0 +1,102 @@
+classDiagram
+direction LR
+
+class User {
+  +int user_id
+  +string username
+  +string email
+  +bool is_active
+}
+
+class UserProfileRecord {
+  +int profile_id
+  +int user_id
+  +int location_id
+  +string full_name
+  +DateTime date_of_birth
+  +string phone
+  +string address
+  +string about_me
+  +string avatar_path
+  +DateTime created_at
+  +DateTime updated_at
+}
+
+class Location {
+  +int location_id
+  +string country
+  +string city
+}
+
+class UserEducation {
+  +int education_id
+  +int user_id
+  +string school_name
+  +string degree
+  +string field_of_study
+  +DateTime start_date
+  +DateTime end_date
+  +string description
+}
+
+class UserExperience {
+  +int experience_id
+  +int user_id
+  +string company_name
+  +string position
+  +DateTime start_date
+  +DateTime end_date
+  +string description
+}
+
+class UserProject {
+  +int project_id
+  +int user_id
+  +string project_name
+  +string description
+  +string project_url
+  +DateTime start_date
+  +DateTime end_date
+}
+
+class Skill {
+  +int skill_id
+  +string skill_name
+}
+
+class UserSkill {
+  +int user_skill_id
+  +int user_id
+  +int skill_id
+}
+
+class UserCV {
+  +int cv_id
+  +int user_id
+  +string file_path
+  +string file_name
+  +DateTime created_at
+  +bool is_default
+}
+
+User "1" --> "0..1" UserProfileRecord : co ho so
+UserProfileRecord "0..1" --> "1" User : FK user_id
+Location "1" --> "0..*" UserProfileRecord : noi o
+UserProfileRecord "*" --> "1" Location : FK location_id
+
+User "1" --> "0..*" UserEducation : hoc van
+UserEducation "*" --> "1" User : FK user_id
+
+User "1" --> "0..*" UserExperience : kinh nghiem
+UserExperience "*" --> "1" User : FK user_id
+
+User "1" --> "0..*" UserProject : du an
+UserProject "*" --> "1" User : FK user_id
+
+User "1" --> "0..*" UserSkill : ky nang cua ung vien
+Skill "1" --> "0..*" UserSkill : duoc user su dung
+UserSkill "*" --> "1" User : FK user_id
+UserSkill "*" --> "1" Skill : FK skill_id
+
+User "1" --> "0..*" UserCV : danh sach CV
+UserCV "*" --> "1" User : FK user_id

@@ -1,0 +1,24 @@
+flowchart TB
+
+Admin[Khu vuc quan tri]
+
+Admin --> AdminDashboard[Bang dieu khien /Admin]
+Admin --> AdminTables[Quan ly bang du lieu /Admin/Table]
+Admin --> AdminSystemSettings[Cau hinh he thong /AdminSystemSettings]
+
+AdminDashboard --> Chart[Thong ke nguoi dung, viec lam, ung tuyen]
+AdminDashboard --> RecentUsers[Nguoi dung moi]
+AdminDashboard --> RecentJobs[Viec lam moi]
+AdminDashboard --> RecentApplications[Don ung tuyen moi]
+AdminDashboard --> RecentLogs[Nhat ky gan day]
+
+AdminTables --> AdminDetails[Chi tiet ban ghi /Admin/Details]
+AdminTables --> AdminCreate[Tao ban ghi /Admin/Create]
+AdminTables --> AdminEdit[Sua ban ghi /Admin/Edit]
+AdminTables --> AdminDelete[Xoa ban ghi /Admin/Delete]
+AdminTables --> EnableUser[Kich hoat nguoi dung /Admin/EnableUser]
+
+AdminSystemSettings --> UpdateSettings[Cap nhat cau hinh he thong]
+AdminSystemSettings --> UploadSystemLogo[Tai logo he thong]
+AdminSystemSettings --> UploadDefaultAvatar[Tai avatar mac dinh]
+AdminSystemSettings --> UploadDefaultCompanyLogo[Tai logo cong ty mac dinh]

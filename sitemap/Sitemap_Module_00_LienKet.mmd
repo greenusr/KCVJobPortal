@@ -1,0 +1,38 @@
+flowchart LR
+
+Home[Trang chu]
+
+Public[Module 01: Trang cong khai]
+Auth[Module 02: Tai khoan]
+Candidate[Module 03: Khu vuc ung vien]
+Employer[Module 04: Khu vuc nha tuyen dung]
+Admin[Module 05: Khu vuc quan tri]
+DocsSystem[Module 06: Tai lieu va he thong]
+
+Home --> Public
+Home --> Auth
+Home --> Candidate
+Home --> Employer
+Home --> Admin
+Home --> DocsSystem
+
+Public --> Auth
+Public --> Candidate
+Public --> Employer
+
+Auth --> Candidate
+Auth --> Employer
+Auth --> Admin
+
+Candidate --> Public
+Candidate --> DocsSystem
+
+Employer --> Public
+Employer --> Candidate
+Employer --> DocsSystem
+
+Admin --> Public
+Admin --> Employer
+Admin --> DocsSystem
+
+DocsSystem --> Public

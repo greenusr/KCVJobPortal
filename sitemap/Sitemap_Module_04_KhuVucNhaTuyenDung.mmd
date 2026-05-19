@@ -1,0 +1,36 @@
+flowchart TB
+
+Employer[Khu vuc nha tuyen dung]
+
+Employer --> CompanyManage[Cong ty cua toi /CompanySettings]
+Employer --> Companies[Danh sach cong ty /Companies]
+Employer --> Jobs[Quan ly viec lam /Jobs]
+Employer --> Applications[Quan ly don ung tuyen /Applications]
+Employer --> SentInvitations[Loi moi da gui /CandidateInvitations/Sent]
+Employer --> Notifications[Thong bao /Notifications]
+
+CompanyManage --> CompanySettings[Cai dat cong ty /CompanySettings/Settings/:id]
+CompanyManage --> CompanyCreate[Tao cong ty /Companies/Create]
+CompanyManage --> CompanyDetails[Chi tiet cong ty /Companies/Details/:id]
+CompanyManage --> TransferOwner[Chuyen chu so huu /Companies/TransferOwner/:id]
+
+Companies --> CompanyEdit[Sua cong ty /Companies/Edit/:id]
+Companies --> CompanyDelete[Xoa cong ty /Companies/Delete/:id]
+Companies --> ApproveRequest[Duyet yeu cau tham gia /Companies/ApproveRequest/:id]
+Companies --> RejectRequest[Tu choi yeu cau tham gia /Companies/RejectRequest/:id]
+Companies --> LeaveCompany[Roi cong ty /Companies/Leave/:id]
+
+Jobs --> JobCreate[Dang tin viec lam /Jobs/Create]
+Jobs --> JobDetails[Chi tiet viec lam /Jobs/Details/:id]
+Jobs --> JobEdit[Sua tin viec lam /Jobs/Edit/:id]
+Jobs --> JobDelete[Xoa tin viec lam /Jobs/Delete/:id]
+
+Applications --> ApplicationIndex[Danh sach don /Applications]
+Applications --> RejectApplication[Tu choi don /Applications/Reject/:id]
+Applications --> InterviewCreate[Tao lich phong van /Applications/Interview/:id]
+Applications --> CompleteApplication[Hoan tat ket qua /Applications/Complete/:id]
+
+SentInvitations --> InviteCandidate[Moi ung vien /CandidateInvitations/Invite/:candidateId]
+SentInvitations --> InvitationDetails[Chi tiet loi moi /CandidateInvitations/Details/:id]
+
+Notifications --> OpenNotification[Mo thong bao /Notifications/Open/:id]

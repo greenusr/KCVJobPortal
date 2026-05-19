@@ -1,0 +1,129 @@
+classDiagram
+direction LR
+
+class Controller
+
+class JobsController {
+  -JobPortalDataContext data
+  +Index()
+  +Details()
+  +Create()
+  +Edit()
+  +Delete()
+  +DeleteConfirmed()
+  +Apply()
+  -GetJobDetail()
+  -SyncJobSkills()
+  -SyncJobCategories()
+  -LoadJobSelectLists()
+}
+
+class CompaniesController {
+  -JobPortalDataContext data
+  +Index()
+  +Details()
+  +Create()
+  +Edit()
+  +Delete()
+  +DeleteConfirmed()
+  +Leave()
+  +ApproveRequest()
+  +RejectRequest()
+  +TransferOwner()
+  -BuildDetailsModel()
+  -GetMembers()
+  -IsCompanyOwner()
+}
+
+class CompanySettingsController {
+  -JobPortalDataContext data
+  +Index()
+  +Settings()
+  -ResolveCompany()
+  -CanUpdateCompany()
+  -ValidateSettings()
+  -SaveLogoIfProvided()
+}
+
+class ApplicationsController {
+  -JobPortalDataContext data
+  +Index()
+  +Reject()
+  +Interview()
+  +Complete()
+  -GetApplicationForCurrentUser()
+  -BuildInterviewModel()
+  -LogCurrentUserActivity()
+}
+
+class CandidateApplicationsController {
+  -JobPortalDataContext data
+  +Index()
+  +InterviewDetails()
+  -BuildApplications()
+  -CanViewCandidateApplications()
+}
+
+class CandidateInvitationsController {
+  -JobPortalDataContext data
+  +Index()
+  +Sent()
+  +Details()
+  +Invite()
+  +Accept()
+  +Decline()
+  -CanInviteToJob()
+  -BuildInvitationQuery()
+  -TrySendInvitationEmail()
+}
+
+class JobPortalDataContext {
+  +Jobs
+  +Companies
+  +CompanyUsers
+  +CompanyJoinRequests
+  +JobApplications
+  +Interviews
+  +CandidateInvitations
+}
+
+class PaginationService
+class SystemSettingsService
+class NotificationService
+class FileUploadService
+class AccountLogService
+
+Controller <|-- JobsController
+Controller <|-- CompaniesController
+Controller <|-- CompanySettingsController
+Controller <|-- ApplicationsController
+Controller <|-- CandidateApplicationsController
+Controller <|-- CandidateInvitationsController
+
+JobsController ..> JobPortalDataContext : quan ly viec lam
+CompaniesController ..> JobPortalDataContext : quan ly cong ty
+CompanySettingsController ..> JobPortalDataContext : cau hinh cong ty
+ApplicationsController ..> JobPortalDataContext : xu ly don
+CandidateApplicationsController ..> JobPortalDataContext : ung vien xem don
+CandidateInvitationsController ..> JobPortalDataContext : loi moi ung vien
+
+JobsController ..> PaginationService : phan trang
+JobsController ..> SystemSettingsService : cau hinh tin
+JobsController ..> NotificationService : bao ung tuyen
+JobsController ..> AccountLogService : log tim/xem/ung tuyen
+
+CompaniesController ..> FileUploadService : upload logo
+CompaniesController ..> PaginationService : phan trang
+CompaniesController ..> SystemSettingsService : logo mac dinh
+CompaniesController ..> AccountLogService : log cong ty
+
+CompanySettingsController ..> FileUploadService : upload logo
+CompanySettingsController ..> SystemSettingsService : rang buoc logo
+
+ApplicationsController ..> NotificationService : ket qua/phong van
+ApplicationsController ..> PaginationService : phan trang
+ApplicationsController ..> AccountLogService : log xu ly don
+
+CandidateInvitationsController ..> NotificationService : bao loi moi
+CandidateInvitationsController ..> PaginationService : phan trang
+CandidateInvitationsController ..> AccountLogService : log loi moi

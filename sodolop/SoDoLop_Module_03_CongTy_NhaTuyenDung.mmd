@@ -1,0 +1,63 @@
+classDiagram
+direction LR
+
+class User {
+  +int user_id
+  +string username
+  +string email
+  +bool is_active
+}
+
+class Company {
+  +int company_id
+  +string company_name
+  +string industry
+  +string website
+  +string contact_email
+  +string logo_path
+  +string description
+  +string contact_phone
+  +string address
+  +bool public_company_profile
+  +bool show_jobs_publicly
+  +DateTime updated_at
+}
+
+class CompanyUser {
+  +int user_id
+  +int company_id
+  +string role
+}
+
+class CompanyJoinRequest {
+  +int request_id
+  +int company_id
+  +int user_id
+  +string status
+  +DateTime requested_at
+  +DateTime responded_at
+  +int responded_by
+}
+
+class Job {
+  +int job_id
+  +string job_title
+  +int company_id
+  +DateTime posted_date
+  +bool is_active
+}
+
+User "1" --> "0..*" CompanyUser : la thanh vien cong ty
+Company "1" --> "0..*" CompanyUser : co thanh vien
+CompanyUser "*" --> "1" User : FK user_id
+CompanyUser "*" --> "1" Company : FK company_id
+
+User "1" --> "0..*" CompanyJoinRequest : gui yeu cau tham gia
+Company "1" --> "0..*" CompanyJoinRequest : nhan yeu cau
+User "1" --> "0..*" CompanyJoinRequest : duyet yeu cau
+CompanyJoinRequest "*" --> "1" User : FK user_id
+CompanyJoinRequest "*" --> "1" User : FK responded_by
+CompanyJoinRequest "*" --> "1" Company : FK company_id
+
+Company "1" --> "0..*" Job : dang tin tuyen dung
+Job "*" --> "0..1" Company : FK company_id

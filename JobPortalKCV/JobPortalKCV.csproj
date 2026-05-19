@@ -157,16 +157,6 @@
     <Compile Include="Helpers\AuthRoleHelper.cs" />
     <Compile Include="Helpers\EmailHelper.cs" />
     <Compile Include="Helpers\UiText.cs" />
-    <Compile Include="Models\AdminEntities.cs" />
-    <Compile Include="Models\AccountSettingEntities.cs" />
-    <Compile Include="Models\ApplicationEntities.cs" />
-    <Compile Include="Models\CandidateInvitationEntities.cs" />
-    <Compile Include="Models\CompanyEntities.cs" />
-    <Compile Include="Models\StarEntities.cs" />
-    <Compile Include="Models\SystemSettingEntities.cs" />
-    <Compile Include="Models\UserCV.cs" />
-    <Compile Include="Models\UserProfileEntities.cs" />
-    <Compile Include="Models\UserVerification.cs" />
     <Compile Include="Models\EntityDefaults.partial.cs" />
     <Compile Include="Models\JobPortal.designer.cs">
       <AutoGen>True</AutoGen>
@@ -174,7 +164,6 @@
       <DependentUpon>JobPortal.dbml</DependentUpon>
     </Compile>
     <Compile Include="Models\JobPortalDataContext.partial.cs" />
-    <Compile Include="Models\NotificationEntities.cs" />
     <Compile Include="Models\ViewModel\AdminDashboardViewModel.cs" />
     <Compile Include="Models\ViewModel\AccountSettingsViewModels.cs" />
     <Compile Include="Models\ViewModel\AdminManagementViewModels.cs" />

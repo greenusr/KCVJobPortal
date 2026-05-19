@@ -1,0 +1,24 @@
+flowchart TB
+
+Home[Trang chu /]
+
+Public[Trang cong khai]
+
+Home --> Public
+
+Public --> About[Gioi thieu /Home/About]
+Public --> JobsIndex[Viec lam /Jobs]
+Public --> CompaniesIndex[Cong ty /Companies]
+Public --> CandidatesIndex[Ung vien /Candidates]
+Public --> SearchResults[Tim kiem /Search/Results]
+
+JobsIndex --> JobDetails[Chi tiet viec lam /Jobs/Details/:id]
+CompaniesIndex --> CompanyDetails[Chi tiet cong ty /Companies/Details/:id]
+CandidatesIndex --> ProfileView[Xem ho so ung vien /Profile/ViewProfile/:id]
+
+SearchResults --> JobDetails
+SearchResults --> CompanyDetails
+SearchResults --> ProfileView
+
+JobDetails --> ApplyJob[Nop don ung tuyen /Jobs/Apply/:id]
+ProfileView --> InviteCandidate[Moi ung vien /CandidateInvitations/Invite/:candidateId]

@@ -1,0 +1,21 @@
+flowchart TB
+
+Auth[Tai khoan]
+
+Auth --> Login[Dang nhap /Account/Login]
+Auth --> Register[Chon loai dang ky /Account/Register]
+Auth --> ForgotPassword[Quen mat khau /Account/ForgotPassword]
+Auth --> Logout[Dang xuat /Account/Logout]
+
+Register --> RegisterCandidate[Dang ky ung vien /Account/RegisterCandidate]
+Register --> RegisterEmployer[Dang ky nha tuyen dung /Account/RegisterEmployer]
+
+RegisterCandidate --> VerifyEmail[Xac thuc email /Account/VerifyEmail]
+RegisterEmployer --> VerifyEmail
+
+ForgotPassword --> ResetPassword[Dat lai mat khau /Account/ResetPassword]
+ResetPassword --> VerifyEmail
+
+Login --> CandidateHome[Khu vuc ung vien]
+Login --> EmployerHome[Khu vuc nha tuyen dung]
+Login --> AdminHome[Khu vuc quan tri]

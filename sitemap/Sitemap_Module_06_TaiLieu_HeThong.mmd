@@ -1,0 +1,28 @@
+flowchart TB
+
+DocsSystem[Tai lieu va he thong]
+
+DocsSystem --> Docs[Tai lieu huong dan]
+DocsSystem --> Language[Chuyen ngon ngu]
+DocsSystem --> Errors[Trang loi]
+
+Docs --> DocsIndex[Tong quan tai lieu /Docs]
+Docs --> DocsDetail[Chi tiet tai lieu /Docs/Detail]
+Docs --> DocsTopic[Chu de tai lieu /Docs/Topic]
+
+Language --> SetLanguage[Chuyen ngon ngu /Language/Set]
+
+Errors --> ErrorIndex[Loi chung /Error]
+Errors --> BadRequest[400 Bad Request /Error/BadRequest]
+Errors --> Forbidden[403 Forbidden /Error/Forbidden]
+Errors --> NotFound[404 Not Found /Error/NotFound]
+Errors --> TooLarge[413 Too Large /Error/TooLarge]
+Errors --> ServerError[500 Server Error /Error/ServerError]
+
+DocsIndex --> DocsDetail
+DocsIndex --> DocsTopic
+ErrorIndex --> BadRequest
+ErrorIndex --> Forbidden
+ErrorIndex --> NotFound
+ErrorIndex --> TooLarge
+ErrorIndex --> ServerError

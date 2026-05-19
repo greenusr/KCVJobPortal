@@ -1,0 +1,69 @@
+classDiagram
+direction LR
+
+class User {
+  +int user_id
+  +string username
+  +string password_hash
+  +string email
+  +bool is_active
+}
+
+class Role {
+  +int role_id
+  +string role_name
+}
+
+class UserRole {
+  +int user_id
+  +int role_id
+}
+
+class UserVerification {
+  +int verification_id
+  +int user_id
+  +string otp_code
+  +string type
+  +bool is_verified
+  +DateTime expired_at
+  +DateTime created_at
+}
+
+class UserSetting {
+  +int setting_id
+  +int user_id
+  +bool app_notifications_enabled
+  +bool job_updates_enabled
+  +bool interview_notifications_enabled
+  +bool invitation_notifications_enabled
+  +bool public_profile_enabled
+  +bool show_cv_to_employers
+  +int default_cv_id
+  +DateTime created_at
+  +DateTime updated_at
+}
+
+class UserCV {
+  +int cv_id
+  +int user_id
+  +string file_path
+  +string file_name
+  +DateTime created_at
+  +bool is_default
+}
+
+User "1" --> "0..*" UserRole : co vai tro
+Role "1" --> "0..*" UserRole : duoc gan cho user
+UserRole "*" --> "1" User : FK user_id
+UserRole "*" --> "1" Role : FK role_id
+
+User "1" --> "0..*" UserVerification : ma OTP
+UserVerification "*" --> "1" User : FK user_id
+
+User "1" --> "0..1" UserSetting : cau hinh ca nhan
+UserSetting "0..1" --> "1" User : FK user_id
+UserSetting "*" --> "0..1" UserCV : CV mac dinh
+UserCV "1" --> "0..*" UserSetting : duoc chon lam default_cv
+
+User "1" --> "0..*" UserCV : tai len CV
+UserCV "*" --> "1" User : FK user_id

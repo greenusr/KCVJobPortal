@@ -1,0 +1,114 @@
+classDiagram
+direction LR
+
+class M01_TaiKhoan_PhanQuyen {
+  +User
+  +Role
+  +UserRole
+  +UserVerification
+  +UserSetting
+  +UserCV
+}
+
+class M02_HoSo_UngVien {
+  +UserProfileRecord
+  +UserEducation
+  +UserExperience
+  +UserProject
+  +UserSkill
+  +Skill
+  +Location
+}
+
+class M03_CongTy_NhaTuyenDung {
+  +Company
+  +CompanyUser
+  +CompanyJoinRequest
+  +Job
+}
+
+class M04_ViecLam_DanhMuc_KyNang {
+  +Job
+  +Company
+  +Location
+  +EmploymentType
+  +JobCategory
+  +JobCategoryMap
+  +Skill
+  +JobSkill
+}
+
+class M05_UngTuyen_PhongVan_LoiMoi {
+  +JobApplication
+  +ApplicationStatuse
+  +Interview
+  +CandidateInvitation
+  +User
+  +Job
+  +UserCV
+}
+
+class M06_TuongTac_ThongBao_Log_CauHinh {
+  +Notification
+  +Star
+  +UserActivityLog
+  +UserLoginLog
+  +SystemSetting
+}
+
+class M07_Controller_TaiKhoan_HoSo {
+  +AccountController
+  +AccountSettingsController
+  +ProfileController
+  +UserCVsController
+}
+
+class M08_Controller_ViecLam_CongTy_UngTuyen {
+  +JobsController
+  +CompaniesController
+  +CompanySettingsController
+  +ApplicationsController
+  +CandidateApplicationsController
+  +CandidateInvitationsController
+}
+
+class M09_Controller_TimKiem_Admin_HeThong {
+  +SearchController
+  +CandidatesController
+  +StarsController
+  +NotificationsController
+  +AdminController
+  +AdminSystemSettingsController
+  +DocsController
+}
+
+M01_TaiKhoan_PhanQuyen "User/UserCV" --> "Profile/CV" M02_HoSo_UngVien : mo rong ho so ung vien
+M01_TaiKhoan_PhanQuyen "User" --> "CompanyUser/Request" M03_CongTy_NhaTuyenDung : user tham gia cong ty
+M01_TaiKhoan_PhanQuyen "User/UserCV" --> "JobApplication" M05_UngTuyen_PhongVan_LoiMoi : ung vien nop don
+M01_TaiKhoan_PhanQuyen "User" --> "Notification/Log/Star" M06_TuongTac_ThongBao_Log_CauHinh : nhan thong bao va ghi log
+
+M02_HoSo_UngVien "Skill/Location" --> "JobSkill/Job" M04_ViecLam_DanhMuc_KyNang : dung chung ky nang va dia diem
+M02_HoSo_UngVien "UserProfile/Skill" --> "Search/Candidates" M09_Controller_TimKiem_Admin_HeThong : tim ung vien
+
+M03_CongTy_NhaTuyenDung "Company" --> "Job" M04_ViecLam_DanhMuc_KyNang : cong ty dang viec lam
+M03_CongTy_NhaTuyenDung "Company/Request" --> "Notification" M06_TuongTac_ThongBao_Log_CauHinh : thong bao tham gia cong ty
+
+M04_ViecLam_DanhMuc_KyNang "Job" --> "JobApplication/Invitation" M05_UngTuyen_PhongVan_LoiMoi : job nhan don va loi moi
+M04_ViecLam_DanhMuc_KyNang "Job/Category/Skill" --> "Search" M09_Controller_TimKiem_Admin_HeThong : tim viec lam
+
+M05_UngTuyen_PhongVan_LoiMoi "Application/Interview/Invitation" --> "Notification/Log" M06_TuongTac_ThongBao_Log_CauHinh : tao thong bao va log
+
+M07_Controller_TaiKhoan_HoSo ..> M01_TaiKhoan_PhanQuyen : quan ly tai khoan
+M07_Controller_TaiKhoan_HoSo ..> M02_HoSo_UngVien : quan ly ho so
+M07_Controller_TaiKhoan_HoSo ..> M06_TuongTac_ThongBao_Log_CauHinh : log/cau hinh/OTP
+
+M08_Controller_ViecLam_CongTy_UngTuyen ..> M03_CongTy_NhaTuyenDung : quan ly cong ty
+M08_Controller_ViecLam_CongTy_UngTuyen ..> M04_ViecLam_DanhMuc_KyNang : quan ly viec lam
+M08_Controller_ViecLam_CongTy_UngTuyen ..> M05_UngTuyen_PhongVan_LoiMoi : xu ly ung tuyen
+M08_Controller_ViecLam_CongTy_UngTuyen ..> M06_TuongTac_ThongBao_Log_CauHinh : thong bao/log
+
+M09_Controller_TimKiem_Admin_HeThong ..> M01_TaiKhoan_PhanQuyen : quan tri user
+M09_Controller_TimKiem_Admin_HeThong ..> M02_HoSo_UngVien : tim ung vien
+M09_Controller_TimKiem_Admin_HeThong ..> M03_CongTy_NhaTuyenDung : tim/quan tri cong ty
+M09_Controller_TimKiem_Admin_HeThong ..> M04_ViecLam_DanhMuc_KyNang : tim/quan tri viec
+M09_Controller_TimKiem_Admin_HeThong ..> M06_TuongTac_ThongBao_Log_CauHinh : thong bao/he thong

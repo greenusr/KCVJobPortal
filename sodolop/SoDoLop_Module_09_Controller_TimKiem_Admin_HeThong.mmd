@@ -1,0 +1,141 @@
+classDiagram
+direction LR
+
+class Controller
+
+class SearchController {
+  -JobPortalDataContext data
+  +Results()
+  -SearchJobs()
+  -SearchUsers()
+  -SearchCompanies()
+  -ApplyPagination()
+  -LogSearchIfNeeded()
+}
+
+class CandidatesController {
+  -JobPortalDataContext data
+  +Index()
+  -BuildCandidates()
+  -SortCandidates()
+  -GetCurrentUser()
+}
+
+class StarsController {
+  -string UserTarget
+  -string JobTarget
+  -string CompanyTarget
+  -JobPortalDataContext data
+  +Toggle()
+  +Saved()
+  +StarredBy()
+  -TargetExists()
+  -CanViewStarredBy()
+}
+
+class NotificationsController {
+  -JobPortalDataContext data
+  +Dropdown()
+  +Index()
+  +Open()
+  +MarkAllAsRead()
+  -ResolveNotificationUrl()
+  -ToListItem()
+}
+
+class AdminController {
+  -JobPortalDataContext data
+  +Index()
+  +Table()
+  +Details()
+  +Create()
+  +Edit()
+  +Delete()
+  +EnableUser()
+  -GetTableDefinitions()
+  -ReadRows()
+  -CreateRecord()
+  -UpdateRecord()
+  -DeleteRecord()
+}
+
+class AdminSystemSettingsController {
+  -JobPortalDataContext data
+  +Index()
+  -IsAdmin()
+  -IsValidConfiguration()
+  -SaveOptionalSystemImage()
+  -ToViewModel()
+}
+
+class DocsController {
+  +Index()
+  +Detail()
+  +Topic()
+  -BuildModel()
+  -FilterSections()
+}
+
+class HomeController {
+  +Index()
+  +About()
+}
+
+class ErrorController {
+  +Index()
+  +BadRequest()
+  +Forbidden()
+  +NotFound()
+  +TooLarge()
+  +ServerError()
+  +Status()
+}
+
+class LanguageController {
+  +Set()
+  -GetSafeReturnUrl()
+}
+
+class JobPortalDataContext {
+  +Users
+  +Jobs
+  +Companies
+  +Notifications
+  +Stars
+  +SystemSettings
+}
+
+class PaginationService
+class SystemSettingsService
+class AccountLogService
+class FileUploadService
+
+Controller <|-- SearchController
+Controller <|-- CandidatesController
+Controller <|-- StarsController
+Controller <|-- NotificationsController
+Controller <|-- AdminController
+Controller <|-- AdminSystemSettingsController
+Controller <|-- DocsController
+Controller <|-- HomeController
+Controller <|-- ErrorController
+Controller <|-- LanguageController
+
+SearchController ..> JobPortalDataContext : tim kiem tong hop
+CandidatesController ..> JobPortalDataContext : danh sach ung vien
+StarsController ..> JobPortalDataContext : luu yeu thich
+NotificationsController ..> JobPortalDataContext : doc/ghi thong bao
+AdminController ..> JobPortalDataContext : quan tri du lieu
+AdminSystemSettingsController ..> JobPortalDataContext : cau hinh he thong
+
+SearchController ..> PaginationService : phan trang
+SearchController ..> AccountLogService : log tim kiem
+SearchController ..> SystemSettingsService : cau hinh
+CandidatesController ..> PaginationService : phan trang
+StarsController ..> PaginationService : phan trang
+StarsController ..> AccountLogService : log star
+NotificationsController ..> SystemSettingsService : phan trang
+AdminController ..> SystemSettingsService : phan trang
+AdminController ..> FileUploadService : upload admin
+AdminSystemSettingsController ..> FileUploadService : upload anh he thong
+AdminSystemSettingsController ..> SystemSettingsService : luu cau hinh

@@ -1,0 +1,87 @@
+classDiagram
+direction LR
+
+class User {
+  +int user_id
+  +string username
+  +string email
+  +bool is_active
+}
+
+class Job {
+  +int job_id
+  +string job_title
+  +int company_id
+  +DateTime application_deadline
+  +bool is_active
+}
+
+class UserCV {
+  +int cv_id
+  +int user_id
+  +string file_path
+  +string file_name
+  +bool is_default
+}
+
+class ApplicationStatuse {
+  +int status_id
+  +string status_name
+}
+
+class JobApplication {
+  +int application_id
+  +int job_id
+  +int user_id
+  +DateTime application_date
+  +string cover_letter
+  +int status_id
+  +int cv_id
+  +string status
+  +DateTime applied_date
+  +DateTime completed_at
+  +string final_result
+}
+
+class Interview {
+  +int interview_id
+  +int application_id
+  +DateTime interview_date
+  +string location
+  +string contact_name
+  +string contact_email
+  +string contact_phone
+  +string additional_info
+  +DateTime created_at
+}
+
+class CandidateInvitation {
+  +int invitation_id
+  +int employer_id
+  +int candidate_id
+  +int job_id
+  +string message
+  +string status
+  +DateTime created_at
+  +DateTime responded_at
+}
+
+User "1" --> "0..*" JobApplication : nop don ung tuyen
+Job "1" --> "0..*" JobApplication : nhan don ung tuyen
+UserCV "1" --> "0..*" JobApplication : CV duoc dung
+ApplicationStatuse "1" --> "0..*" JobApplication : trang thai don
+
+JobApplication "*" --> "0..1" User : FK user_id
+JobApplication "*" --> "0..1" Job : FK job_id
+JobApplication "*" --> "0..1" UserCV : FK cv_id
+JobApplication "*" --> "0..1" ApplicationStatuse : FK status_id
+
+JobApplication "1" --> "0..*" Interview : lich phong van
+Interview "*" --> "1" JobApplication : FK application_id
+
+User "1" --> "0..*" CandidateInvitation : ung vien duoc moi
+User "1" --> "0..*" CandidateInvitation : nha tuyen dung moi
+Job "1" --> "0..*" CandidateInvitation : loi moi cho job
+CandidateInvitation "*" --> "1" User : FK candidate_id
+CandidateInvitation "*" --> "1" User : FK employer_id
+CandidateInvitation "*" --> "1" Job : FK job_id

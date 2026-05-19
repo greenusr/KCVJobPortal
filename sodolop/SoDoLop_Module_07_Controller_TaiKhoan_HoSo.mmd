@@ -1,0 +1,112 @@
+classDiagram
+direction LR
+
+class Controller
+
+class AccountController {
+  -JobPortalDataContext data
+  +Login()
+  +Register()
+  +RegisterCandidate()
+  +RegisterEmployer()
+  +VerifyEmail()
+  +ResendRegisterOtp()
+  +ForgotPassword()
+  +ResetPassword()
+  +ResendResetPasswordOtp()
+  +UploadAvatar()
+  +Logout()
+  -CreateUser()
+  -CreateProfileForUser()
+  -AssignRole()
+  -SendVerificationEmail()
+}
+
+class AccountSettingsController {
+  -JobPortalDataContext data
+  +Index()
+  +ChangePassword()
+  +UpdateNotifications()
+  +UpdatePrivacy()
+  +UpdateCvSettings()
+  +DeleteLoginLog()
+  +DeleteAllLoginLogs()
+  +DeleteActivityLog()
+  +DeleteAllActivityLogs()
+  -BuildModel()
+  -EnsureSettings()
+  -GetCurrentUser()
+}
+
+class ProfileController {
+  -JobPortalDataContext data
+  +Me()
+  +ViewProfile()
+  +Edit()
+  +AddEducation()
+  +UpdateEducation()
+  +DeleteEducation()
+  +AddExperience()
+  +UpdateExperience()
+  +DeleteExperience()
+  +AddProject()
+  +UpdateProject()
+  +DeleteProject()
+  +AddSkill()
+  +UpdateSkill()
+  +DeleteSkill()
+  -BuildDetailsModel()
+  -BuildEditModel()
+  -CanEditProfile()
+  -CanViewProfile()
+}
+
+class UserCVsController {
+  -JobPortalDataContext data
+  +Index()
+  +Upload()
+  +SetDefault()
+  -GetCurrentUser()
+}
+
+class JobPortalDataContext {
+  +Users
+  +UserProfileRecords
+  +UserSettings
+  +UserCVs
+  +UserEducations
+  +UserExperiences
+  +UserProjects
+  +UserSkills
+}
+
+class PasswordHashService
+class UserVerificationService
+class FileUploadService
+class SystemSettingsService
+class AccountLogService
+
+Controller <|-- AccountController
+Controller <|-- AccountSettingsController
+Controller <|-- ProfileController
+Controller <|-- UserCVsController
+
+AccountController ..> JobPortalDataContext : doc/ghi user
+AccountSettingsController ..> JobPortalDataContext : doc/ghi setting
+ProfileController ..> JobPortalDataContext : doc/ghi ho so
+UserCVsController ..> JobPortalDataContext : doc/ghi CV
+
+AccountController ..> PasswordHashService : bam/xac thuc mat khau
+AccountController ..> UserVerificationService : tao/xac thuc OTP
+AccountController ..> FileUploadService : upload avatar/logo
+AccountController ..> SystemSettingsService : cau hinh OTP
+AccountController ..> AccountLogService : log dang nhap
+
+AccountSettingsController ..> PasswordHashService : doi mat khau
+AccountSettingsController ..> SystemSettingsService : phan trang
+AccountSettingsController ..> AccountLogService : log thay doi
+ProfileController ..> FileUploadService : upload avatar
+ProfileController ..> SystemSettingsService : avatar mac dinh
+ProfileController ..> AccountLogService : log xem ho so
+UserCVsController ..> FileUploadService : upload CV
+UserCVsController ..> AccountLogService : log CV
